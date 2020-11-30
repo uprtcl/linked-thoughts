@@ -33,8 +33,8 @@ export class Doc extends moduleConnect(LitElement) {
       showAcl: true,
       showInfo: true,
       showIcon: true,
+      isDraggable: true,
       showDraftControl: true,
-      checkOwner: true,
       showMyDraft: true,
     };
 

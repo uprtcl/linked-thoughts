@@ -48,7 +48,7 @@ export class Home extends moduleConnect(LitElement) {
 
     const remote = this.requestAll(EveesModule.bindings.EveesRemote).find((provider: EveesRemote) =>
       provider.id.startsWith('http')
-    ) as EveesRemote;
+    ) as EveesHttp;
 
     const perspective = await remote.getHome(remote.userId);
     
@@ -58,11 +58,11 @@ export class Home extends moduleConnect(LitElement) {
       creatorId: perspective.object.payload.creatorId
     });
 
-
     if (id !== perspective.id) {
       throw new Error('unexpected id');
     }
 
+    await remote.flush();
     this.go(perspective.id);
   }
 

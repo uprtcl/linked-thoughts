@@ -2,7 +2,7 @@ import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
 import { EveesHttp, EveesHttpModule } from '@uprtcl/evees-http';
 
-import { HttpStore, HttpAuth0Provider } from '@uprtcl/http-provider';
+import { HttpStoreCached, HttpAuth0Provider } from '@uprtcl/http-provider';
 
 import { MicroOrchestrator, i18nextBaseModule } from '@uprtcl/micro-orchestrator';
 import { LensesModule } from '@uprtcl/lenses';
@@ -36,7 +36,7 @@ export const initUprtcl = async () => {
   };
 
   const httpProvider = new HttpAuth0Provider({ host: c1host, apiId: 'evees-v1' }, auth0Config);
-  const httpStore = new HttpStore(httpProvider, httpCidConfig);
+  const httpStore = new HttpStoreCached(httpProvider, httpCidConfig);
   const httpEvees = new EveesHttp(httpProvider, httpStore);
 
   const evees = new EveesModule([httpEvees]);

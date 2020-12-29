@@ -22,7 +22,7 @@ export class App extends LitElement {
       sharedStyles,
       css`
         :host {
-          height: 100vh;
+          height: 100%;
           flex-direction: column;
           display: flex;
           justify-content: center;

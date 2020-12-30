@@ -33,26 +33,39 @@ export class Home extends moduleConnect(LitElement) {
 
   spaces!: object;
 
+  client: ApolloClient<any>;
+  remote: any;
+
   async firstUpdated() {
     const eveesProvider = this.requestAll(
       EveesModule.bindings.EveesRemote
     ).find((provider: EveesHttp) => provider.id.startsWith('http')) as EveesHttp;
 
-    await eveesProvider.login();
+      await eveesProvider.login();
+    
+    this.client= await this.request(ApolloClientModule.bindings.Client);
+
+    this.remote = await this.requestAll(EveesModule.bindings.EveesRemote).find((provider: EveesRemote) =>
+      provider.id.startsWith('http')
+    ) as EveesHttp;
+
+    const perspective = await this.remote.getHome(this.remote.userId);
+
+    try {
+      await EveesHelpers.getPerspectiveData(this.client, perspective.id);
+      this.go(perspective.id);
+    } catch(err) {
+      this.loadingHome = false;
+      console.log("New user.");
+    }
   }
 
   async newDocument(title: string) {
     this.creatingNewDocument = true;
 
-    const client:ApolloClient<any> = this.request(ApolloClientModule.bindings.Client);
+    const perspective = await this.remote.getHome(this.remote.userId);
 
-    const remote = this.requestAll(EveesModule.bindings.EveesRemote).find((provider: EveesRemote) =>
-      provider.id.startsWith('http')
-    ) as EveesHttp;
-
-    const perspective = await remote.getHome(remote.userId);
-    
-    const id = await EveesHelpers.createPerspective(client, remote, {
+    const id = await EveesHelpers.createPerspective(this.client, this.remote, {
       context: perspective.object.payload.context,
       timestamp: perspective.object.payload.timestamp,
       creatorId: perspective.object.payload.creatorId
@@ -62,7 +75,7 @@ export class Home extends moduleConnect(LitElement) {
       throw new Error('unexpected id');
     }
 
-    await remote.flush();
+    await this.remote.flush();
     this.go(perspective.id);
   }
 
@@ -78,23 +91,26 @@ export class Home extends moduleConnect(LitElement) {
     }
 
     return html`
-      ${!this.showNewSpaceForm
-        ? html`
-            <img class="background-image" src="/img/home-bg.svg" />
-            <div class="button-container">
-              <uprtcl-button @click=${() => (this.showNewSpaceForm = true)} raised>
-                create your space
-              </uprtcl-button>
-            </div>
-          `
-        : html`
-            <uprtcl-form-string
-              value=""
-              label="title (optional)"
-              ?loading=${this.creatingNewDocument}
-              @cancel=${() => (this.showNewSpaceForm = false)}
-              @accept=${e => this.newDocument(e.detail.value)}
-            ></uprtcl-form-string>
+      ${this.loadingHome
+        ? html `<uprtcl-loading></uprtcl-loading>`
+        :
+          !this.showNewSpaceForm
+          ? html`
+              <img class="background-image" src="/img/home-bg.svg" />
+              <div class="button-container">
+                <uprtcl-button @click=${() => (this.showNewSpaceForm = true)} raised>
+                  create your space
+                </uprtcl-button>
+              </div>
+            `
+          : html`
+              <uprtcl-form-string
+                value=""
+                label="title (optional)"
+                ?loading=${this.creatingNewDocument}
+                @cancel=${() => (this.showNewSpaceForm = false)}
+                @accept=${e => this.newDocument(e.detail.value)}
+              ></uprtcl-form-string>
           `}
     `;
   }

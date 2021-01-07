@@ -10,7 +10,6 @@ export const sharedStyles = css`
     --black-transparent: rgba(3, 3, 3, 0.25);
     --gray: #333333;
     --border-radius-complete: 100vh;
-
     --background-color: #fffffb;
     
   }

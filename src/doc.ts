@@ -39,11 +39,11 @@ export class Doc extends moduleConnect(LitElement) {
     };
 
     return html`
-      <wiki-drawer
+      <lt-wiki-drawer
         uref=${this.docId}
         .eveesInfoConfig=${eveesInfoConfig}
         @back=${() => this.goHome()}
-      ></wiki-drawer>
+      ></lt-wiki-drawer>
     `;
   }
 

@@ -136,10 +136,12 @@ export class Home extends moduleConnect(LitElement) {
       timestamp: 0,
       creatorId: remote.userId,
     };
-
-    const linkedThoughtsPerspectiveEntity = await deriveEntity(
-      linkedThoughtsPerspectiveObject,
-      remote.store.cidConfig
+    debugger;
+    const linkedThoughtsPerspectiveEntity = await EveesHelpers.snapDefaultPerspective(
+      remote,
+      linkedThoughtsPerspectiveObject.creatorId,
+      linkedThoughtsPerspectiveObject.context,
+      linkedThoughtsPerspectiveObject.timestamp
     );
     let linkedThoughtsPerspectiveExist: boolean;
     try {
@@ -152,14 +154,19 @@ export class Home extends moduleConnect(LitElement) {
       linkedThoughtsPerspectiveExist = false;
     }
 
+    let linkedThoughtsPerspectiveID;
     if (!linkedThoughtsPerspectiveExist) {
-      await EveesHelpers.createPerspective(client, remote, {
-        context: perspective.object.payload.context,
-        timestamp: perspective.object.payload.timestamp,
-        creatorId: perspective.object.payload.creatorId,
-      });
+      linkedThoughtsPerspectiveID = await EveesHelpers.createPerspective(
+        client,
+        remote,
+        {
+          context: linkedThoughtsPerspectiveObject.context,
+          timestamp: linkedThoughtsPerspectiveObject.timestamp,
+          creatorId: linkedThoughtsPerspectiveObject.creatorId,
+        }
+      );
     }
-
+    debugger;
     // we know home and LT dashboard "folders"/perspectives exists
     const privateFolder = await EveesHelpers.createPerspective(client, remote, {
       parentId: linkedThoughtsPerspectiveEntity.id,
@@ -213,14 +220,13 @@ export class Home extends moduleConnect(LitElement) {
       type: TextType.Title,
       links: [privateFolder, blogFolder],
     };
-    debugger;
+
     await EveesHelpers.updateHeadWithData(
       client,
       remote.store,
       linkedThoughtsPerspectiveEntity.id,
       dashboardInitObject
     );
-    debugger;
 
     await remote.flush();
     this.go(perspective.id);

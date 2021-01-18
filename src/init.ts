@@ -3,9 +3,9 @@ import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { EveesHttp } from '@uprtcl/evees-http';
 import { HttpStore, HttpAuth0Provider } from '@uprtcl/http-provider';
 
-import { eveesLoader } from '@uprtcl/evees';
 import { DocumentsModule } from '@uprtcl/documents';
 import { WikisModule } from '@uprtcl/wikis';
+import { EveesContentModule, eveesLoader } from '@uprtcl/evees';
 
 export const initUprtcl = async () => {
   const c1host = 'http://localhost:3100/uprtcl/1';
@@ -36,7 +36,9 @@ export const initUprtcl = async () => {
 
   const remotes = [httpEvees];
   const stores = [httpStore];
-  const modules = [documents, wikis];
+  const modules = new Map<string, EveesContentModule>();
+  modules.set(DocumentsModule.id, documents);
+  modules.set(WikisModule.id, wikis);
 
   eveesLoader(remotes, stores, modules);
 };

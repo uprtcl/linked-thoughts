@@ -1,14 +1,11 @@
-import { LitElement, html, css, property, query } from 'lit-element';
-import { ApolloClient } from 'apollo-boost';
+import { LitElement, html, css, property } from 'lit-element';
 
-import { moduleConnect } from '@uprtcl/micro-orchestrator';
-
+import { eveesConnect, getHome } from '@uprtcl/evees';
 import { EveesHttp } from '@uprtcl/evees-http';
-import { ApolloClientModule } from '@uprtcl/graphql';
 
 import { Router } from '@vaadin/router';
 
-export class Home extends moduleConnect(LitElement) {
+export class Home extends eveesConnect(LitElement) {
   @property({ attribute: false })
   loadingSpaces: boolean = true;
 
@@ -32,31 +29,17 @@ export class Home extends moduleConnect(LitElement) {
 
   spaces!: object;
 
-  client: ApolloClient<any>;
   remote: any;
 
   async firstUpdated() {
-    const eveesProvider = this.requestAll(
-      EveesModule.bindings.EveesRemote
-    ).find((provider: EveesHttp) =>
-      provider.id.startsWith('http')
-    ) as EveesHttp;
-
+    const eveesProvider = this.evees.findRemote('http') as EveesHttp;
     await eveesProvider.login();
 
-    this.client = await this.request(ApolloClientModule.bindings.Client);
-
-    this.remote = (await this.requestAll(
-      EveesModule.bindings.EveesRemote
-    ).find((provider: EveesRemote) =>
-      provider.id.startsWith('http')
-    )) as EveesHttp;
-
-    const perspective = await this.remote.getHome(this.remote.userId);
+    const homePerspective = await getHome(this.remote, this.remote.userId);
 
     try {
-      await EveesHelpers.getPerspectiveData(this.client, perspective.id);
-      this.go(perspective.id);
+      await this.evees.getPerspectiveData(homePerspective.id);
+      this.go(homePerspective.id);
     } catch (err) {
       this.loadingHome = false;
       console.log('New user.');
@@ -66,20 +49,14 @@ export class Home extends moduleConnect(LitElement) {
   async newDocument(title: string) {
     this.creatingNewDocument = true;
 
-    const perspective = await this.remote.getHome(this.remote.userId);
-
-    const id = await EveesHelpers.createPerspective(this.client, this.remote, {
-      context: perspective.object.payload.context,
-      timestamp: perspective.object.payload.timestamp,
-      creatorId: perspective.object.payload.creatorId,
+    const homePerspective = await getHome(this.remote, this.remote.userId);
+    const id = await this.evees.client.newPerspective({
+      perspective: homePerspective,
+      details: {},
     });
 
-    if (id !== perspective.id) {
-      throw new Error('unexpected id');
-    }
-
     await this.remote.flush();
-    this.go(perspective.id);
+    this.go(homePerspective.id);
   }
 
   go(perspectiveId: string) {

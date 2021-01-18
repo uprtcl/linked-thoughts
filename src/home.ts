@@ -2,7 +2,6 @@ import { LitElement, html, css, property, query } from 'lit-element';
 import { ApolloClient } from 'apollo-boost';
 
 import { moduleConnect } from '@uprtcl/micro-orchestrator';
-import { EveesModule, EveesRemote, EveesHelpers } from '@uprtcl/evees';
 
 import { EveesHttp } from '@uprtcl/evees-http';
 import { ApolloClientModule } from '@uprtcl/graphql';
@@ -39,24 +38,28 @@ export class Home extends moduleConnect(LitElement) {
   async firstUpdated() {
     const eveesProvider = this.requestAll(
       EveesModule.bindings.EveesRemote
-    ).find((provider: EveesHttp) => provider.id.startsWith('http')) as EveesHttp;
-
-      await eveesProvider.login();
-    
-    this.client= await this.request(ApolloClientModule.bindings.Client);
-
-    this.remote = await this.requestAll(EveesModule.bindings.EveesRemote).find((provider: EveesRemote) =>
+    ).find((provider: EveesHttp) =>
       provider.id.startsWith('http')
     ) as EveesHttp;
+
+    await eveesProvider.login();
+
+    this.client = await this.request(ApolloClientModule.bindings.Client);
+
+    this.remote = (await this.requestAll(
+      EveesModule.bindings.EveesRemote
+    ).find((provider: EveesRemote) =>
+      provider.id.startsWith('http')
+    )) as EveesHttp;
 
     const perspective = await this.remote.getHome(this.remote.userId);
 
     try {
       await EveesHelpers.getPerspectiveData(this.client, perspective.id);
       this.go(perspective.id);
-    } catch(err) {
+    } catch (err) {
       this.loadingHome = false;
-      console.log("New user.");
+      console.log('New user.');
     }
   }
 
@@ -68,7 +71,7 @@ export class Home extends moduleConnect(LitElement) {
     const id = await EveesHelpers.createPerspective(this.client, this.remote, {
       context: perspective.object.payload.context,
       timestamp: perspective.object.payload.timestamp,
-      creatorId: perspective.object.payload.creatorId
+      creatorId: perspective.object.payload.creatorId,
     });
 
     if (id !== perspective.id) {
@@ -85,32 +88,32 @@ export class Home extends moduleConnect(LitElement) {
 
   render() {
     if (this.switchNetwork) {
-      return html`
-        Please make sure you are connected to Rinkeby network
-      `;
+      return html` Please make sure you are connected to Rinkeby network `;
     }
 
     return html`
       ${this.loadingHome
-        ? html `<uprtcl-loading></uprtcl-loading>`
-        :
-          !this.showNewSpaceForm
-          ? html`
-              <img class="background-image" src="/img/home-bg.svg" />
-              <div class="button-container">
-                <uprtcl-button @click=${() => (this.showNewSpaceForm = true)} raised>
-                  create your space
-                </uprtcl-button>
-              </div>
-            `
-          : html`
-              <uprtcl-form-string
-                value=""
-                label="title (optional)"
-                ?loading=${this.creatingNewDocument}
-                @cancel=${() => (this.showNewSpaceForm = false)}
-                @accept=${e => this.newDocument(e.detail.value)}
-              ></uprtcl-form-string>
+        ? html`<uprtcl-loading></uprtcl-loading>`
+        : !this.showNewSpaceForm
+        ? html`
+            <img class="background-image" src="/img/home-bg.svg" />
+            <div class="button-container">
+              <uprtcl-button
+                @click=${() => (this.showNewSpaceForm = true)}
+                raised
+              >
+                create your space
+              </uprtcl-button>
+            </div>
+          `
+        : html`
+            <uprtcl-form-string
+              value=""
+              label="title (optional)"
+              ?loading=${this.creatingNewDocument}
+              @cancel=${() => (this.showNewSpaceForm = false)}
+              @accept=${(e) => this.newDocument(e.detail.value)}
+            ></uprtcl-form-string>
           `}
     `;
   }

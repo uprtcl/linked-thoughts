@@ -55,7 +55,7 @@ export class Home extends eveesConnect(LitElement) {
       details: {},
     });
 
-    await this.remote.flush();
+    await this.evees.client.flush();
     this.go(homePerspective.id);
   }
 

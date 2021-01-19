@@ -1,7 +1,7 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
-import { EveesHttp } from '@uprtcl/evees-http';
-import { HttpStore, HttpAuth0Provider } from '@uprtcl/http-provider';
+import { EveesHttp, HttpStore } from '@uprtcl/evees-http';
+import { HttpAuth0Connection } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
 import { WikisModule } from '@uprtcl/wikis';
@@ -24,21 +24,15 @@ export const initUprtcl = async () => {
     cacheLocation: 'localstorage',
   };
 
-  const httpProvider = new HttpAuth0Provider(
-    { host: c1host, apiId: 'evees-v1' },
-    auth0Config
-  );
+  const httpProvider = new HttpAuth0Connection(c1host, auth0Config);
   const httpStore = new HttpStore(httpProvider, httpCidConfig);
   const httpEvees = new EveesHttp(httpProvider, httpStore);
-
-  const documents = new DocumentsModule();
-  const wikis = new WikisModule();
 
   const remotes = [httpEvees];
   const stores = [httpStore];
   const modules = new Map<string, EveesContentModule>();
-  modules.set(DocumentsModule.id, documents);
-  modules.set(WikisModule.id, wikis);
+  modules.set(DocumentsModule.id, new DocumentsModule());
+  modules.set(WikisModule.id, new WikisModule());
 
   eveesLoader(remotes, stores, modules);
 };

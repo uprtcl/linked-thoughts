@@ -32,8 +32,8 @@ export class Home extends eveesConnect(LitElement) {
   remote: any;
 
   async firstUpdated() {
-    const eveesProvider = this.evees.findRemote('http') as EveesHttp;
-    await eveesProvider.login();
+    this.remote = this.evees.findRemote('http') as EveesHttp;
+    await this.remote.login();
 
     const homePerspective = await getHome(this.remote, this.remote.userId);
 

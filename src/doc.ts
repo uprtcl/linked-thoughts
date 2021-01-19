@@ -1,10 +1,9 @@
 import { LitElement, html, css, property } from 'lit-element';
-import { moduleConnect } from '@uprtcl/micro-orchestrator';
-import { EveesInfoConfig } from '@uprtcl/evees';
+import { eveesConnect, EveesInfoConfig } from '@uprtcl/evees';
 
 import { Router } from '@vaadin/router';
 
-export class Doc extends moduleConnect(LitElement) {
+export class Doc extends eveesConnect(LitElement) {
   @property({ attribute: false })
   docId!: string;
 

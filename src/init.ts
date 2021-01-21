@@ -24,15 +24,14 @@ export const initUprtcl = async () => {
     cacheLocation: 'localstorage',
   };
 
-  const httpProvider = new HttpAuth0Connection(c1host, auth0Config);
-  const httpStore = new HttpStore(httpProvider, httpCidConfig);
-  const httpEvees = new EveesHttp(httpProvider, httpStore);
+  const httpConnection = new HttpAuth0Connection(c1host, auth0Config);
+  const httpStore = new HttpStore(httpConnection, httpCidConfig);
+  const httpEvees = new EveesHttp(httpConnection, httpStore);
 
   const remotes = [httpEvees];
-  const stores = [httpStore];
   const modules = new Map<string, EveesContentModule>();
   modules.set(DocumentsModule.id, new DocumentsModule());
   modules.set(WikisModule.id, new WikisModule());
 
-  eveesLoader(remotes, stores, modules);
+  eveesLoader(remotes, modules);
 };

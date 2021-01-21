@@ -1,6 +1,6 @@
 import { LitElement, html, css, property } from 'lit-element';
 
-import { eveesConnect, getHome } from '@uprtcl/evees';
+import { eveesConnect, getHome, Perspective, Secured } from '@uprtcl/evees';
 import { EveesHttp } from '@uprtcl/evees-http';
 
 import { Router } from '@vaadin/router';
@@ -30,33 +30,32 @@ export class Home extends eveesConnect(LitElement) {
   spaces!: object;
 
   remote: any;
+  homePerspective: Secured<Perspective>;
 
   async firstUpdated() {
     this.remote = this.evees.findRemote('http') as EveesHttp;
     await this.remote.login();
 
-    const homePerspective = await getHome(this.remote, this.remote.userId);
+    this.homePerspective = await getHome(this.remote, this.remote.userId);
+    const { details } = await this.evees.client.getPerspective(
+      this.homePerspective.id
+    );
 
-    try {
-      await this.evees.getPerspectiveData(homePerspective.id);
-      this.go(homePerspective.id);
-    } catch (err) {
-      this.loadingHome = false;
-      console.log('New user.');
+    if (!details.canUpdate) {
+      await this.initHome();
     }
+    this.go(this.homePerspective.id);
   }
 
-  async newDocument(title: string) {
+  async initHome() {
     this.creatingNewDocument = true;
 
-    const homePerspective = await getHome(this.remote, this.remote.userId);
-    const id = await this.evees.client.newPerspective({
-      perspective: homePerspective,
+    /** create the perspective */
+    await this.evees.client.newPerspective({
+      perspective: this.homePerspective,
       details: {},
     });
-
     await this.evees.client.flush();
-    this.go(homePerspective.id);
   }
 
   go(perspectiveId: string) {
@@ -69,29 +68,7 @@ export class Home extends eveesConnect(LitElement) {
     }
 
     return html`
-      ${this.loadingHome
-        ? html`<uprtcl-loading></uprtcl-loading>`
-        : !this.showNewSpaceForm
-        ? html`
-            <img class="background-image" src="/img/home-bg.svg" />
-            <div class="button-container">
-              <uprtcl-button
-                @click=${() => (this.showNewSpaceForm = true)}
-                raised
-              >
-                create your space
-              </uprtcl-button>
-            </div>
-          `
-        : html`
-            <uprtcl-form-string
-              value=""
-              label="title (optional)"
-              ?loading=${this.creatingNewDocument}
-              @cancel=${() => (this.showNewSpaceForm = false)}
-              @accept=${(e) => this.newDocument(e.detail.value)}
-            ></uprtcl-form-string>
-          `}
+      ${this.loadingHome ? html`<uprtcl-loading></uprtcl-loading>` : ''}
     `;
   }
 

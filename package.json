@@ -29,6 +29,7 @@
     "graphql": "^14.6.0",
     "lit-element": "^2.2.3",
     "navigo": "^7.1.2",
+    "url-loader": "^4.1.1",
     "wicg-inert": "^3.0.2"
   },
   "devDependencies": {

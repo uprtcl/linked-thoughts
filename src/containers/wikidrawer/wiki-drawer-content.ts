@@ -11,6 +11,8 @@ import {
   ContentUpdatedEvent,
 } from '@uprtcl/evees';
 import { MenuConfig } from '@uprtcl/common-ui';
+import LockIcon from '../../assets/icons/lock.svg';
+import GlobeIcon from '../../assets/icons/globe.svg';
 
 import { Wiki } from './types';
 
@@ -22,7 +24,7 @@ interface PageData {
   draggingOver: boolean;
 }
 
-export class WikiDrawerContent extends EveesBaseElement<Wiki> {
+export class WikiDrawerContent extends EveesBaseElement<any> {
   logger = new Logger('WIKI-DRAWER-CONTENT');
 
   @internalProperty()
@@ -48,7 +50,10 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
         this.logger.log('ContentUpdatedEvent()', this.uref);
         this.load();
       }
-      if (this.pagesList && this.pagesList.findIndex((page) => page.id === e.detail.uref) !== -1) {
+      if (
+        this.pagesList &&
+        this.pagesList.findIndex((page) => page.id === e.detail.uref) !== -1
+      ) {
         this.loadPagesData();
       }
     }) as EventListener);
@@ -85,10 +90,17 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
     }
 
     this.logger.log('loadPagesData()');
-
-    const pagesListPromises = this.data.object.pages.map(
+    
+    const homePerspectiveData = await EveesHelpers.getPerspectiveData(this.client,this.data.object.links[0]);
+    const privatePerspData  =  await EveesHelpers.getPerspectiveData( this.client,homePerspectiveData.object.links[0])
+    
+    this.data = privatePerspData
+    const myData  =  await EveesHelpers.getPerspectiveData( this.client,privatePerspData.object.links[0])
+    
+    const pagesListPromises = this.data.object.links.map(
       async (pageId): Promise<PageData> => {
         const data = await EveesHelpers.getPerspectiveData(this.client, pageId);
+        
         if (!data) throw new Error(`data not found for page ${pageId}`);
         const hasTitle: HasTitle = this.recognizer
           .recognizeBehaviours(data)
@@ -105,6 +117,7 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
     );
 
     this.pagesList = await Promise.all(pagesListPromises);
+    
     this.logger.log('loadPagesData()', { pagesList: this.pagesList });
   }
 
@@ -138,6 +151,7 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
       : {
           title: '',
           pages: [],
+          links: [],
         };
 
     const dragged = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -148,7 +162,7 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
     if (!dragged.uref) return;
     if (dragged.parentId === this.uref) return;
 
-    const index = this.data.object.pages.length;
+    const index = this.data.object.links.length;
 
     await this.spliceChildrenAndUpdate(wikiObject, [dragged.uref], index, 0);
   }
@@ -161,7 +175,7 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
   async replacePagePerspective(oldId, newId) {
     if (!this.data) throw new Error('wiki undefined');
 
-    const ix = this.data.object.pages.findIndex((pageId) => pageId === oldId);
+    const ix = this.data.object.links.findIndex((pageId) => pageId === oldId);
 
     if (ix === -1) return;
 
@@ -174,6 +188,7 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
       : {
           title: '',
           pages: [],
+          links: []
         };
 
     this.creatingNewPage = true;
@@ -184,7 +199,7 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
       links: [],
     };
 
-    index = index === undefined ? wikiObject.pages.length : index;
+    index = index === undefined ? wikiObject.links.length : index;
 
     await this.spliceChildrenAndUpdate(wikiObject, [newPage], index, 0);
 
@@ -251,12 +266,16 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
   }
 
   goBack() {
-    this.dispatchEvent(new CustomEvent('back', { bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent('back', { bubbles: true, composed: true })
+    );
   }
 
   renderPageList(showOptions = true) {
     if (this.pagesList === undefined)
-      return html` <uprtcl-loading class="empty-pages-loader"></uprtcl-loading> `;
+      return html`
+        <uprtcl-loading class="empty-pages-loader"></uprtcl-loading>
+      `;
 
     return html`
       ${this.editableActual
@@ -277,12 +296,25 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
         : html``}
       ${this.showNewPageDialog
         ? html`<uprtcl-dialog id="updates-dialog">
-            <button @click=${() => (this.showNewPageDialog = false)}>Close</button>
+              <span class="new-page-modal-heading">Add new page to</span>
+            <div class="new-page-modal-options">
+              <div>
+                <img src=${LockIcon} />
+                Private
+              </div>
+              <div>
+                <img src=${GlobeIcon} />
+                Blog
+              </div>
+            </div>
+            <button @click=${() => (this.showNewPageDialog = false)}>
+              Close
+            </button>
             <button
               @click=${() => {
                 this.showNewPageDialog = false;
                 this.newPage();
-              }}
+              }}  
             >
               Create New Page
             </button>
@@ -307,7 +339,6 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
 
   renderPageItem(page: PageData, ix: number, showOptions: boolean) {
     const menuConfig: MenuConfig = {
-
       'add-below': {
         disabled: false,
         text: 'create below',
@@ -341,7 +372,9 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
           @click=${() => this.selectPage(ix)}
         >
           <div class="text-container">
-            ${text.length < MAX_LENGTH ? text : `${text.slice(0, MAX_LENGTH)}...`}
+            ${text.length < MAX_LENGTH
+              ? text
+              : `${text.slice(0, MAX_LENGTH)}...`}
           </div>
           ${this.editableActual && showOptions
             ? html`
@@ -357,15 +390,21 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
               `
             : ''}
         </div>
-        ${page.draggingOver ? html`<div class="title-dragging-over"></div>` : ''}
+        ${page.draggingOver
+          ? html`<div class="title-dragging-over"></div>`
+          : ''}
       </div>
     `;
   }
 
   renderHome() {
-    return html`<div class="home-title" style=${`color: ${this.color}`}>Now seeing</div>
+    return html`<div class="home-title" style=${`color: ${this.color}`}>
+        Now seeing
+      </div>
       <uprtcl-card>
-        <evees-perspective-icon perspective-id=${this.uref}></evees-perspective-icon>
+        <evees-perspective-icon
+          perspective-id=${this.uref}
+        ></evees-perspective-icon>
       </uprtcl-card>`;
   }
 
@@ -376,7 +415,11 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
 
     return html`
       <div class="app-content-with-nav">
-        <div class="app-navbar" @dragover=${this.dragOverEffect} @drop=${this.handlePageDrop}>
+        <div
+          class="app-navbar"
+          @dragover=${this.dragOverEffect}
+          @drop=${this.handlePageDrop}
+        >
           <evees-login-widget @showName=${true}></evees-login-widget>
           <!-- <h4>PRIVATE</h4> -->
           ${this.renderPageList()}
@@ -390,7 +433,9 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
                   <documents-editor
                     id="doc-editor"
                     .client=${this.client}
-                    uref=${this.data.object.pages[this.selectedPageIx] as string}
+                    uref=${this.data.object.links[
+                      this.selectedPageIx
+                    ] as string}
                     parent-id=${this.uref}
                     color=${this.color}
                     .eveesInfoConfig=${this.eveesInfoConfig}
@@ -542,6 +587,37 @@ export class WikiDrawerContent extends EveesBaseElement<Wiki> {
           margin: 16px auto;
           padding: 12px 16px;
         }
+        .new-page-modal-heading
+        {
+          font-size:1.75rem;
+          font-weight:600;
+          text-align:center;
+          margin: 1rem 0rem;
+        }
+        .new-page-modal-options{
+          width:100%;
+          text-align:center;
+          display: flex;
+flex-wrap: wrap;
+          font-size:1.5rem;
+          font-weight:600;
+          margin:1rem 0;
+        }
+        .new-page-modal-options > * {
+          margin: 0 1rem;
+          flex:1;
+          box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          height: 128px;
+    justify-content: center;
+
+        }
+        .new-page-modal-options  img{
+          margin-bottom:1rem;
+        }
+        
       `,
     ];
   }

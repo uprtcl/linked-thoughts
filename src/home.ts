@@ -110,12 +110,12 @@ export class Home extends moduleConnect(LitElement) {
       provider.id.startsWith('http')
     ) as EveesHttp;
 
-    const perspective = await remote.getHome(remote.userId);
+    const homePerspective = await remote.getHome(remote.userId);
 
     let homePerspectiveExist: boolean;
 
     try {
-      await EveesHelpers.getPerspectiveData(this.client, perspective.id);
+      await EveesHelpers.getPerspectiveData(this.client, homePerspective.id);
       homePerspectiveExist = true;
     } catch (err) {
       homePerspectiveExist = false;
@@ -123,9 +123,9 @@ export class Home extends moduleConnect(LitElement) {
 
     if (!homePerspectiveExist) {
       await EveesHelpers.createPerspective(client, remote, {
-        context: perspective.object.payload.context,
-        timestamp: perspective.object.payload.timestamp,
-        creatorId: perspective.object.payload.creatorId,
+        context: homePerspective.object.payload.context,
+        timestamp: homePerspective.object.payload.timestamp,
+        creatorId: homePerspective.object.payload.creatorId,
       });
     }
 
@@ -136,7 +136,7 @@ export class Home extends moduleConnect(LitElement) {
       timestamp: 0,
       creatorId: remote.userId,
     };
-    debugger;
+    // debugger;
     const linkedThoughtsPerspectiveEntity = await EveesHelpers.snapDefaultPerspective(
       remote,
       linkedThoughtsPerspectiveObject.creatorId,
@@ -166,7 +166,6 @@ export class Home extends moduleConnect(LitElement) {
         }
       );
     }
-    debugger;
     // we know home and LT dashboard "folders"/perspectives exists
     const privateFolder = await EveesHelpers.createPerspective(client, remote, {
       parentId: linkedThoughtsPerspectiveEntity.id,
@@ -180,7 +179,7 @@ export class Home extends moduleConnect(LitElement) {
       type: TextType.Title,
       links: [],
     };
-
+    debugger;
     await EveesHelpers.updateHeadWithData(
       client,
       remote.store,
@@ -228,8 +227,21 @@ export class Home extends moduleConnect(LitElement) {
       dashboardInitObject
     );
 
+    const homeInitObject = {
+      text: '',
+      type: TextType.Title,
+      links: [linkedThoughtsPerspectiveID],
+    };
+    await EveesHelpers.updateHeadWithData(
+      client,
+      remote.store,
+      homePerspective.id,
+      homeInitObject
+    );
+    debugger;
+    
     await remote.flush();
-    this.go(perspective.id);
+    this.go(homePerspective.id);
     //
     // at this point we ready, we created 3 folders
     /** - home (publicRead = false)

@@ -38,11 +38,11 @@ export class Doc extends eveesConnect(LitElement) {
     };
 
     return html`
-      <wiki-drawer
+      <lt-wiki-drawer
         uref=${this.docId}
         .eveesInfoConfig=${eveesInfoConfig}
         @back=${() => this.goHome()}
-      ></wiki-drawer>
+      ></lt-wiki-drawer>
     `;
   }
 

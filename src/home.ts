@@ -1,4 +1,15 @@
-import { LitElement, html, css, property } from 'lit-element';
+import { LitElement, html, css, property, query } from 'lit-element';
+import { ApolloClient } from 'apollo-boost';
+
+import { htmlToText, TextType, TextNode } from '@uprtcl/documents';
+import { moduleConnect } from '@uprtcl/micro-orchestrator';
+import {
+  EveesModule,
+  EveesRemote,
+  EveesHelpers,
+  deriveEntity,
+  Perspective,
+} from '@uprtcl/evees';
 
 import { eveesConnect, getHome, Perspective, Secured } from '@uprtcl/evees';
 import { EveesHttp } from '@uprtcl/evees-http';
@@ -33,29 +44,216 @@ export class Home extends eveesConnect(LitElement) {
   homePerspective: Secured<Perspective>;
 
   async firstUpdated() {
-    this.remote = this.evees.findRemote('http') as EveesHttp;
-    await this.remote.login();
+    const eveesProvider = this.requestAll(
+      EveesModule.bindings.EveesRemote
+    ).find((provider: EveesHttp) =>
+      provider.id.startsWith('http')
+    ) as EveesHttp;
 
-    this.homePerspective = await this.evees.getHome(this.remote.id);
-    const { details } = await this.evees.client.getPerspective(
-      this.homePerspective.id
-    );
+    await eveesProvider.login();
 
-    if (!details.canUpdate) {
-      await this.initHome();
+    this.client = await this.request(ApolloClientModule.bindings.Client);
+
+    this.remote = (await this.requestAll(
+      EveesModule.bindings.EveesRemote
+    ).find((provider: EveesRemote) =>
+      provider.id.startsWith('http')
+    )) as EveesHttp;
+
+    const perspective = await this.remote.getHome(this.remote.userId);
+
+    try {
+      await EveesHelpers.getPerspectiveData(this.client, perspective.id);
+      this.go(perspective.id);
+    } catch (err) {
+      this.loadingHome = false;
+      console.log('New user.');
     }
     this.go(this.homePerspective.id);
   }
 
-  async initHome() {
+  async newDocument(title: string) {
+    // alert('Lol');
     this.creatingNewDocument = true;
 
-    /** create the perspective */
-    await this.evees.client.newPerspective({
-      perspective: this.homePerspective,
-      details: {},
+    // const client: ApolloClient<any> = this.request(
+    //   ApolloClientModule.bindings.Client
+    // );
+
+    // const remote = this.requestAll(
+    //   EveesModule.bindings.EveesRemote
+    // ).find((provider: EveesRemote) =>
+    //   provider.id.startsWith('http')
+    // ) as EveesHttp;
+
+    // const id = await EveesHelpers.createPerspective(client, remote, {
+    //   context: perspective.object.payload.context,
+    //   timestamp: perspective.object.payload.timestamp,
+    //   creatorId: perspective.object.payload.creatorId,
+    // });
+
+    // if (id !== perspective.id) {
+    //   throw new Error('unexpected id');
+    // }
+
+    // await remote.flush();
+    // this.go(perspective.id);
+
+    // Raw Code
+
+    const client: ApolloClient<any> = this.request(
+      ApolloClientModule.bindings.Client
+    );
+
+    const remote = this.requestAll(
+      EveesModule.bindings.EveesRemote
+    ).find((provider: EveesRemote) =>
+      provider.id.startsWith('http')
+    ) as EveesHttp;
+
+    const homePerspective = await remote.getHome(remote.userId);
+
+    let homePerspectiveExist: boolean;
+
+    try {
+      await EveesHelpers.getPerspectiveData(this.client, homePerspective.id);
+      homePerspectiveExist = true;
+    } catch (err) {
+      homePerspectiveExist = false;
+    }
+
+    if (!homePerspectiveExist) {
+      await EveesHelpers.createPerspective(client, remote, {
+        context: homePerspective.object.payload.context,
+        timestamp: homePerspective.object.payload.timestamp,
+        creatorId: homePerspective.object.payload.creatorId,
+      });
+    }
+
+    const linkedThoughtsPerspectiveObject: Perspective = {
+      remote: remote.id,
+      path: remote.defaultPath,
+      context: 'linked-thoughts.dashboard',
+      timestamp: 0,
+      creatorId: remote.userId,
+    };
+    // debugger;
+    const linkedThoughtsPerspectiveEntity = await EveesHelpers.snapDefaultPerspective(
+      remote,
+      linkedThoughtsPerspectiveObject.creatorId,
+      linkedThoughtsPerspectiveObject.context,
+      linkedThoughtsPerspectiveObject.timestamp
+    );
+    let linkedThoughtsPerspectiveExist: boolean;
+    try {
+      await EveesHelpers.getPerspectiveData(
+        this.client,
+        linkedThoughtsPerspectiveEntity.id
+      );
+      linkedThoughtsPerspectiveExist = true;
+    } catch (err) {
+      linkedThoughtsPerspectiveExist = false;
+    }
+
+    let linkedThoughtsPerspectiveID;
+    if (!linkedThoughtsPerspectiveExist) {
+      linkedThoughtsPerspectiveID = await EveesHelpers.createPerspective(
+        client,
+        remote,
+        {
+          context: linkedThoughtsPerspectiveObject.context,
+          timestamp: linkedThoughtsPerspectiveObject.timestamp,
+          creatorId: linkedThoughtsPerspectiveObject.creatorId,
+        }
+      );
+    }
+    // we know home and LT dashboard "folders"/perspectives exists
+    const privateFolder = await EveesHelpers.createPerspective(client, remote, {
+      parentId: linkedThoughtsPerspectiveEntity.id,
     });
-    await this.evees.client.flush();
+    const page1Id = await EveesHelpers.createPerspective(client, remote, {
+      parentId: privateFolder,
+    });
+
+    const newPageObject: TextNode = {
+      text: '',
+      type: TextType.Title,
+      links: [],
+    };
+    debugger;
+    await EveesHelpers.updateHeadWithData(
+      client,
+      remote.store,
+      page1Id,
+      newPageObject
+    );
+
+    const privateFolderObject: TextNode = {
+      text: 'Private',
+      type: TextType.Title,
+      links: [page1Id],
+    };
+    // at this point private folder is ready, now lets prepare the blog folder
+
+    await EveesHelpers.updateHeadWithData(
+      client,
+      remote.store,
+      privateFolder,
+      privateFolderObject
+    );
+
+    const blogFolder = await EveesHelpers.createPerspective(client, remote, {
+      parentId: linkedThoughtsPerspectiveEntity.id,
+    });
+
+    // we need to make the blog public.
+    // await remote.accessControl.set(blogFolder.id, {
+    //   publicRead: true,
+    //   publicWrite: false,
+    //   delegate: false,
+    //   // delegateTo
+    // });
+
+    // at this point, the blog and private "folders" exist : LinkedThoughtDashboard
+    const dashboardInitObject = {
+      text: '',
+      type: TextType.Title,
+      links: [privateFolder, blogFolder],
+    };
+
+    await EveesHelpers.updateHeadWithData(
+      client,
+      remote.store,
+      linkedThoughtsPerspectiveEntity.id,
+      dashboardInitObject
+    );
+
+    const homeInitObject = {
+      text: '',
+      type: TextType.Title,
+      links: [linkedThoughtsPerspectiveID],
+    };
+    await EveesHelpers.updateHeadWithData(
+      client,
+      remote.store,
+      homePerspective.id,
+      homeInitObject
+    );
+    debugger;
+    
+    await remote.flush();
+    this.go(homePerspective.id);
+    //
+    // at this point we ready, we created 3 folders
+    /** - home (publicRead = false)
+     *  |--> linkedThoughts  (delegate ACL to home)
+     *    |--> privateSection  (delegate ACL to linkedThoughts)
+     *    |  |--> page1  (delegate ACL to privateSection)
+     *    |--> blog (custom ACL publicRead = true, publicWrite = false)
+     */
+
+    // when we are wokring with the app
+    // share to blog -> add page1 as child of blog, change ACL of page1 to delegateTo (inheritFrom) blog instead of private section.
   }
 
   go(perspectiveId: string) {
@@ -68,7 +266,29 @@ export class Home extends eveesConnect(LitElement) {
     }
 
     return html`
-      ${this.loadingHome ? html`<uprtcl-loading></uprtcl-loading>` : ''}
+      ${this.loadingHome
+        ? html`<uprtcl-loading></uprtcl-loading>`
+        : !this.showNewSpaceForm
+        ? html`
+            <img class="background-image" src="/img/home-bg.svg" />
+            <div class="button-container">
+              <uprtcl-button
+                @click=${() => (this.showNewSpaceForm = true)}
+                raised
+              >
+                create your space
+              </uprtcl-button>
+            </div>
+          `
+        : html`
+            <uprtcl-form-string
+              value=""
+              label="title (optional)"
+              ?loading=${this.creatingNewDocument}
+              @cancel=${() => (this.showNewSpaceForm = false)}
+              @accept=${(e) => this.newDocument(e.detail.value)}
+            ></uprtcl-form-string>
+          `}
     `;
   }
 

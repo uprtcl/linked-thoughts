@@ -1,5 +1,8 @@
-export interface Wiki {
+export interface Dashboard {
+  sections: Map<string, string>;
+}
+
+export interface Section {
   title: string;
-  pages: Array<string>;
-  links: Array<string>;
+  pages: Map<string, string>;
 }

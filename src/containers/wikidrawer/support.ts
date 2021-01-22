@@ -1,5 +1,6 @@
 import { TextType } from '@uprtcl/documents';
 import { Evees } from '@uprtcl/evees';
+import { Dashboard, Section } from './types';
 
 export class AppSupport {
   static async getRemote(evees: Evees) {
@@ -32,15 +33,22 @@ export class AppSupport {
       parentId: privateId,
     });
 
-    await evees.updatePerspectiveData(privateId, {
+    const privateSectionData: Section = {
       title: 'Private',
       pages: [pageId],
-    });
+    };
+    await evees.updatePerspectiveData(privateId, privateSectionData);
 
-    await evees.updatePerspectiveData(publicId, {
+    const publicSectionData: Section = {
       title: 'Blog',
       pages: [],
-    });
+    };
+    await evees.updatePerspectiveData(publicId, publicSectionData);
+
+    const dashboardData: Dashboard = {
+      sections: [privateId, publicId],
+    };
+    await evees.updatePerspectiveData(dashboardId, dashboardData);
 
     await evees.updatePerspectiveData(on, {
       linkedThoughts: dashboardId,

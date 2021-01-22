@@ -108,21 +108,22 @@ export class DashboardElement extends eveesConnect(LitElement) {
   }
 
   async loadSections() {
-    const sections = Array.from(this.dashboardData.object.sections.values());
-    const pagesListPromises = sections.map(
-      async (sectionId): Promise<SectionData> => {
-        const sectionData = await this.evees.getPerspectiveData(sectionId);
+    await Promise.all(
+      this.dashboardData.object.sections.map(
+        async (sectionId): Promise<SectionData> => {
+          const sectionData = await this.evees.getPerspectiveData(sectionId);
 
-        if (!sectionData)
-          throw new Error(`data not found for section ${sectionId}`);
-        const title = this.evees.behavior(sectionData.object, 'title');
+          if (!sectionData)
+            throw new Error(`data not found for section ${sectionId}`);
+          const title = this.evees.behavior(sectionData.object, 'title');
 
-        return {
-          id: sectionId,
-          title,
-          draggingOver: false,
-        };
-      }
+          return {
+            id: sectionId,
+            title,
+            draggingOver: false,
+          };
+        }
+      )
     );
   }
 
@@ -178,11 +179,9 @@ export class DashboardElement extends eveesConnect(LitElement) {
       <div class="app-content-with-nav">
         <div class="app-navbar">
           <evees-login-widget showName=${true}></evees-login-widget>
-          ${Array.from(this.dashboardData.object.sections.values()).map(
-            (sectionId) => {
-              return html`<app-section uref=${sectionId}></app-section>`;
-            }
-          )}
+          ${this.dashboardData.object.sections.map((sectionId) => {
+            return html`<app-section uref=${sectionId}></app-section>`;
+          })}
         </div>
 
         <div class="app-content">

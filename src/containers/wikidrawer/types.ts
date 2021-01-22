@@ -1,8 +1,8 @@
 export interface Dashboard {
-  sections: Map<string, string>;
+  sections: string[];
 }
 
 export interface Section {
   title: string;
-  pages: Map<string, string>;
+  pages: string[];
 }

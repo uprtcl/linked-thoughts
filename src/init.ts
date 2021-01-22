@@ -25,6 +25,8 @@ export const initUprtcl = async () => {
   };
 
   const httpConnection = new HttpAuth0Connection(c1host, auth0Config);
+  await httpConnection.ready();
+
   const httpStore = new HttpStore(httpConnection, httpCidConfig);
   const httpEvees = new EveesHttp(httpConnection, httpStore);
 

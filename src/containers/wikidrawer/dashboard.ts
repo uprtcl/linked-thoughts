@@ -111,7 +111,6 @@ export class DashboardElement extends eveesConnect(LitElement) {
 
   /** overwrite */
   async load() {
-    this.loading = true;
     const homeData = await this.evees.getPerspectiveData(
       this.homePerspective.id
     );
@@ -120,7 +119,6 @@ export class DashboardElement extends eveesConnect(LitElement) {
       this.dashboardId
     );
     await this.loadSections();
-    this.loading = true;
   }
 
   async loadSections() {

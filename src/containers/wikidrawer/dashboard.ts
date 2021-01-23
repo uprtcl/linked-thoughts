@@ -1,5 +1,7 @@
 import { html, css, internalProperty, LitElement } from 'lit-element';
+import { Router } from '@vaadin/router';
 
+import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
 import {
   Entity,
@@ -13,7 +15,8 @@ import LockIcon from '../../assets/icons/lock.svg';
 import GlobeIcon from '../../assets/icons/globe.svg';
 import { AppSupport } from './support';
 import { Dashboard } from './types';
-import { EveesHttp } from '@uprtcl/evees-http';
+
+import { GettingStarted } from '../../constants/routeNames';
 
 const MAX_LENGTH = 999;
 
@@ -54,6 +57,8 @@ export class DashboardElement extends eveesConnect(LitElement) {
       this.decodeUrl();
       await this.checkDashboardInit();
       await this.load();
+    } else {
+      Router.go(GettingStarted);
     }
 
     this.loading = false;
@@ -127,7 +132,17 @@ export class DashboardElement extends eveesConnect(LitElement) {
     );
   }
 
-  async newPage(index?: number) {}
+  async newPage(onSection: number = 0) {
+    // const page: TextNode = {
+    //   text: '',
+    //   type: TextType.Title,
+    //   links: [],
+    // };
+    // const pageId = await this.evees.createEvee({
+    //   object: page,
+    //   parentId: this.dashboardData.object.sections[onSection],
+    // });
+  }
 
   renderNewPageDialog(showOptions = true) {
     return html`<uprtcl-dialog id="updates-dialog">
@@ -163,26 +178,32 @@ export class DashboardElement extends eveesConnect(LitElement) {
       </uprtcl-card>`;
   }
 
+  renderNavbar() {
+    return html`<evees-login-widget showName=${true}></evees-login-widget>
+      <div class="row align-center">
+        <uprtcl-button
+          class="button-new-page"
+          @click=${() => {
+            this.showNewPageDialog = true;
+          }}
+        >
+          New Page
+        </uprtcl-button>
+      </div>
+      ${this.dashboardData.object.sections.map((sectionId) => {
+        return html`<app-section uref=${sectionId}></app-section>`;
+      })}
+      ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
+  }
+
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
-
-    if (!this.isLogged)
-      return html`
-        <uprtcl-button-loading @click=${() => this.login()}
-          >Login</uprtcl-button-loading
-        >
-      `;
 
     this.logger.log('rendering wiki after loading');
 
     return html`
       <div class="app-content-with-nav">
-        <div class="app-navbar">
-          <evees-login-widget showName=${true}></evees-login-widget>
-          ${this.dashboardData.object.sections.map((sectionId) => {
-            return html`<app-section uref=${sectionId}></app-section>`;
-          })}
-        </div>
+        <div class="app-navbar">${this.renderNavbar()}</div>
 
         <div class="app-content">
           ${this.selectedPageId !== undefined

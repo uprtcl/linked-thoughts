@@ -36,7 +36,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
   showNewPageDialog = false;
 
   @internalProperty()
-  selectedPageId = true;
+  selectedPageId: string | undefined;
 
   homePerspective: Secured<Perspective>;
   dashboardId: string;

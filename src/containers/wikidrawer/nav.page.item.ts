@@ -1,6 +1,6 @@
-import { html, css, internalProperty } from 'lit-element';
-import { LitElement, property } from 'lit-element';
+import { html, css, internalProperty ,LitElement, property} from 'lit-element';
 
+import { styles } from '@uprtcl/common-ui';
 import { Entity, eveesConnect } from '@uprtcl/evees';
 import { MenuConfig } from '@uprtcl/common-ui';
 import { TextNode } from '@uprtcl/documents';
@@ -67,17 +67,17 @@ export class PageItemElement extends eveesConnect(LitElement) {
     const empty = this.title === '';
     // TODO: const selected = this.selectedPageIx === ix;
 
-    let classes: string[] = [];
+    // let classes: string[] = [];
 
-    classes.push('page-item');
-    if (empty) classes.push('title-empty');
+    // classes.push('page-item');
+    // if (empty) classes.push('title-empty');
     // if (selected) classes.push('title-selected');
 
     const titleStr = this.title ? this.title : 'empty';
 
     return html`
-      <div class="page-item-row">
-        <div class=${classes.join(' ')} @click=${() => this.selectPage()}>
+      
+        <div class="page-item-row"  @click=${() => this.selectPage()}>
           <span class="text-container">${titleStr}</span>
 
           <span class="item-menu-container">
@@ -89,11 +89,36 @@ export class PageItemElement extends eveesConnect(LitElement) {
             >
             </uprtcl-options-menu>
           </span>
-        </div>
         ${this.draggingOver
           ? html`<div class="title-dragging-over"></div>`
           : ''}
       </div>
     `;
+  }
+  static get styles() {
+    return [
+      styles,
+      css`
+        :host {
+          
+          
+        }
+        
+        .page-item-row{
+          display:flex;
+          flex-direction:row;
+          align-items:center;
+          padding:0.1rem 0.25rem;
+          padding-left:2.2rem;
+          transition: background 0.1s ease-in-out;
+        }
+        .page-item-row:hover{
+          background:#0001;
+        }
+        .text-container{
+          flex:1;
+        }
+      `,
+    ];
   }
 }

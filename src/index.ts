@@ -5,6 +5,7 @@ import { DashboardElement } from './containers/wikidrawer/dashboard';
 import { GettingStartedElement } from './containers/wikidrawer/getting-started';
 import { NavSectionElement } from './containers/wikidrawer/nav.section';
 import { PageItemElement } from './containers/wikidrawer/nav.page.item';
+import {SectionPage} from './containers/SectionPage'
 
 (async function () {
   await initUprtcl();
@@ -15,4 +16,5 @@ import { PageItemElement } from './containers/wikidrawer/nav.page.item';
   customElements.define('app-nav-section', NavSectionElement);
   customElements.define('app-nav-page-item', PageItemElement);
   customElements.define('app-getting-started', GettingStartedElement);
+  customElements.define('app-section-page',SectionPage);
 })();

@@ -1,6 +1,9 @@
 import { Router } from '@vaadin/router';
 import * as Routes from './constants/routeNames';
-import { GenerateDocumentRoute } from './utils/routes.helpers';
+import {
+  GenerateDocumentRoute,
+  GenerateSectionRoute,
+} from './utils/routes.helpers';
 
 export class LTRouter {
   static Router: Router;
@@ -23,6 +26,10 @@ export class LTRouter {
           },
           {
             path: GenerateDocumentRoute(),
+            component: 'div',
+          },
+          {
+            path: GenerateSectionRoute(),
             component: 'div',
           },
         ],

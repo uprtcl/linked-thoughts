@@ -15,8 +15,9 @@ import LockIcon from '../../assets/icons/lock.svg';
 import GlobeIcon from '../../assets/icons/globe.svg';
 import { AppSupport } from './support';
 import { Dashboard } from './types';
-
+import { LTRouter } from '../../router';
 import { GettingStarted } from '../../constants/routeNames';
+import { TextNode, TextType } from '@uprtcl/documents';
 
 const MAX_LENGTH = 999;
 
@@ -45,6 +46,15 @@ export class DashboardElement extends eveesConnect(LitElement) {
   dashboardId: string;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('popstate', () => this.decodeUrl());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+  }
 
   async firstUpdated() {
     this.remote = (await AppSupport.getRemote(this.evees)) as EveesHttp;
@@ -75,7 +85,8 @@ export class DashboardElement extends eveesConnect(LitElement) {
     // /getting-started
     // /
     // this.sectionSelected = '';
-    // this.pageSelected = '';
+
+    this.selectedPageId = LTRouter.Router.location.params.docId as string;
   }
 
   async checkDashboardInit() {
@@ -133,15 +144,17 @@ export class DashboardElement extends eveesConnect(LitElement) {
   }
 
   async newPage(onSection: number = 0) {
-    // const page: TextNode = {
-    //   text: '',
-    //   type: TextType.Title,
-    //   links: [],
-    // };
-    // const pageId = await this.evees.createEvee({
-    //   object: page,
-    //   parentId: this.dashboardData.object.sections[onSection],
-    // });
+    const page: TextNode = {
+      text: '',
+      type: TextType.Title,
+      links: [],
+    };
+    await this.evees.addChild(
+      page,
+      this.dashboardData.object.sections[onSection]
+    );
+
+    await this.evees.client.flush();
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -191,7 +204,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
         </uprtcl-button>
       </div>
       ${this.dashboardData.object.sections.map((sectionId) => {
-        return html`<app-section uref=${sectionId}></app-section>`;
+        return html`<app-nav-section uref=${sectionId}></app-nav-section>`;
       })}
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }

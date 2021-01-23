@@ -1,18 +1,38 @@
 import { Router } from '@vaadin/router';
 import * as Routes from './constants/routeNames';
-export function setupRouter(outlet: HTMLElement) {
-  const router = new Router(outlet);
+import { GenerateDocumentRoute } from './utils/routes.helpers';
 
-  router.setRoutes([
-    {
-      path: Routes.Home,
-      component: 'app-dashboard',
-    },
-    {
-      path: Routes.GettingStarted,
-      component: 'app-getting-started',
-    },
-  ]);
+export class LTRouter {
+  static Router: Router;
 
-  return router;
+  static setupRouter(outlet: HTMLElement) {
+    const router = new Router(outlet);
+
+    router.setRoutes([
+      {
+        path: Routes.GettingStarted,
+        component: 'app-getting-started',
+      },
+      {
+        path: Routes.Home,
+        component: 'app-dashboard', // Slot
+        children: [
+          {
+            path: '/',
+            component: 'div',
+          },
+          {
+            path: GenerateDocumentRoute(),
+            component: 'div',
+          },
+        ],
+      },
+    ]);
+
+    this.Router = router;
+
+    return router;
+  }
 }
+
+export const LTRouterInstance = new LTRouter();

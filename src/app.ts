@@ -1,7 +1,6 @@
 import { LitElement, html, query, css } from 'lit-element';
-import { Router } from '@vaadin/router';
 
-import { setupRouter } from './router';
+import { LTRouter } from './router';
 import { sharedStyles } from './styles';
 
 export class App extends LitElement {
@@ -9,8 +8,7 @@ export class App extends LitElement {
   outlet: HTMLElement;
 
   async firstUpdated() {
-    setupRouter(this.outlet);
-    // Router.go('/home');
+    LTRouter.setupRouter(this.outlet);
   }
 
   render() {

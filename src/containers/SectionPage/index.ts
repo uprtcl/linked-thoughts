@@ -1,20 +1,10 @@
-import {
-  html,
-  css,
-  internalProperty,
-  LitElement,
-  property,
-  svg,
-} from 'lit-element';
+import { html, css, internalProperty, LitElement, property } from 'lit-element';
 import lodash from 'lodash';
 import { styles } from '@uprtcl/common-ui';
 import { Entity, eveesConnect } from '@uprtcl/evees';
-import { MenuConfig } from '@uprtcl/common-ui';
-import { TextNode } from '@uprtcl/documents';
 import { Router } from '@vaadin/router';
 import FileAddIcon from '../../assets/icons/file-add.svg';
 import DropDownIcon from '../../assets/icons/drop-down.svg';
-import GlobeIcon from '../../assets/icons/globe.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 
@@ -51,7 +41,17 @@ export class SectionPage extends eveesConnect(LitElement) {
 
   async firstUpdated() {
     this.loading = true;
+    this.load();
+    this.loading = false;
+  }
 
+  updated(changedProperties) {
+    if (changedProperties.has('uref')) {
+      this.load();
+    }
+  }
+
+  async load() {
     this.sectionData = await this.evees.getPerspectiveData(this.uref);
 
     await Promise.all(
@@ -63,7 +63,6 @@ export class SectionPage extends eveesConnect(LitElement) {
     );
     this.filteredPageList = this.pageList;
     this.title = this.sectionData.object.title;
-    this.loading = false;
   }
 
   sortPagesBy() {
@@ -102,9 +101,8 @@ export class SectionPage extends eveesConnect(LitElement) {
     this.searchFilter();
   }
 
-  navigateToDoc(uref)
-  {
-    Router.go(GenerateDocumentRoute(uref))
+  navigateToDoc(uref) {
+    Router.go(GenerateDocumentRoute(uref));
   }
   /**
    * Header includes the title of the section and the searchbar
@@ -139,7 +137,7 @@ export class SectionPage extends eveesConnect(LitElement) {
       : html`${this.filteredPageList.map((pageData) => {
           return html`
             <tr>
-              <td @click=${()=>this.navigateToDoc(pageData.id)}>
+              <td @click=${() => this.navigateToDoc(pageData.id)}>
                 ${pageData.object.text
                   ? html`<b>${pageData.object.text}</b>`
                   : html`<i>Untitled</i>`}

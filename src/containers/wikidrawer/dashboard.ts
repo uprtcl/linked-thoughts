@@ -174,24 +174,24 @@ export class DashboardElement extends eveesConnect(LitElement) {
     return html`<uprtcl-dialog id="updates-dialog">
       <span class="new-page-modal-heading">Add new page to</span>
       <div class="new-page-modal-options">
-        <div>
-          <img src=${LockIcon} />
-          Private
+        <div
+          @click=${() => {
+            this.showNewPageDialog = false;
+            this.newPage(0);
+          }}
+        >
+          ${LockIcon} Private
         </div>
-        <div>
-          <img src=${GlobeIcon} />
-          Blog
+        <div
+          @click=${() => {
+            this.showNewPageDialog = false;
+            this.newPage(1);
+          }}
+        >
+          ${GlobeIcon} Blog
         </div>
       </div>
       <button @click=${() => (this.showNewPageDialog = false)}>Close</button>
-      <button
-        @click=${() => {
-          this.showNewPageDialog = false;
-          this.newPage();
-        }}
-      >
-        Create New Page
-      </button>
     </uprtcl-dialog>`;
   }
 

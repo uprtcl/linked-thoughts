@@ -19,6 +19,12 @@ import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 
 // const FileAddIcon = SVGToLit(require())
+
+enum TitleFilter {
+  null = '',
+  asc = 'asc',
+  des = 'des',
+}
 export class SectionPage extends eveesConnect(LitElement) {
   @property()
   uref: string;
@@ -30,7 +36,16 @@ export class SectionPage extends eveesConnect(LitElement) {
   title: string | null = null;
 
   @internalProperty()
-  pageList: Array<any> = FakePages;
+  pageList: Array<any> = [];
+
+  @internalProperty()
+  filteredPageList: Array<any> = [];
+
+  @internalProperty()
+  searchQuery: string = '';
+
+  @internalProperty()
+  filterTitle: TitleFilter = TitleFilter.asc;
 
   sectionData: Entity<Section>;
 
@@ -46,18 +61,51 @@ export class SectionPage extends eveesConnect(LitElement) {
         this.pageList.push(page);
       })
     );
-
+    this.filteredPageList = this.pageList;
     this.title = this.sectionData.object.title;
     this.loading = false;
   }
 
   sortPagesBy() {
-    this.pageList = lodash.sortBy(
-      this.pageList,
-      (pageData) => pageData.object.text
-    );
+    switch (this.filterTitle) {
+      case TitleFilter.asc:
+        this.filteredPageList = lodash
+          .sortBy(this.filteredPageList, (pageData) => pageData.object.text)
+          .reverse();
+
+        this.filterTitle = TitleFilter.des;
+        break;
+
+      case TitleFilter.des:
+        this.filteredPageList = lodash.sortBy(
+          this.filteredPageList,
+          (pageData) => pageData.object.text
+        );
+
+        this.filterTitle = TitleFilter.asc;
+        break;
+    }
   }
 
+  searchFilter() {
+    this.filteredPageList = lodash.filter(this.pageList, (pageData) => {
+      return (
+        lodash
+          .lowerCase(pageData.object.text)
+          .indexOf(lodash.lowerCase(this.searchQuery)) !== -1
+      );
+    });
+  }
+
+  handleSearch(e) {
+    this.searchQuery = e.target.value;
+    this.searchFilter();
+  }
+
+  navigateToDoc(uref)
+  {
+    Router.go(GenerateDocumentRoute(uref))
+  }
   /**
    * Header includes the title of the section and the searchbar
    */
@@ -67,6 +115,7 @@ export class SectionPage extends eveesConnect(LitElement) {
         <span class="section-heading"> ${this.title} </span>
         <div class="search-cont">
           <input
+            @input=${this.handleSearch}
             class="search-field"
             type="text"
             placeholder="Find pages..."
@@ -85,12 +134,16 @@ export class SectionPage extends eveesConnect(LitElement) {
     `;
   }
   renderPageItems() {
-    return this.pageList.length == 0
+    return this.filteredPageList.length == 0
       ? html``
-      : html`${this.pageList.map((pageData) => {
+      : html`${this.filteredPageList.map((pageData) => {
           return html`
             <tr>
-              <td>${pageData.object.text}</td>
+              <td @click=${()=>this.navigateToDoc(pageData.id)}>
+                ${pageData.object.text
+                  ? html`<b>${pageData.object.text}</b>`
+                  : html`<i>Untitled</i>`}
+              </td>
               <td>an hour ago (Not real)</td>
               <td>Blog</td>
               <td>_ _ _</td>
@@ -208,45 +261,3 @@ export class SectionPage extends eveesConnect(LitElement) {
     ];
   }
 }
-
-const FakePages = [
-  {
-    id: 'zb2wwoLdU8HCFcPEwaBce2G69Rpgei2q7qqhHyRjD9fsdsddCS',
-    object: {
-      text: 'Documents',
-      type: 'Title',
-      links: [
-        'zb2wwyAjRPppQrJdAVgdEmUGtnWFfVBDWmE2VrqCv4ULBzDpY',
-        'zb2wwxA6iH7bxH3iUn2ouD4Rvuh3JbJsowyEZ6eNCuSQJCjRf',
-        'zb2wwnSMqV983rGc8Dbg7heP3TLTWRuc7DDJJmsV3yjQtjDSY',
-        'zb2wwmcSEas6g4imXHkoJmh2wgpTD5LNZqGZcPdjJUZouvvbX',
-      ],
-    },
-  },
-  {
-    id: 'zb2wwoLdU8HCFcPEwaBce2G69Rpgei2q7qqhHyRjD9fsdsqSdCS',
-    object: {
-      text: 'Accounts',
-      type: 'Title',
-      links: [
-        'zb2wwyAjRPppQrJdAVgdEmUGtnWFfVBDWmE2VrqCv4ULBzDpY',
-        'zb2wwxA6iH7bxH3iUn2ouD4Rvuh3JbJsowyEZ6eNCuSQJCjRf',
-        'zb2wwnSMqV983rGc8Dbg7heP3TLTWRuc7DDJJmsV3yjQtjDSY',
-        'zb2wwmcSEas6g4imXHkoJmh2wgpTD5LNZqGZcPdjJUZouvvbX',
-      ],
-    },
-  },
-  {
-    id: 'zb2wwoLdU8HCFcPEwaBce2G69Rpgei2q7qqhHyRjDsdsdsdsdCS',
-    object: {
-      text: 'Contacts',
-      type: 'Title',
-      links: [
-        'zb2wwyAjRPppQrJdAVgdEmUGtnWFfVBDWmE2VrqCv4ULBzDpY',
-        'zb2wwxA6iH7bxH3iUn2ouD4Rvuh3JbJsowyEZ6eNCuSQJCjRf',
-        'zb2wwnSMqV983rGc8Dbg7heP3TLTWRuc7DDJJmsV3yjQtjDSY',
-        'zb2wwmcSEas6g4imXHkoJmh2wgpTD5LNZqGZcPdjJUZouvvbX',
-      ],
-    },
-  },
-];

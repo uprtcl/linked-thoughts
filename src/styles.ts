@@ -1,7 +1,6 @@
-import { css } from "lit-element";
+import { css } from 'lit-element';
 
 export const sharedStyles = css`
-  
   :host {
     --primary: #2f80ed;
     --secondary: #333333;
@@ -11,7 +10,6 @@ export const sharedStyles = css`
     --gray: #333333;
     --border-radius-complete: 100vh;
     --background-color: #fffffb;
-    
   }
   .row {
     display: flex;
@@ -21,5 +19,9 @@ export const sharedStyles = css`
   .column {
     display: flex;
     flex-direction: column;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 `;

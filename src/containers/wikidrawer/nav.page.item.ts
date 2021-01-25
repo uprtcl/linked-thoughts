@@ -73,8 +73,7 @@ export class PageItemElement extends eveesConnect(LitElement) {
     // if (empty) classes.push('title-empty');
     // if (selected) classes.push('title-selected');
 
-    const titleStr = this.title ? this.title : 'empty';
-
+    const titleStr = this.title ? this.title : 'Untitled';
     return html`
       
         <div class="page-item-row"  @click=${() => this.selectPage()}>

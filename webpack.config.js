@@ -61,14 +61,7 @@ module.exports = {
       },
       {
         test: /\.svg$/i,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              encoding: false,
-            },
-          },
-        ],
+        loader: 'lit-svg-loader',
       },
     ],
   },

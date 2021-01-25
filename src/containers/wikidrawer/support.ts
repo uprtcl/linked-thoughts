@@ -1,6 +1,6 @@
 import { TextType } from '@uprtcl/documents';
 import { Evees } from '@uprtcl/evees';
-import { Dashboard, Section } from './types';
+import { Dashboard, Section } from '../types';
 
 export class AppSupport {
   static async getRemote(evees: Evees) {

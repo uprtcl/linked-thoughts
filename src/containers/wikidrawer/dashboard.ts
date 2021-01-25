@@ -14,7 +14,7 @@ import {
 import LockIcon from '../../assets/icons/lock.svg';
 import GlobeIcon from '../../assets/icons/globe.svg';
 import { AppSupport } from './support';
-import { Dashboard } from './types';
+import { Dashboard } from '../types';
 import { LTRouter } from '../../router';
 import { GettingStarted } from '../../constants/routeNames';
 import { TextNode, TextType } from '@uprtcl/documents';
@@ -27,6 +27,7 @@ interface SectionData {
   draggingOver: boolean;
 }
 
+type PageOrSection = 'page' | 'section';
 export class DashboardElement extends eveesConnect(LitElement) {
   logger = new Logger('Dashboard');
 
@@ -40,7 +41,13 @@ export class DashboardElement extends eveesConnect(LitElement) {
   showNewPageDialog = false;
 
   @internalProperty()
+  pageOrSection: PageOrSection;
+
+  @internalProperty()
   selectedPageId: string | undefined;
+
+  @internalProperty()
+  selectedSectionId: string | undefined;
 
   homePerspective: Secured<Perspective>;
   dashboardId: string;
@@ -85,8 +92,14 @@ export class DashboardElement extends eveesConnect(LitElement) {
     // /getting-started
     // /
     // this.sectionSelected = '';
-
-    this.selectedPageId = LTRouter.Router.location.params.docId as string;
+    if (LTRouter.Router.location.params.sectionId) {
+      this.pageOrSection = 'section';
+      this.selectedSectionId = LTRouter.Router.location.params
+        .sectionId as string;
+    } else if (LTRouter.Router.location.params.docId) {
+      this.pageOrSection = 'page';
+      this.selectedPageId = LTRouter.Router.location.params.docId as string;
+    }
   }
 
   async checkDashboardInit() {
@@ -159,24 +172,24 @@ export class DashboardElement extends eveesConnect(LitElement) {
     return html`<uprtcl-dialog id="updates-dialog">
       <span class="new-page-modal-heading">Add new page to</span>
       <div class="new-page-modal-options">
-        <div>
-          <img src=${LockIcon} />
-          Private
+        <div
+          @click=${() => {
+            this.showNewPageDialog = false;
+            this.newPage(0);
+          }}
+        >
+          ${LockIcon} Private
         </div>
-        <div>
-          <img src=${GlobeIcon} />
-          Blog
+        <div
+          @click=${() => {
+            this.showNewPageDialog = false;
+            this.newPage(1);
+          }}
+        >
+          ${GlobeIcon} Blog
         </div>
       </div>
       <button @click=${() => (this.showNewPageDialog = false)}>Close</button>
-      <button
-        @click=${() => {
-          this.showNewPageDialog = false;
-          this.newPage();
-        }}
-      >
-        Create New Page
-      </button>
     </uprtcl-dialog>`;
   }
 
@@ -201,12 +214,33 @@ export class DashboardElement extends eveesConnect(LitElement) {
           New Page
         </uprtcl-button>
       </div>
-      ${this.dashboardData.object.sections.map((sectionId) => {
-        return html`<app-nav-section uref=${sectionId}></app-nav-section>`;
-      })}
+      <div class="section-cont">
+        ${this.dashboardData.object.sections.map((sectionId) => {
+          return html`<app-nav-section uref=${sectionId}></app-nav-section>`;
+        })}
+      </div>
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 
+  renderPageContent() {
+    return html` ${this.selectedPageId !== undefined
+      ? html`
+          <div class="page-container">
+            <documents-editor
+              id="doc-editor"
+              uref=${this.selectedPageId}
+              parent-id=${this.dashboardId}
+            >
+            </documents-editor>
+          </div>
+        `
+      : null}`;
+  }
+  renderSectionContent() {
+    return html` ${this.selectedSectionId !== undefined
+      ? html` <app-section-page uref=${this.selectedSectionId} /> `
+      : null}`;
+  }
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
 
@@ -217,17 +251,10 @@ export class DashboardElement extends eveesConnect(LitElement) {
         <div class="app-navbar">${this.renderNavbar()}</div>
 
         <div class="app-content">
-          ${this.selectedPageId !== undefined
-            ? html`
-                <div class="page-container">
-                  <documents-editor
-                    id="doc-editor"
-                    uref=${this.selectedPageId}
-                    parent-id=${this.dashboardId}
-                  >
-                  </documents-editor>
-                </div>
-              `
+          ${this.pageOrSection === 'page'
+            ? this.renderPageContent()
+            : this.pageOrSection === 'section'
+            ? this.renderSectionContent()
             : html` <div class="home-container">${this.renderHome()}</div> `}
         </div>
       </div>
@@ -243,6 +270,13 @@ export class DashboardElement extends eveesConnect(LitElement) {
           flex: 1 1 0;
           flex-direction: column;
         }
+        .row {
+          display: flex;
+          flex-direction: row;
+        }
+        .align-center {
+          justify-content: center;
+        }
         .app-content-with-nav {
           flex: 1 1 0;
           display: flex;
@@ -253,7 +287,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
         .app-navbar {
           -ms-overflow-style: none; /* IE and Edge */
           scrollbar-width: none; /* Firefox */
-          width: 260px;
+          width: 250px;
           flex-shrink: 0;
           background: var(--white);
           box-shadow: 1px 0px 10px rgba(0, 0, 0, 0.1);
@@ -335,6 +369,8 @@ export class DashboardElement extends eveesConnect(LitElement) {
         }
         .button-new-page {
           height: 40px;
+          width: '100%';
+          max-width: 170px;
         }
         .button-row {
           width: calc(100% - 20px);
@@ -399,6 +435,9 @@ export class DashboardElement extends eveesConnect(LitElement) {
         }
         .new-page-modal-options img {
           margin-bottom: 1rem;
+        }
+        .section-cont {
+          /* margin-left:2rem; */
         }
       `,
     ];

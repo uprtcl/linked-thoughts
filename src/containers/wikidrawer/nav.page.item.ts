@@ -1,5 +1,5 @@
-import { html, css, internalProperty ,LitElement, property} from 'lit-element';
-
+import { html, css, internalProperty, LitElement, property } from 'lit-element';
+import { classMap } from 'lit-html/directives/class-map';
 import { styles } from '@uprtcl/common-ui';
 import { Entity, eveesConnect } from '@uprtcl/evees';
 import { MenuConfig } from '@uprtcl/common-ui';
@@ -7,10 +7,13 @@ import { TextNode } from '@uprtcl/documents';
 import { Router } from '@vaadin/router';
 
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
-
+import { sharedStyles } from '../../styles';
 export class PageItemElement extends eveesConnect(LitElement) {
   @property()
   uref: string;
+
+  @property({ type: Boolean })
+  selected: boolean = false;
 
   @internalProperty()
   loading = true;
@@ -64,30 +67,27 @@ export class PageItemElement extends eveesConnect(LitElement) {
       },
     };
 
-    const empty = this.title === '';
-    // TODO: const selected = this.selectedPageIx === ix;
+    let classes: string[] = [];
 
-    // let classes: string[] = [];
-
-    // classes.push('page-item');
-    // if (empty) classes.push('title-empty');
-    // if (selected) classes.push('title-selected');
-
+    classes.push('page-item-row clickable');
+    if (this.selected) {
+      classes.push('selected-item');
+    }
     const titleStr = this.title ? this.title : 'Untitled';
-    return html`
-      
-        <div class="page-item-row"  @click=${() => this.selectPage()}>
-          <span class="text-container">${titleStr}</span>
 
-          <span class="item-menu-container">
-            <uprtcl-options-menu
-              class="options-menu"
-              @option-click=${(e) => this.optionOnPage(e.detail.key)}
-              .config=${menuConfig}
-              skinny
-            >
-            </uprtcl-options-menu>
-          </span>
+    return html`
+      <div class=${classes.join(' ')} @click=${() => this.selectPage()}>
+        <span class="text-container">${titleStr}</span>
+
+        <span class="item-menu-container">
+          <uprtcl-options-menu
+            class="options-menu"
+            @option-click=${(e) => this.optionOnPage(e.detail.key)}
+            .config=${menuConfig}
+            skinny
+          >
+          </uprtcl-options-menu>
+        </span>
         ${this.draggingOver
           ? html`<div class="title-dragging-over"></div>`
           : ''}
@@ -97,25 +97,24 @@ export class PageItemElement extends eveesConnect(LitElement) {
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
-          
-          
         }
-        
-        .page-item-row{
-          display:flex;
-          flex-direction:row;
-          align-items:center;
-          padding:0.1rem 0.25rem;
-          padding-left:2.2rem;
+
+        .page-item-row {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          padding: 0.1rem 0.2rem;
+          padding-left: 2.2rem;
           transition: background 0.1s ease-in-out;
         }
-        .page-item-row:hover{
-          background:#0001;
+        .page-item-row:hover {
+          background: #0001;
         }
-        .text-container{
-          flex:1;
+        .text-container {
+          flex: 1;
         }
       `,
     ];

@@ -24,4 +24,14 @@ export const sharedStyles = css`
   .cursor-pointer {
     cursor: pointer;
   }
+  .clickable {
+    cursor: pointer;
+    user-select: none;
+  }
+  .selected-item {
+    background-color: #0002;
+  }
+  .selected-item:hover {
+    background-color: #0003;
+  }
 `;

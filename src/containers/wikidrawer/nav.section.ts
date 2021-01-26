@@ -6,15 +6,33 @@ import { Router } from '@vaadin/router';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
 import { LTRouter } from '../../router';
 import { Section } from '../types';
+import { sharedStyles } from '../../styles';
 export class NavSectionElement extends eveesConnect(LitElement) {
   @property()
   uref: string;
+
+  @property()
+  sectionIndex: number;
 
   @internalProperty()
   loading = true;
 
   sectionData: Entity<Section>;
 
+  @internalProperty()
+  selectedId: string;
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('popstate', () => this.decodeUrl());
+  }
+
+  decodeUrl() {
+    if (LTRouter.Router.location.params.docId) {
+      this.selectedId = LTRouter.Router.location.params.docId as string;
+    } else if (LTRouter.Router.location.params.sectionId)
+      this.selectedId = LTRouter.Router.location.params.sectionId as string;
+  }
   async firstUpdated() {
     this.loading = true;
     this.evees.client.events.on(ClientEvents.updated, (perspectives) =>
@@ -42,19 +60,31 @@ export class NavSectionElement extends eveesConnect(LitElement) {
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
-    return html`<section class="section-heading" @click=${this.navigateSection}>
+    let classes: string[] = [];
+    classes.push('section-heading clickable');
+    if (this.selectedId === this.uref) {
+      classes.push('selected-item');
+    }
+
+    return html`<section
+        class=${classes.join(' ')}
+        @click=${this.navigateSection}
+      >
         ${this.sectionData.object.title}
       </section>
       <uprtcl-list>
-        ${this.sectionData.object.pages.map(
-          (pageId) =>
-            html`<app-nav-page-item uref=${pageId}></app-nav-page-item>`
-        )}
+        ${this.sectionData.object.pages.map((pageId) => {
+          return html`<app-nav-page-item
+            ?selected=${this.selectedId === pageId ? true : false}
+            uref=${pageId}
+          ></app-nav-page-item>`;
+        })}
       </uprtcl-list>`;
   }
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
           display: flex;
@@ -67,8 +97,9 @@ export class NavSectionElement extends eveesConnect(LitElement) {
           text-transform: uppercase;
           font-weight: 600;
           color: grey;
-          margin-left: 2rem;
-          margin-bottom: 0.2rem;
+          padding-left: 2rem;
+          padding-bottom: 0.3rem;
+          padding-top: 0.3rem;
         }
       `,
     ];

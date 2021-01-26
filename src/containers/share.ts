@@ -46,6 +46,7 @@ export default class ShareCard extends LitElement {
         display: flex;
         align-items: center;
       }
+    
     `;
   }
 }

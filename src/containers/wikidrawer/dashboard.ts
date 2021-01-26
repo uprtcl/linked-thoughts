@@ -215,8 +215,8 @@ export class DashboardElement extends eveesConnect(LitElement) {
         </uprtcl-button>
       </div>
       <div class="section-cont">
-        ${this.dashboardData.object.sections.map((sectionId) => {
-          return html`<app-nav-section uref=${sectionId}></app-nav-section>`;
+        ${this.dashboardData.object.sections.map((sectionId,sectionIndex) => {
+          return html`<app-nav-section sectionIndex=${sectionIndex} uref=${sectionId}></app-nav-section>`;
         })}
       </div>
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;

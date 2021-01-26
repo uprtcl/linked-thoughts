@@ -1,11 +1,11 @@
 import { initUprtcl } from './init';
 import { App } from './app';
 import ShareCard from './containers/share';
-import { DashboardElement } from './containers/wikidrawer/dashboard';
-import { GettingStartedElement } from './containers/wikidrawer/getting-started';
-import { NavSectionElement } from './containers/wikidrawer/nav.section';
-import { PageItemElement } from './containers/wikidrawer/nav.page.item';
-import {SectionPage} from './containers/SectionPage'
+import { DashboardElement } from './containers/dashboard';
+import { GettingStartedElement } from './containers/NavBar/getting-started';
+import { NavSectionElement } from './containers/NavBar/nav.section';
+import { PageItemElement } from './containers/NavBar/nav.page.item';
+import { SectionPage } from './containers/SectionPage';
 
 (async function () {
   await initUprtcl();
@@ -16,5 +16,5 @@ import {SectionPage} from './containers/SectionPage'
   customElements.define('app-nav-section', NavSectionElement);
   customElements.define('app-nav-page-item', PageItemElement);
   customElements.define('app-getting-started', GettingStartedElement);
-  customElements.define('app-section-page',SectionPage);
+  customElements.define('app-section-page', SectionPage);
 })();

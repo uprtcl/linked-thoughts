@@ -14,9 +14,9 @@ import {
 import LockIcon from '../../assets/icons/lock.svg';
 import GlobeIcon from '../../assets/icons/globe.svg';
 import { AppSupport } from './support';
-import { Dashboard } from '../types';
-import { LTRouter } from '../../router';
-import { GettingStarted } from '../../constants/routeNames';
+import { Dashboard } from './types';
+import { LTRouter } from '../router';
+import { GettingStarted } from '../constants/routeNames';
 import { TextNode, TextType } from '@uprtcl/documents';
 
 const MAX_LENGTH = 999;

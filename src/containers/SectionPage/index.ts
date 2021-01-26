@@ -1,7 +1,7 @@
 import { html, css, internalProperty, LitElement, property } from 'lit-element';
 import lodash from 'lodash';
 import { styles } from '@uprtcl/common-ui';
-import { Entity, eveesConnect } from '@uprtcl/evees';
+import { Entity, Evees, EveesBaseElement, eveesConnect } from '@uprtcl/evees';
 import { Router } from '@vaadin/router';
 import FileAddIcon from '../../assets/icons/file-add.svg';
 import DropDownIcon from '../../assets/icons/drop-down.svg';
@@ -15,13 +15,7 @@ enum TitleFilter {
   asc = 'asc',
   des = 'des',
 }
-export class SectionPage extends eveesConnect(LitElement) {
-  @property()
-  uref: string;
-
-  @internalProperty()
-  loading = true;
-
+export class SectionPage extends EveesBaseElement<Section> {
   @internalProperty()
   title: string | null = null;
 
@@ -37,32 +31,16 @@ export class SectionPage extends eveesConnect(LitElement) {
   @internalProperty()
   filterTitle: TitleFilter = TitleFilter.asc;
 
-  sectionData: Entity<Section>;
-
-  async firstUpdated() {
-    this.loading = true;
-    this.load();
-    this.loading = false;
-  }
-
-  updated(changedProperties) {
-    if (changedProperties.has('uref')) {
-      this.load();
-    }
-  }
-
   async load() {
-    this.sectionData = await this.evees.getPerspectiveData(this.uref);
+    await super.load();
 
-    await Promise.all(
-      this.sectionData.object.pages.map(async (pageId) => {
-        const page = await this.evees.getPerspectiveData(pageId);
-
-        this.pageList.push(page);
+    this.pageList = await Promise.all(
+      this.data.object.pages.map(async (pageId) => {
+        return this.evees.getPerspectiveData(pageId);
       })
     );
     this.filteredPageList = this.pageList;
-    this.title = this.sectionData.object.title;
+    this.title = this.data.object.title;
   }
 
   sortPagesBy() {

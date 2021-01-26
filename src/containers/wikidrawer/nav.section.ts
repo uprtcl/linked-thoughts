@@ -1,40 +1,11 @@
-import { html, css, internalProperty, LitElement, property } from 'lit-element';
-import { ClientEvents, Entity, eveesConnect } from '@uprtcl/evees';
+import { html, css } from 'lit-element';
+import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
 
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
-import { LTRouter } from '../../router';
 import { Section } from '../types';
-export class NavSectionElement extends eveesConnect(LitElement) {
-  @property()
-  uref: string;
-
-  @internalProperty()
-  loading = true;
-
-  sectionData: Entity<Section>;
-
-  async firstUpdated() {
-    this.loading = true;
-    this.evees.client.events.on(ClientEvents.updated, (perspectives) =>
-      this.perspectiveUpdated(perspectives)
-    );
-    await this.load();
-    this.loading = false;
-  }
-
-  perspectiveUpdated(perspectives: string[]) {
-    if (perspectives.includes(this.uref)) {
-      this.load();
-    }
-  }
-
-  async load() {
-    this.sectionData = await this.evees.getPerspectiveData(this.uref);
-    this.requestUpdate();
-  }
-
+export class NavSectionElement extends EveesBaseElement<Section> {
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));
   }
@@ -43,10 +14,10 @@ export class NavSectionElement extends eveesConnect(LitElement) {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
     return html`<section class="section-heading" @click=${this.navigateSection}>
-        ${this.sectionData.object.title}
+        ${this.data.object.title}
       </section>
       <uprtcl-list>
-        ${this.sectionData.object.pages.map(
+        ${this.data.object.pages.map(
           (pageId) =>
             html`<app-nav-page-item uref=${pageId}></app-nav-page-item>`
         )}

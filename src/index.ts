@@ -2,10 +2,10 @@ import { initUprtcl } from './init';
 import { App } from './app';
 import ShareCard from './containers/share';
 import { DashboardElement } from './containers/dashboard';
-import { GettingStartedElement } from './containers/NavBar/getting-started';
 import { NavSectionElement } from './containers/NavBar/nav.section';
 import { PageItemElement } from './containers/NavBar/nav.page.item';
-import { SectionPage } from './containers/SectionPage';
+import { GettingStartedElement } from './containers/getting-started';
+import { SectionPage } from './containers/SectionPage/section.page';
 
 (async function () {
   await initUprtcl();

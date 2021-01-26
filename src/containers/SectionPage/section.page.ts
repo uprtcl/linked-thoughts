@@ -1,16 +1,25 @@
-import { html, css, internalProperty, LitElement, property } from 'lit-element';
+import { html, css, internalProperty } from 'lit-element';
 import lodash from 'lodash';
-import { styles } from '@uprtcl/common-ui';
-import { Entity, Evees, EveesBaseElement, eveesConnect } from '@uprtcl/evees';
+import moment from 'moment';
 import { Router } from '@vaadin/router';
+
+import { styles } from '@uprtcl/common-ui';
+import { Commit, EveesBaseElement, Perspective, Signed } from '@uprtcl/evees';
+
 import FileAddIcon from '../../assets/icons/file-add.svg';
 import DropDownIcon from '../../assets/icons/drop-down.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
-
+import { sharedStyles } from '../../styles';
 // const FileAddIcon = SVGToLit(require())
 
-enum TitleFilter {
+enum SortType {
+  title,
+  dateCreated,
+  dataUpdated,
+}
+
+enum SortFilter {
   null = '',
   asc = 'asc',
   des = 'des',
@@ -29,37 +38,97 @@ export class SectionPage extends EveesBaseElement<Section> {
   searchQuery: string = '';
 
   @internalProperty()
-  filterTitle: TitleFilter = TitleFilter.asc;
+  filterTitle: SortFilter = SortFilter.asc;
+
+  @internalProperty()
+  filterDateCreated: SortFilter = SortFilter.asc;
+
+  @internalProperty()
+  filterDateUpdated: SortFilter = SortFilter.asc;
+
+  @internalProperty()
+  filterDropDown: boolean = false;
 
   async load() {
     await super.load();
 
     this.pageList = await Promise.all(
       this.data.object.pages.map(async (pageId) => {
-        return this.evees.getPerspectiveData(pageId);
+        const { details } = await this.evees.client.getPerspective(pageId);
+
+        const perspective = await this.evees.client.store.getEntity<
+          Signed<Perspective>
+        >(pageId);
+
+        const head = await this.evees.client.store.getEntity<Signed<Commit>>(
+          details.headId
+        );
+
+        return {
+          details,
+          perspective,
+          head,
+        };
       })
     );
     this.filteredPageList = this.pageList;
     this.title = this.data.object.title;
   }
 
-  sortPagesBy() {
-    switch (this.filterTitle) {
-      case TitleFilter.asc:
+  sortPagesBy(sortType: SortType) {
+    const funcFilterTitle = (pageData) => pageData.object.text;
+    const funcFilterDateCreated = (pageData) =>
+      pageData.meta.perspective.object.payload.timestamp;
+    const funcFilterDateUpdated = (pageData) =>
+      pageData.meta.head.object.payload.timestamp;
+
+    let comparator_function = null;
+    let current_sort_type = null;
+    switch (sortType) {
+      case SortType.title:
+        comparator_function = funcFilterTitle;
+        current_sort_type = this.filterTitle;
+        break;
+      case SortType.dateCreated:
+        comparator_function = funcFilterDateCreated;
+        current_sort_type = this.filterDateCreated;
+        break;
+      case SortType.dataUpdated:
+        comparator_function = funcFilterDateUpdated;
+        current_sort_type = this.filterDateUpdated;
+        break;
+    }
+
+    const updateSortFilter = (sortType: SortType, value: SortFilter) => {
+      switch (sortType) {
+        case SortType.title:
+          this.filterTitle = value;
+          break;
+        case SortType.dateCreated:
+          this.filterDateCreated = value;
+          break;
+        case SortType.dataUpdated:
+          this.filterDateUpdated = value;
+          break;
+      }
+    };
+
+    switch (current_sort_type) {
+      case SortFilter.asc:
         this.filteredPageList = lodash
-          .sortBy(this.filteredPageList, (pageData) => pageData.object.text)
+          .sortBy(this.filteredPageList, comparator_function)
           .reverse();
 
-        this.filterTitle = TitleFilter.des;
+        updateSortFilter(sortType, SortFilter.des);
         break;
 
-      case TitleFilter.des:
+      case SortFilter.des:
         this.filteredPageList = lodash.sortBy(
           this.filteredPageList,
-          (pageData) => pageData.object.text
+          comparator_function
         );
 
-        this.filterTitle = TitleFilter.asc;
+        updateSortFilter(sortType, SortFilter.asc);
         break;
     }
   }
@@ -105,7 +174,36 @@ export class SectionPage extends EveesBaseElement<Section> {
       <div class="list-actions-cont">
         <div class="list-actions-heading">${this.title} Pages</div>
         <div class="action-new-page">${FileAddIcon} New Page</div>
-        <div>${DropDownIcon}</div>
+        <div>
+          ${this.filterDropDown
+            ? html`<div class="filter-drop-down">
+                <div
+                  class="filter-drop-down-item clickable"
+                  @click=${() => this.sortPagesBy(SortType.dateCreated)}
+                >
+                  Date Created
+                </div>
+                <div
+                  class="filter-drop-down-item clickable"
+                  @click=${() => this.sortPagesBy(SortType.dataUpdated)}
+                >
+                  Last Updated
+                </div>
+                <div
+                  class="filter-drop-down-item clickable"
+                  @click=${() => this.sortPagesBy(SortType.title)}
+                >
+                  Title
+                </div>
+              </div>`
+            : null}
+          <span
+            @click=${() => {
+              this.filterDropDown = !this.filterDropDown;
+            }}
+            >${DropDownIcon}</span
+          >
+        </div>
       </div>
     `;
   }
@@ -113,17 +211,28 @@ export class SectionPage extends EveesBaseElement<Section> {
     return this.filteredPageList.length == 0
       ? html``
       : html`${this.filteredPageList.map((pageData) => {
+          const creationTime = moment(
+            pageData.meta.perspective.object.payload.timestamp
+          ).toLocaleString();
+
+          const lastUpdatedTime = moment(
+            pageData.meta.head.object.payload.timestamp
+          ).toLocaleString();
+
           return html`
             <tr>
-              <td @click=${() => this.navigateToDoc(pageData.id)}>
+              <td
+                class="clickable"
+                @click=${() => this.navigateToDoc(pageData.id)}
+              >
                 ${pageData.object.text
                   ? html`<b>${pageData.object.text}</b>`
                   : html`<i>Untitled</i>`}
               </td>
-              <td>an hour ago (Not real)</td>
-              <td>Blog</td>
-              <td>_ _ _</td>
-              <td>:</td>
+              <td .title=${lastUpdatedTime}>
+                ${moment(lastUpdatedTime).fromNow()}
+              </td>
+              <td .title=${creationTime}>${moment(creationTime).fromNow()}</td>
             </tr>
           `;
         })}`;
@@ -133,11 +242,9 @@ export class SectionPage extends EveesBaseElement<Section> {
       <table style="width:100%">
         <thead class="table-head">
           <tr>
-            <th @click=${this.sortPagesBy}>Title</th>
-            <th>Last Viewed</th>
-            <th>True Location</th>
-            <th>References</th>
-            <th>Action</th>
+            <th>Title</th>
+            <th>Last Updated</th>
+            <th>Date Created</th>
           </tr>
         </thead>
         <tbody>
@@ -162,6 +269,7 @@ export class SectionPage extends EveesBaseElement<Section> {
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
           margin: 3% 5%;
@@ -209,7 +317,7 @@ export class SectionPage extends EveesBaseElement<Section> {
           margin-top: 2rem;
         }
         .list-actions-cont > * {
-          margin: 0.5rem 2rem 0.5rem 0;
+          margin: 0.5rem 2rem 0 0;
         }
         .list-actions-heading {
           flex: 1;
@@ -232,6 +340,21 @@ export class SectionPage extends EveesBaseElement<Section> {
           line-height: 2rem;
           color: grey;
           font-size: 1.1rem;
+        }
+        .filter-drop-down {
+          min-width: 120px;
+
+          position: absolute;
+          background-color: var(--white, #fff);
+          right: 100px;
+          margin-top: 2.5rem;
+
+          box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+        .filter-drop-down-item {
+          padding: 10px;
+          text-align: right;
         }
       `,
     ];

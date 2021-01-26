@@ -3,10 +3,11 @@ import { html, css, internalProperty, LitElement } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
 import { eveesConnect, Logger } from '@uprtcl/evees';
 
-import { AppSupport } from '../support';
 import { EveesHttp } from '@uprtcl/evees-http';
 import { Router } from '@vaadin/router';
-import { Home } from '../../constants/routeNames';
+
+import { Home } from '../constants/routeNames';
+import { AppSupport } from './support';
 
 export class GettingStartedElement extends eveesConnect(LitElement) {
   logger = new Logger('Dashboard');

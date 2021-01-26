@@ -1,11 +1,15 @@
-import { html, css } from 'lit-element';
+import { html, css, internalProperty } from 'lit-element';
 import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
 
+import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 export class NavSectionElement extends EveesBaseElement<Section> {
+  @internalProperty()
+  selectedId: string;
+
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));
   }
@@ -13,19 +17,31 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
-    return html`<section class="section-heading" @click=${this.navigateSection}>
+    let classes: string[] = [];
+    classes.push('section-heading clickable');
+    if (this.selectedId === this.uref) {
+      classes.push('selected-item');
+    }
+
+    return html`<section
+        class=${classes.join(' ')}
+        @click=${this.navigateSection}
+      >
         ${this.data.object.title}
       </section>
       <uprtcl-list>
-        ${this.data.object.pages.map(
-          (pageId) =>
-            html`<app-nav-page-item uref=${pageId}></app-nav-page-item>`
-        )}
+        ${this.data.object.pages.map((pageId) => {
+          return html`<app-nav-page-item
+            ?selected=${this.selectedId === pageId ? true : false}
+            uref=${pageId}
+          ></app-nav-page-item>`;
+        })}
       </uprtcl-list>`;
   }
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
           display: flex;
@@ -38,8 +54,9 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           text-transform: uppercase;
           font-weight: 600;
           color: grey;
-          margin-left: 2rem;
-          margin-bottom: 0.2rem;
+          padding-left: 2rem;
+          padding-bottom: 0.3rem;
+          padding-top: 0.3rem;
         }
       `,
     ];

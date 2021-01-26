@@ -11,8 +11,8 @@ import {
   Secured,
 } from '@uprtcl/evees';
 
-import LockIcon from '../../assets/icons/lock.svg';
-import GlobeIcon from '../../assets/icons/globe.svg';
+import LockIcon from '../assets/icons/lock.svg';
+import GlobeIcon from '../assets/icons/globe.svg';
 import { AppSupport } from './support';
 import { Dashboard } from './types';
 import { LTRouter } from '../router';

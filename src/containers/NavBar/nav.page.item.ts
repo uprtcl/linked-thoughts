@@ -1,14 +1,17 @@
-import { html, css, internalProperty } from 'lit-element';
-
-import { styles } from '@uprtcl/common-ui';
-import { Entity, EveesBaseElement } from '@uprtcl/evees';
-import { MenuConfig } from '@uprtcl/common-ui';
-import { TextNode } from '@uprtcl/documents';
+import { html, css, internalProperty, property } from 'lit-element';
 import { Router } from '@vaadin/router';
 
+import { MenuConfig, styles } from '@uprtcl/common-ui';
+import { EveesBaseElement } from '@uprtcl/evees';
+import { TextNode } from '@uprtcl/documents';
+
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
+import { sharedStyles } from 'src/styles';
 
 export class PageItemElement extends EveesBaseElement<TextNode> {
+  @property({ type: Boolean })
+  selected: boolean = false;
+
   @internalProperty()
   draggingOver = false;
 
@@ -60,18 +63,16 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
       },
     };
 
-    const empty = this.title === '';
-    // TODO: const selected = this.selectedPageIx === ix;
+    let classes: string[] = [];
 
-    // let classes: string[] = [];
-
-    // classes.push('page-item');
-    // if (empty) classes.push('title-empty');
-    // if (selected) classes.push('title-selected');
-
+    classes.push('page-item-row clickable');
+    if (this.selected) {
+      classes.push('selected-item');
+    }
     const titleStr = this.title ? this.title : 'Untitled';
+
     return html`
-      <div class="page-item-row" @click=${() => this.selectPage()}>
+      <div class=${classes.join(' ')} @click=${() => this.selectPage()}>
         <span class="text-container">${titleStr}</span>
 
         <span class="item-menu-container">
@@ -92,6 +93,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
         }
@@ -100,7 +102,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
           display: flex;
           flex-direction: row;
           align-items: center;
-          padding: 0.1rem 0.25rem;
+          padding: 0.1rem 0.2rem;
           padding-left: 2.2rem;
           transition: background 0.1s ease-in-out;
         }

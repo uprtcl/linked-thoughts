@@ -4,13 +4,22 @@ import moment from 'moment';
 import { Router } from '@vaadin/router';
 
 import { styles } from '@uprtcl/common-ui';
-import { Commit, EveesBaseElement, Perspective, Signed } from '@uprtcl/evees';
+import {
+  Secured,
+  Commit,
+  EveesBaseElement,
+  Perspective,
+  Signed,
+  PerspectiveDetails,
+  Entity,
+} from '@uprtcl/evees';
 
 import FileAddIcon from '../../assets/icons/file-add.svg';
 import DropDownIcon from '../../assets/icons/drop-down.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 import { sharedStyles } from '../../styles';
+import { TextNode } from '@uprtcl/documents';
 // const FileAddIcon = SVGToLit(require())
 
 enum SortType {
@@ -24,15 +33,24 @@ enum SortFilter {
   asc = 'asc',
   des = 'des',
 }
+
+interface PageData {
+  data: Entity<TextNode>;
+  meta: {
+    head: Secured<Commit>;
+    perspective: Secured<Perspective>;
+    details: PerspectiveDetails;
+  };
+}
 export class SectionPage extends EveesBaseElement<Section> {
   @internalProperty()
   title: string | null = null;
 
   @internalProperty()
-  pageList: Array<any> = [];
+  pageList: Array<PageData> = [];
 
   @internalProperty()
-  filteredPageList: Array<any> = [];
+  filteredPageList: Array<PageData> = [];
 
   @internalProperty()
   searchQuery: string = '';
@@ -60,14 +78,26 @@ export class SectionPage extends EveesBaseElement<Section> {
           Signed<Perspective>
         >(pageId);
 
-        const head = await this.evees.client.store.getEntity<Signed<Commit>>(
-          details.headId
-        );
+        let head = undefined;
+        let data = undefined;
+
+        if (details.headId) {
+          head = await this.evees.client.store.getEntity<Signed<Commit>>(
+            details.headId
+          );
+
+          data = await this.evees.client.store.getEntity<TextNode>(
+            head.object.payload.dataId
+          );
+        }
 
         return {
-          details,
-          perspective,
-          head,
+          data,
+          meta: {
+            details,
+            perspective,
+            head,
+          },
         };
       })
     );
@@ -76,7 +106,7 @@ export class SectionPage extends EveesBaseElement<Section> {
   }
 
   sortPagesBy(sortType: SortType) {
-    const funcFilterTitle = (pageData) => pageData.object.text;
+    const funcFilterTitle = (pageData) => pageData.data.object.text;
     const funcFilterDateCreated = (pageData) =>
       pageData.meta.perspective.object.payload.timestamp;
     const funcFilterDateUpdated = (pageData) =>
@@ -137,7 +167,7 @@ export class SectionPage extends EveesBaseElement<Section> {
     this.filteredPageList = lodash.filter(this.pageList, (pageData) => {
       return (
         lodash
-          .lowerCase(pageData.object.text)
+          .lowerCase(pageData.data.object.text)
           .indexOf(lodash.lowerCase(this.searchQuery)) !== -1
       );
     });
@@ -223,10 +253,10 @@ export class SectionPage extends EveesBaseElement<Section> {
             <tr>
               <td
                 class="clickable"
-                @click=${() => this.navigateToDoc(pageData.id)}
+                @click=${() => this.navigateToDoc(pageData.data.id)}
               >
-                ${pageData.object.text
-                  ? html`<b>${pageData.object.text}</b>`
+                ${pageData.data.object.text
+                  ? html`<b>${pageData.data.object.text}</b>`
                   : html`<i>Untitled</i>`}
               </td>
               <td .title=${lastUpdatedTime}>

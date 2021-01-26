@@ -6,7 +6,7 @@ import { EveesBaseElement } from '@uprtcl/evees';
 import { TextNode } from '@uprtcl/documents';
 
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
-import { sharedStyles } from 'src/styles';
+import { sharedStyles } from '../../styles';
 
 export class PageItemElement extends EveesBaseElement<TextNode> {
   @property({ type: Boolean })

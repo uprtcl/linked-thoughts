@@ -3,12 +3,25 @@ import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
 
+import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 export class NavSectionElement extends EveesBaseElement<Section> {
   @internalProperty()
   selectedId: string;
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('popstate', () => this.decodeUrl());
+  }
+
+  decodeUrl() {
+    if (LTRouter.Router.location.params.docId) {
+      this.selectedId = LTRouter.Router.location.params.docId as string;
+    } else if (LTRouter.Router.location.params.sectionId)
+      this.selectedId = LTRouter.Router.location.params.sectionId as string;
+  }
 
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));

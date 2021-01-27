@@ -160,6 +160,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
       type: TextType.Title,
       links: [],
     };
+
     await this.evees.addChild(
       page,
       this.dashboardData.object.sections[onSection]
@@ -215,8 +216,11 @@ export class DashboardElement extends eveesConnect(LitElement) {
         </uprtcl-button>
       </div>
       <div class="section-cont">
-        ${this.dashboardData.object.sections.map((sectionId) => {
-          return html`<app-nav-section uref=${sectionId}></app-nav-section>`;
+        ${this.dashboardData.object.sections.map((sectionId, sectionIndex) => {
+          return html`<app-nav-section
+            uref=${sectionId}
+            idx=${sectionIndex}
+          ></app-nav-section>`;
         })}
       </div>
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;

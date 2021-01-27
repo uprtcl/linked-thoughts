@@ -1,4 +1,4 @@
-import { html, css, internalProperty } from 'lit-element';
+import { html, css, internalProperty, property } from 'lit-element';
 import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
@@ -8,7 +8,16 @@ import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 
+import PlusSquareIcon from '../../assets/icons/plus-square.svg';
+import { TextNode, TextType } from '@uprtcl/documents';
+
 export class NavSectionElement extends EveesBaseElement<Section> {
+  @property({ type: String })
+  uref: string;
+
+  @property({ type: Number })
+  idx: number = 0;
+
   @internalProperty()
   selectedId: string;
 
@@ -27,6 +36,16 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       this.selectedId = LTRouter.Router.location.params.docId as string;
     } else if (LTRouter.Router.location.params.sectionId)
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
+  }
+  async newPage() {
+    const page: TextNode = {
+      text: '',
+      type: TextType.Title,
+      links: [],
+    };
+    await this.evees.addChild(page, this.uref);
+
+    await this.evees.client.flush();
   }
 
   navigateSection() {
@@ -47,6 +66,9 @@ export class NavSectionElement extends EveesBaseElement<Section> {
         @click=${this.navigateSection}
       >
         ${this.data.object.title}
+        <span @click=${this.newPage} class="add-page-button"
+          >${PlusSquareIcon}</span
+        >
       </section>
       <uprtcl-list>
         ${this.data.object.pages.map((pageId) => {
@@ -76,6 +98,10 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           padding-left: 2rem;
           padding-bottom: 0.3rem;
           padding-top: 0.3rem;
+          display: flex;
+        }
+        .add-page-button {
+          margin-left: 1.5rem;
         }
       `,
     ];

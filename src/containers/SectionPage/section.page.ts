@@ -19,8 +19,8 @@ import DropDownIcon from '../../assets/icons/drop-down.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 import { sharedStyles } from '../../styles';
-import { TextNode } from '@uprtcl/documents';
-// const FileAddIcon = SVGToLit(require())
+import { TextNode, TextType } from '@uprtcl/documents';
+import SearchIcon from '../../assets/icons/search.svg';
 
 enum SortType {
   title,
@@ -105,6 +105,18 @@ export class SectionPage extends EveesBaseElement<Section> {
     this.title = this.data.object.title;
   }
 
+  async newPage() {
+    const page: TextNode = {
+      text: '',
+      type: TextType.Title,
+      links: [],
+    };
+    
+    await this.evees.addChild(page, this.uref);
+
+    await this.evees.client.flush();
+  }
+  
   sortPagesBy(sortType: SortType) {
     const funcFilterTitle = (pageData) => pageData.data.object.text;
     const funcFilterDateCreated = (pageData) =>
@@ -194,7 +206,7 @@ export class SectionPage extends EveesBaseElement<Section> {
             class="search-field"
             type="text"
             placeholder="Find pages..."
-          /><span>🔍</span>
+          /><span>${SearchIcon}</span>
         </div>
       </div>
     `;
@@ -203,7 +215,7 @@ export class SectionPage extends EveesBaseElement<Section> {
     return html`
       <div class="list-actions-cont">
         <div class="list-actions-heading">${this.title} Pages</div>
-        <div class="action-new-page">${FileAddIcon} New Page</div>
+        <div class="action-new-page clickable" @click=${this.newPage}>${FileAddIcon} New Page</div>
         <div>
           ${this.filterDropDown
             ? html`<div class="filter-drop-down">
@@ -329,6 +341,7 @@ export class SectionPage extends EveesBaseElement<Section> {
           padding: 0.5rem 1.2rem;
           border: 2px solid grey;
           border-radius: 5px;
+          display: flex;
         }
         .search-field {
           border: none;

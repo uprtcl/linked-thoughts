@@ -7,6 +7,7 @@ import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
+
 export class NavSectionElement extends EveesBaseElement<Section> {
   @internalProperty()
   selectedId: string;
@@ -14,6 +15,11 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener('popstate', () => this.decodeUrl());
+  }
+
+  async firstUpdated() {
+    await super.firstUpdated();
+    this.decodeUrl();
   }
 
   decodeUrl() {

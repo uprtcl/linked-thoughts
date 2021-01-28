@@ -1,14 +1,7 @@
 import { TextType } from '@uprtcl/documents';
-import {
-  Entity,
-  Evees,
-  PartialPerspective,
-  Perspective,
-  Secured,
-  Signed,
-} from '@uprtcl/evees';
+import { Evees, Perspective, Secured } from '@uprtcl/evees';
 import { EveesHttp } from '@uprtcl/evees-http';
-import { Dashboard, Home, Section } from './types';
+import { App } from 'src/app';
 
 /** a tree of perspectives that is apended to
  * the home space of the logged user. This server creates this
@@ -19,33 +12,21 @@ export interface AppElement {
   perspective?: Secured<Perspective>;
   children?: AppElement[];
 }
-
-const appElementsInit: AppElement = {
-  path: '/',
-  getInitData: (children: AppElement[]) => {
-    return { linkedThoghts: children[0].perspective.id };
-  },
-  children: [
-    {
-      path: '/linkedThoughts',
-      getInitData: (children: AppElement[]) => {
-        return { sections: children.map((child) => child.perspective.id) };
-      },
-      children: [
-        { path: '/privateSection', children: [{ path: '/firstPage' }] },
-        { path: '/blogSection' },
-      ],
-    },
-  ],
-};
-
 /** the relative (to home) path of each app element */
 export class AppSupport {
   readonly remote: EveesHttp;
-  readonly home: AppElement = appElementsInit;
 
-  constructor(protected evees: Evees) {
+  constructor(protected evees: Evees, protected home: AppElement) {
     this.remote = this.evees.findRemote('http') as EveesHttp;
+  }
+
+  async check(): Promise<void> {
+    /** home space perspective is deterministic */
+    this.home.perspective = await this.remote.getHome();
+    await this.checkOrCreatePerspective(this.home.perspective);
+
+    /** all other objects are obtained relative to the home perspective */
+    await this.getOrCreateElementData(this.home);
   }
 
   /** Returns the appElement from the path */
@@ -68,24 +49,6 @@ export class AppSupport {
     }
 
     return thisElement;
-  }
-
-  async checkOrCreateElement(path: string) {
-    /** home space perspective is deterministic */
-    if (path === '/') {
-      this.home.perspective = await this.remote.getHome();
-      await this.checkOrCreatePerspective(this.home.perspective);
-      return;
-    }
-
-    /** all other objects are obtained relative to the home perspective */
-    const homeData = await this.evees.getPerspectiveData(
-      this.home.perspective.id
-    );
-
-    if (!homeData) {
-      this.initTree(this.home);
-    }
   }
 
   async createSnapElementRec(element: AppElement) {
@@ -114,10 +77,13 @@ export class AppSupport {
       const id = await this.evees.createEvee({
         partialPerspective: perspective.object.payload,
       });
+    }
+  }
 
-      if (id !== this.home.id) {
-        throw new Error('Undexpected id for home perspective');
-      }
+  async getOrCreateElementData(element: AppElement) {
+    const data = await this.evees.getPerspectiveData(element.perspective.id);
+    if (!data) {
+      await this.initTree(element);
     }
   }
 
@@ -134,118 +100,5 @@ export class AppSupport {
     }
 
     await this.evees.client.flush();
-  }
-
-  private async checkElement(path: string): Promise<void> {
-    const element = this.getElement(path);
-
-    /** if the perspective is not set, we need to check if the element exist */
-    if (!element.perspective) {
-      const { details } = await this.evees.client.getPerspective(this.home.id);
-
-      /** canUpdate is used as the flag to detect if the home space exists */
-      if (!details.canUpdate) {
-        /** create the home perspective as it did not existed */
-        const id = await this.evees.createEvee({
-          partialPerspective: this.home.perspective.object.payload,
-        });
-
-        if (id !== this.home.id) {
-          throw new Error('Undexpected id for home perspective');
-        }
-      }
-    }
-  }
-
-  async createElementPerspective(path: string) {
-    const { element, parent } = this.getElement(path);
-
-    element.perspective = perspective;
-  }
-
-  /** Returns the perspective that represents the LinkedThoughts space of the
-   * logged user. LinkedThoughts objects are stored under the user home perspective as
-   * home.object.linkedThoughs */
-  async getDashboardPerspective(): Promise<Secured<Perspective>> {
-    /** to arrive to the dashboard, we need to start from the home perspective */
-    const home = await this.getHomePerspective();
-
-    let homeData: Entity<Home> | undefined = undefined;
-    // check if the home data exist and has a linkedThoughts property
-    try {
-      homeData = await this.evees.getPerspectiveData<Home>(home.id);
-    } catch (e) {
-      /** its ok, if the data does not exists, we will create it now */
-    }
-
-    let dashboardId: string;
-
-    // if it does not have linkedThoughts property, then create it
-    if (!!homeData && homeData.object.linkedThoughts) {
-      dashboardId = homeData.object.linkedThoughts;
-    } else {
-      dashboardId = await this.createDashboard();
-
-      // now update the homeData with the linkedThoughts property set
-      const homeDataInit: Home = {
-        linkedThoughts: dashboardId,
-      };
-      await this.evees.updatePerspectiveData(home.id, homeDataInit);
-    }
-
-    return this.evees.client.store.getEntity<Signed<Perspective>>(dashboardId);
-  }
-
-  private async createDashboard(): Promise<string> {
-    /** to arrive to the dashboard, we need to start from the home perspective */
-    const home = await this.getHomePerspective();
-
-    const dashboardData: Dashboard = {
-      sections: [],
-    };
-
-    return this.evees.addNewChild(dashboardData, home.id);
-  }
-
-  async getSection(index: number): Promise<Entity<Section>> {
-    /** to arrive to the section, we need to start from the dashboard */
-    const dashboard = await this.getDashboardPerspective();
-
-    let dashboardData: Entity<Dashboard> | undefined = undefined;
-
-    // check if the dashboard data exist and has a sections property
-    try {
-      dashboardData = await this.evees.getPerspectiveData<Dashboard>(
-        dashboard.id
-      );
-    } catch (e) {
-      /** its ok, if the data does not exists, we will create it now */
-    }
-
-    let sectionId: string;
-
-    // if it does not have sections property, then create it
-    if (
-      !!dashboardData &&
-      dashboardData.object.sections &&
-      index < dashboardData.object.sections.length - 1
-    ) {
-      sectionId = dashboardData.object.sections[0];
-    } else {
-      sectionId = await this.createSection(index);
-    }
-
-    return this.evees.client.store.getEntity<Section>(sectionId);
-  }
-
-  private async createSection(index: number) {
-    /** to arrive to the dashboard, we need to start from the home perspective */
-    const dashboard = await this.getDashboardPerspective();
-
-    const sectionData: Section = {
-      sections: [],
-    };
-
-    return this.evees.addNewChild(dashboardData, home.id);
   }
 }

@@ -5,7 +5,7 @@ import { HttpAuth0Connection } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
 import { WikisModule } from '@uprtcl/wikis';
-import { EveesContentModule, eveesLoader } from '@uprtcl/evees';
+import { EveesContentModule, eveesConstructorHelper } from '@uprtcl/evees';
 
 export const initUprtcl = async () => {
   const c1host = 'http://localhost:3100/uprtcl/1';
@@ -35,5 +35,7 @@ export const initUprtcl = async () => {
   modules.set(DocumentsModule.id, new DocumentsModule());
   modules.set(WikisModule.id, new WikisModule());
 
-  eveesLoader(remotes, modules);
+  const evees = eveesConstructorHelper(remotes, modules);
+
+  appLoader(evees);
 };

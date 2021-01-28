@@ -260,14 +260,20 @@ export class DashboardElement extends eveesConnect(LitElement) {
 
     return html`
       <div class="app-content-with-nav">
-        <div class="app-navbar">${this.renderNavbar()}</div>
+        <div class="app-navbar">
+          ${this.renderNavbar()}
+          <div class="padding-div"></div>
+          </div>
 
-        <div class="app-content">
-          ${this.pageOrSection === 'page'
-            ? this.renderPageContent()
-            : this.pageOrSection === 'section'
-            ? this.renderSectionContent()
-            : html` <div class="home-container">${this.renderHome()}</div> `}
+          <div class="app-content">
+            ${
+              this.pageOrSection === 'page'
+                ? this.renderPageContent()
+                : this.pageOrSection === 'section'
+                ? this.renderSectionContent()
+                : html` <div class="home-container">${this.renderHome()}</div> `
+            }
+          </div>
         </div>
       </div>
     `;
@@ -298,8 +304,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
           overflow: hidden;
         }
         .app-navbar {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+          scrollbar-width: 0; /* Firefox */
           width: 250px;
           flex-shrink: 0;
           background: var(--white);
@@ -308,10 +313,33 @@ export class DashboardElement extends eveesConnect(LitElement) {
           height: 100%;
           overflow: scroll;
         }
+        .app-navbar:hover {
+          overflow: scroll;
+        }
         .app-navbar::-webkit-scrollbar {
           display: none;
         }
+        .app-navbar:hover::-webkit-scrollbar {
+          width: 8px;
+          display: block;
+          scrollbar-width: 8px; /* Firefox */
+        }
+        .app-navbar::-webkit-scrollbar-track {
+          /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
+        }
 
+        .app-navbar::-webkit-scrollbar-thumb {
+          background-color: var(--black-transparent, #0003);
+          border-radius: 1rem;
+        }
+        .padding-div {
+          height: 10%;
+          max-height: 5rem;
+        }
+
+        .section-cont {
+          /* margin-left:2rem; */
+        }
         .app-content {
           background: var(--background-color);
           min-width: 475px;
@@ -320,6 +348,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
           display: flex;
           flex-direction: column;
           position: relative;
+          max-height: 100vh;
         }
         .empty-pages-loader {
           margin-top: 22px;
@@ -402,7 +431,15 @@ export class DashboardElement extends eveesConnect(LitElement) {
           flex-direction: column;
           max-height: 100vh;
           overflow: scroll;
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+          padding-bottom: 30vmin;
         }
+
+        .page-container::-webkit-scrollbar {
+          display: none;
+        }
+
         .home-container {
           margin: 0 auto;
           max-width: 900px;
@@ -454,9 +491,6 @@ export class DashboardElement extends eveesConnect(LitElement) {
         }
         .new-page-modal-options img {
           margin-bottom: 1rem;
-        }
-        .section-cont {
-          /* margin-left:2rem; */
         }
       `,
     ];

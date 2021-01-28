@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit-element';
 
 import { Router } from '@vaadin/router';
 import { eveesConnect } from '@uprtcl/evees';
-import { AppSupport } from './containers/support';
+import { AppSupport } from './containers/app.support';
 
 export class AppEntry extends eveesConnect(LitElement) {
   async login() {

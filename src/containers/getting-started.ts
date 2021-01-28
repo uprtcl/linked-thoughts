@@ -7,7 +7,7 @@ import { EveesHttp } from '@uprtcl/evees-http';
 import { Router } from '@vaadin/router';
 
 import { Home } from '../constants/routeNames';
-import { AppSupport } from './support';
+import { AppSupport } from './app.support';
 
 export class GettingStartedElement extends eveesConnect(LitElement) {
   logger = new Logger('Dashboard');

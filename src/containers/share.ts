@@ -1,6 +1,20 @@
-import { LitElement, html, css, property } from 'lit-element';
+import { LitElement, html, css } from 'lit-element';
 
-export default class ShareCard extends LitElement {
+import { eveesConnect } from '@uprtcl/evees';
+export default class ShareCard extends eveesConnect(LitElement) {
+  async movePage(
+    pageId: string,
+    toPerspectiveId: string,
+    index?: number,
+    keepInOrigin: boolean = false
+  ) {
+    await this.evees.addExistingChild(pageId, toPerspectiveId);
+  }
+
+  async handleShare() {
+    // await this.evees.addExistingChild(pageId, toPerspectiveId);
+  }
+
   render() {
     return html`<div class="share-card-cont">
       <div class="content">
@@ -14,6 +28,7 @@ export default class ShareCard extends LitElement {
         <div class="toggle-cont">
           <uprtcl-toggle .active=${true}></uprtcl-toggle>
         </div>
+        <button @click=${() => this.handleShare()}>Click to share</button>
       </div>
     </div>`;
   }
@@ -46,7 +61,6 @@ export default class ShareCard extends LitElement {
         display: flex;
         align-items: center;
       }
-    
     `;
   }
 }

@@ -1,15 +1,17 @@
 import { TextType } from '@uprtcl/documents';
 import { AppElement } from '@uprtcl/evees';
 
+import { Dashboard } from '../containers/types';
+
 export const appElementsInit: AppElement = {
   path: '/',
   getInitData: (children: AppElement[]) => {
-    return { linkedThoghts: children[0].perspective.id };
+    return { linkedThoughts: children[0].perspective.id };
   },
   children: [
     {
       path: '/linkedThoughts',
-      getInitData: (children: AppElement[]) => {
+      getInitData: (children: AppElement[]): Dashboard => {
         return { sections: children.map((child) => child.perspective.id) };
       },
       children: [
@@ -17,14 +19,32 @@ export const appElementsInit: AppElement = {
           path: '/privateSection',
           getInitData: (children: AppElement[]) => {
             return {
-              text: 'Private',
-              type: TextType,
-              links: children.map((child) => child.perspective.id),
+              title: 'Private',
+              pages: children.map((child) => child.perspective.id),
             };
           },
-          children: [{ path: '/firstPage' }],
+          children: [
+            {
+              path: '/firstPage',
+              getInitData: () => {
+                return {
+                  text: '',
+                  type: TextType,
+                  links: [],
+                };
+              },
+            },
+          ],
         },
-        { path: '/blogSection' },
+        {
+          path: '/blogSection',
+          getInitData: () => {
+            return {
+              title: 'Blog',
+              pages: [],
+            };
+          },
+        },
       ],
     },
   ],

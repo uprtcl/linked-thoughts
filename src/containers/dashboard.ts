@@ -50,8 +50,7 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   selectedSectionId: string | undefined;
 
-  homePerspective: Secured<Perspective>;
-  dashboardId: string;
+  dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
 
@@ -70,7 +69,10 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      this.homePerspective = await this.appElements.get('/');
+      /** check the app scheleton is there */
+      await this.appElements.check();
+
+      this.dashboardPerspective = await this.appElements.get('/linkedThoughts');
 
       this.decodeUrl();
       await this.load();
@@ -104,12 +106,8 @@ export class DashboardElement extends ConnectedElement {
 
   /** overwrite */
   async load() {
-    const homeData = await this.evees.getPerspectiveData(
-      this.homePerspective.id
-    );
-    this.dashboardId = homeData.object.linkedThoughts;
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
-      this.dashboardId
+      this.dashboardPerspective.id
     );
     await this.loadSections();
   }
@@ -186,7 +184,7 @@ export class DashboardElement extends ConnectedElement {
     return html`<div class="home-title">Now seeing</div>
       <uprtcl-card>
         <evees-perspective-icon
-          perspective-id=${this.dashboardId}
+          perspective-id=${this.dashboardPerspective.id}
         ></evees-perspective-icon>
       </uprtcl-card>`;
   }
@@ -223,7 +221,7 @@ export class DashboardElement extends ConnectedElement {
             <documents-editor
               id="doc-editor"
               uref=${this.selectedPageId}
-              parent-id=${this.dashboardId}
+              parent-id=${this.dashboardPerspective.id}
             >
             </documents-editor>
           </div>

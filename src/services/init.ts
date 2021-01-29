@@ -13,6 +13,7 @@ import {
 } from '@uprtcl/evees';
 
 import { appElementsInit } from './app.elements.init';
+import { DashboardPattern, SectionPattern } from './app.elements.patterns';
 
 export const EVEES = 'evees-service';
 export const APP_ELEMENTS = 'app-elements-service';
@@ -45,7 +46,8 @@ export const initUprtcl = async () => {
   modules.set(DocumentsModule.id, new DocumentsModule());
   modules.set(WikisModule.id, new WikisModule());
 
-  const evees = eveesConstructorHelper(remotes, modules);
+  const appPatterns = [new DashboardPattern(), new SectionPattern()];
+  const evees = eveesConstructorHelper(remotes, modules, appPatterns);
   const appElements = new AppElements(evees, appElementsInit);
 
   const services = new Map<string, any>();

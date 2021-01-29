@@ -1,4 +1,4 @@
-import { initUprtcl } from './init';
+import { initUprtcl } from './services/init';
 import { App } from './app';
 import ShareCard from './containers/share';
 import { DashboardElement } from './containers/dashboard';

@@ -5,19 +5,20 @@ import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
 import {
   Entity,
-  eveesConnect,
   Logger,
   Perspective,
   Secured,
+  servicesConnect,
 } from '@uprtcl/evees';
+import { TextNode, TextType } from '@uprtcl/documents';
 
 import LockIcon from '../assets/icons/lock.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
-import { AppSupport } from './app.support';
-import { Dashboard } from './types';
 import { LTRouter } from '../router';
+import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
-import { TextNode, TextType } from '@uprtcl/documents';
+
+import { Dashboard } from './types';
 
 const MAX_LENGTH = 999;
 
@@ -28,7 +29,7 @@ interface SectionData {
 }
 
 type PageOrSection = 'page' | 'section';
-export class DashboardElement extends eveesConnect(LitElement) {
+export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
   @internalProperty()
@@ -64,12 +65,12 @@ export class DashboardElement extends eveesConnect(LitElement) {
   }
 
   async firstUpdated() {
-    this.remote = (await AppSupport.getRemote(this.evees)) as EveesHttp;
+    this.remote = this.evees.getRemote() as EveesHttp;
     await (this.remote.connection as any).checkLoginCallback();
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      this.homePerspective = this.getHomeId() await this.evees.getHome(this.remote.id);
+      this.homePerspective = await this.appElements.get('/');
 
       this.decodeUrl();
       await this.load();
@@ -101,7 +102,6 @@ export class DashboardElement extends eveesConnect(LitElement) {
     }
   }
 
-  
   /** overwrite */
   async load() {
     const homeData = await this.evees.getPerspectiveData(

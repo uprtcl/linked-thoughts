@@ -7,7 +7,6 @@ import { EveesHttp } from '@uprtcl/evees-http';
 import { Router } from '@vaadin/router';
 
 import { Home } from '../constants/routeNames';
-import { AppSupport } from './app.support';
 
 export class GettingStartedElement extends eveesConnect(LitElement) {
   logger = new Logger('Dashboard');
@@ -21,7 +20,7 @@ export class GettingStartedElement extends eveesConnect(LitElement) {
   remote: EveesHttp;
 
   async firstUpdated() {
-    this.remote = (await AppSupport.getRemote(this.evees)) as EveesHttp;
+    this.remote = this.evees.getRemote() as EveesHttp;
     await (this.remote.connection as any).checkLoginCallback();
     this.isLogged = await this.remote.isLogged();
 

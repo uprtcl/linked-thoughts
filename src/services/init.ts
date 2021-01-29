@@ -5,7 +5,17 @@ import { HttpAuth0Connection } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
 import { WikisModule } from '@uprtcl/wikis';
-import { EveesContentModule, eveesConstructorHelper } from '@uprtcl/evees';
+import {
+  EveesContentModule,
+  eveesConstructorHelper,
+  AppElements,
+  MultiContainer,
+} from '@uprtcl/evees';
+
+import { appElementsInit } from './app.elements.init';
+
+export const EVEES = 'evees-service';
+export const APP_ELEMENTS = 'app-elements-service';
 
 export const initUprtcl = async () => {
   const c1host = 'http://localhost:3100/uprtcl/1';
@@ -36,6 +46,11 @@ export const initUprtcl = async () => {
   modules.set(WikisModule.id, new WikisModule());
 
   const evees = eveesConstructorHelper(remotes, modules);
+  const appElements = new AppElements(evees, appElementsInit);
 
-  appLoader(evees);
+  const services = new Map<string, any>();
+  services.set(EVEES, evees);
+  services.set(APP_ELEMENTS, appElements);
+
+  customElements.define('app-container', MultiContainer(services));
 };

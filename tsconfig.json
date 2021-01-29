@@ -24,6 +24,6 @@
       "inversify/*": ["node_modules/inversify/*"]
     }
   },
-  "include": ["src","src/svg.d.ts"],
+  "include": ["src", "src/svg.d.ts"],
   "exclude": ["node_modules"]
 }

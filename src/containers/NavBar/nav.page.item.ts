@@ -12,6 +12,12 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   @property({ type: Boolean })
   selected: boolean = false;
 
+  @property({ type: Number })
+  idx: number = null;
+
+  @property()
+  deleteCurrentPerspective: Function = () => null;
+
   @internalProperty()
   draggingOver = false;
 
@@ -33,29 +39,15 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   }
 
   async optionOnPage(option: string) {
-    // switch (option) {
-    //   case 'move-up':
-    //     this.movePage(pageIndex, pageIndex - 1);
-    //     break;
-    //   case 'move-down':
-    //     this.movePage(pageIndex, pageIndex + 1);
-    //     break;
-    //   case 'add-below':
-    //     this.newPage(pageIndex + 1);
-    //     break;
-    //   case 'remove':
-    //     this.removePage(pageIndex);
-    //     break;
-    // }
+    switch (option) {
+      case 'remove':
+        this.deleteCurrentPerspective();
+        break;
+    }
   }
 
   render() {
     const menuConfig: MenuConfig = {
-      'add-below': {
-        disabled: false,
-        text: 'create below',
-        icon: 'add',
-      },
       remove: {
         disabled: false,
         text: 'Delete',

@@ -1,4 +1,5 @@
 import { html, css, internalProperty, property } from 'lit-element';
+import lodash from 'lodash';
 import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
@@ -51,6 +52,19 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));
   }
+  async deletePerspective(pageId: string) {
+    const confirmResponse = window.confirm(
+      'Are you sure you want to delete this item?'
+    );
+
+    if (confirmResponse === true) {
+      lodash.remove(this.data.object.pages, (id) => id === pageId);
+      await this.evees.updatePerspectiveData(this.uref, this.data.object);
+      await this.evees.client.flush();
+
+      Router.go(GenerateSectionRoute(this.uref));
+    }
+  }
 
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
@@ -71,10 +85,12 @@ export class NavSectionElement extends EveesBaseElement<Section> {
         >
       </section>
       <uprtcl-list>
-        ${this.data.object.pages.map((pageId) => {
+        ${this.data.object.pages.map((pageId, pageIndex) => {
           return html`<app-nav-page-item
             ?selected=${this.selectedId === pageId ? true : false}
             uref=${pageId}
+            idx=${pageIndex}
+            .deleteCurrentPerspective=${() => this.deletePerspective(pageId)}
           ></app-nav-page-item>`;
         })}
       </uprtcl-list>`;

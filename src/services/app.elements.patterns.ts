@@ -62,7 +62,7 @@ export class SectionPattern extends Pattern<Section> {
   type = SectionType;
 
   constructor() {
-    super([new DashboardBehaviors()]);
+    super([new SectionBehaviors()]);
   }
 }
 

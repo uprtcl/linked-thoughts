@@ -19,6 +19,9 @@ import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
 import { Dashboard } from './types';
+import { sharedStyles } from '../styles';
+
+import CloseIcon from '../assets/icons/x.svg';
 
 const MAX_LENGTH = 999;
 
@@ -157,6 +160,11 @@ export class DashboardElement extends ConnectedElement {
 
   renderNewPageDialog(showOptions = true) {
     return html`<uprtcl-dialog id="updates-dialog">
+      <span
+        @click=${() => (this.showNewPageDialog = false)}
+        class="new-page-close-icon clickable"
+        >${CloseIcon}</span
+      >
       <span class="new-page-modal-heading">Add new page to</span>
       <div class="new-page-modal-options">
         <div
@@ -164,6 +172,7 @@ export class DashboardElement extends ConnectedElement {
             this.showNewPageDialog = false;
             this.newPage(0);
           }}
+          class="clickable"
         >
           ${LockIcon} Private
         </div>
@@ -172,11 +181,11 @@ export class DashboardElement extends ConnectedElement {
             this.showNewPageDialog = false;
             this.newPage(1);
           }}
+          class="clickable"
         >
           ${GlobeIcon} Blog
         </div>
       </div>
-      <button @click=${() => (this.showNewPageDialog = false)}>Close</button>
     </uprtcl-dialog>`;
   }
 
@@ -202,8 +211,11 @@ export class DashboardElement extends ConnectedElement {
         </uprtcl-button>
       </div>
       <div class="section-cont">
-        ${this.dashboardData.object.sections.map((sectionId) => {
-          return html`<app-nav-section uref=${sectionId}></app-nav-section>`;
+        ${this.dashboardData.object.sections.map((sectionId, sectionIndex) => {
+          return html`<app-nav-section
+            uref=${sectionId}
+            idx=${sectionIndex}
+          ></app-nav-section>`;
         })}
       </div>
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
@@ -240,14 +252,20 @@ export class DashboardElement extends ConnectedElement {
 
     return html`
       <div class="app-content-with-nav">
-        <div class="app-navbar">${this.renderNavbar()}</div>
+        <div class="app-navbar">
+          ${this.renderNavbar()}
+          <div class="padding-div"></div>
+          </div>
 
-        <div class="app-content">
-          ${this.pageOrSection === 'page'
-            ? this.renderPageContent()
-            : this.pageOrSection === 'section'
-            ? this.renderSectionContent()
-            : html` <div class="home-container">${this.renderHome()}</div> `}
+          <div class="app-content">
+            ${
+              this.pageOrSection === 'page'
+                ? this.renderPageContent()
+                : this.pageOrSection === 'section'
+                ? this.renderSectionContent()
+                : html` <div class="home-container">${this.renderHome()}</div> `
+            }
+          </div>
         </div>
       </div>
     `;
@@ -256,6 +274,7 @@ export class DashboardElement extends ConnectedElement {
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
           display: flex;
@@ -277,8 +296,7 @@ export class DashboardElement extends ConnectedElement {
           overflow: hidden;
         }
         .app-navbar {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+          scrollbar-width: 0; /* Firefox */
           width: 250px;
           flex-shrink: 0;
           background: var(--white);
@@ -287,10 +305,33 @@ export class DashboardElement extends ConnectedElement {
           height: 100%;
           overflow: scroll;
         }
+        .app-navbar:hover {
+          overflow: scroll;
+        }
         .app-navbar::-webkit-scrollbar {
           display: none;
         }
+        .app-navbar:hover::-webkit-scrollbar {
+          width: 8px;
+          display: block;
+          scrollbar-width: 8px; /* Firefox */
+        }
+        .app-navbar::-webkit-scrollbar-track {
+          /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
+        }
 
+        .app-navbar::-webkit-scrollbar-thumb {
+          background-color: var(--black-transparent, #0003);
+          border-radius: 1rem;
+        }
+        .padding-div {
+          height: 10%;
+          max-height: 5rem;
+        }
+
+        .section-cont {
+          /* margin-left:2rem; */
+        }
         .app-content {
           background: var(--background-color);
           min-width: 475px;
@@ -299,6 +340,7 @@ export class DashboardElement extends ConnectedElement {
           display: flex;
           flex-direction: column;
           position: relative;
+          max-height: 100vh;
         }
         .empty-pages-loader {
           margin-top: 22px;
@@ -381,7 +423,15 @@ export class DashboardElement extends ConnectedElement {
           flex-direction: column;
           max-height: 100vh;
           overflow: scroll;
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+          padding-bottom: 30vmin;
         }
+
+        .page-container::-webkit-scrollbar {
+          display: none;
+        }
+
         .home-container {
           margin: 0 auto;
           max-width: 900px;
@@ -406,6 +456,10 @@ export class DashboardElement extends ConnectedElement {
           text-align: center;
           margin: 1rem 0rem;
         }
+        .new-page-close-icon {
+          position: absolute;
+          right: 1rem;
+        }
         .new-page-modal-options {
           width: 100%;
           text-align: center;
@@ -414,22 +468,21 @@ export class DashboardElement extends ConnectedElement {
           font-size: 1.5rem;
           font-weight: 600;
           margin: 1rem 0;
+          justify-content: center;
         }
         .new-page-modal-options > * {
           margin: 0 1rem;
-          flex: 1;
+          /* flex: 1; */
           box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
           display: flex;
           flex-direction: column;
           align-items: center;
-          height: 128px;
+          height: 158px;
           justify-content: center;
+          flex-basis: 40%;
         }
         .new-page-modal-options img {
           margin-bottom: 1rem;
-        }
-        .section-cont {
-          /* margin-left:2rem; */
         }
       `,
     ];

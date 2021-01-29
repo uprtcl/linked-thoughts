@@ -27,6 +27,9 @@
       rel="stylesheet"
     />
     <style>
+      html {
+        scroll-behavior: smooth;
+      }
       html,
       body {
         margin: 0;
@@ -35,6 +38,15 @@
         width: 100%;
         font-family: 'Roboto', sans-serif;
         overflow: hidden;
+      }
+      *::-webkit-scrollbar-thumb {
+        background-color:  #0003;
+        border-radius: 1rem;
+      }
+      *::-webkit-scrollbar {
+        width: 8px;
+        display: block;
+        scrollbar-width: 8px; /* Firefox */
       }
     </style>
   </head>

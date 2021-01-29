@@ -1,4 +1,5 @@
-import { html, css, internalProperty } from 'lit-element';
+import { html, css, internalProperty, property } from 'lit-element';
+import lodash from 'lodash';
 import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
@@ -8,7 +9,16 @@ import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 
+import PlusSquareIcon from '../../assets/icons/plus-square.svg';
+import { TextNode, TextType } from '@uprtcl/documents';
+
 export class NavSectionElement extends EveesBaseElement<Section> {
+  @property({ type: String })
+  uref: string;
+
+  @property({ type: Number })
+  idx: number = 0;
+
   @internalProperty()
   selectedId: string;
 
@@ -28,9 +38,32 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     } else if (LTRouter.Router.location.params.sectionId)
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
+  async newPage() {
+    const page: TextNode = {
+      text: '',
+      type: TextType.Title,
+      links: [],
+    };
+    await this.evees.addChild(page, this.uref);
+
+    await this.evees.client.flush();
+  }
 
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));
+  }
+  async deletePerspective(pageId: string) {
+    const confirmResponse = window.confirm(
+      'Are you sure you want to delete this item?'
+    );
+
+    if (confirmResponse === true) {
+      lodash.remove(this.data.object.pages, (id) => id === pageId);
+      await this.evees.updatePerspectiveData(this.uref, this.data.object);
+      await this.evees.client.flush();
+
+      Router.go(GenerateSectionRoute(this.uref));
+    }
   }
 
   render() {
@@ -47,12 +80,17 @@ export class NavSectionElement extends EveesBaseElement<Section> {
         @click=${this.navigateSection}
       >
         ${this.data.object.title}
+        <span @click=${this.newPage} class="add-page-button"
+          >${PlusSquareIcon}</span
+        >
       </section>
       <uprtcl-list>
-        ${this.data.object.pages.map((pageId) => {
+        ${this.data.object.pages.map((pageId, pageIndex) => {
           return html`<app-nav-page-item
             ?selected=${this.selectedId === pageId ? true : false}
             uref=${pageId}
+            idx=${pageIndex}
+            .deleteCurrentPerspective=${() => this.deletePerspective(pageId)}
           ></app-nav-page-item>`;
         })}
       </uprtcl-list>`;
@@ -76,6 +114,10 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           padding-left: 2rem;
           padding-bottom: 0.3rem;
           padding-top: 0.3rem;
+          display: flex;
+        }
+        .add-page-button {
+          margin-left: 1.5rem;
         }
       `,
     ];

@@ -1,5 +1,5 @@
 import { html, css, internalProperty } from 'lit-element';
-import lodash from 'lodash';
+import lodash, { pad } from 'lodash';
 import moment from 'moment';
 import { Router } from '@vaadin/router';
 
@@ -14,13 +14,14 @@ import {
   Entity,
 } from '@uprtcl/evees';
 
+import { ErrorBase } from '../../utils/error.base';
 import FileAddIcon from '../../assets/icons/file-add.svg';
 import DropDownIcon from '../../assets/icons/drop-down.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { Section } from '../types';
 import { sharedStyles } from '../../styles';
-import { TextNode } from '@uprtcl/documents';
-// const FileAddIcon = SVGToLit(require())
+import { TextNode, TextType } from '@uprtcl/documents';
+import SearchIcon from '../../assets/icons/search.svg';
 
 enum SortType {
   title,
@@ -103,6 +104,18 @@ export class SectionPage extends EveesBaseElement<Section> {
     );
     this.filteredPageList = this.pageList;
     this.title = this.data.object.title;
+  }
+
+  async newPage() {
+    const page: TextNode = {
+      text: '',
+      type: TextType.Title,
+      links: [],
+    };
+
+    await this.evees.addChild(page, this.uref);
+
+    await this.evees.client.flush();
   }
 
   sortPagesBy(sortType: SortType) {
@@ -194,7 +207,7 @@ export class SectionPage extends EveesBaseElement<Section> {
             class="search-field"
             type="text"
             placeholder="Find pages..."
-          /><span>🔍</span>
+          /><span>${SearchIcon}</span>
         </div>
       </div>
     `;
@@ -203,7 +216,9 @@ export class SectionPage extends EveesBaseElement<Section> {
     return html`
       <div class="list-actions-cont">
         <div class="list-actions-heading">${this.title} Pages</div>
-        <div class="action-new-page">${FileAddIcon} New Page</div>
+        <div class="action-new-page clickable" @click=${this.newPage}>
+          ${FileAddIcon} New Page
+        </div>
         <div>
           ${this.filterDropDown
             ? html`<div class="filter-drop-down">
@@ -241,30 +256,40 @@ export class SectionPage extends EveesBaseElement<Section> {
     return this.filteredPageList.length == 0
       ? html``
       : html`${this.filteredPageList.map((pageData) => {
-          const creationTime = moment(
-            pageData.meta.perspective.object.payload.timestamp
-          ).toLocaleString();
+          try {
+            let creationTime,
+              lastUpdatedTime = null;
 
-          const lastUpdatedTime = moment(
-            pageData.meta.head.object.payload.timestamp
-          ).toLocaleString();
+            if (pageData.meta.perspective && pageData.meta.head) {
+              creationTime = moment(
+                pageData.meta.perspective.object.payload.timestamp
+              ).toLocaleString();
 
-          return html`
-            <tr>
-              <td
-                class="clickable"
-                @click=${() => this.navigateToDoc(pageData.data.id)}
-              >
-                ${pageData.data.object.text
-                  ? html`<b>${pageData.data.object.text}</b>`
-                  : html`<i>Untitled</i>`}
-              </td>
-              <td .title=${lastUpdatedTime}>
-                ${moment(lastUpdatedTime).fromNow()}
-              </td>
-              <td .title=${creationTime}>${moment(creationTime).fromNow()}</td>
-            </tr>
-          `;
+              lastUpdatedTime = moment(
+                pageData.meta.head.object.payload.timestamp
+              ).toLocaleString();
+            }
+            return html`
+              <tr>
+                <td
+                  class="clickable"
+                  @click=${() => this.navigateToDoc(pageData.data.id)}
+                >
+                  ${pageData.data.object.text
+                    ? html`<b>${pageData.data.object.text}</b>`
+                    : html`<i>Untitled</i>`}
+                </td>
+                <td .title=${lastUpdatedTime}>
+                  ${moment(lastUpdatedTime).fromNow()}
+                </td>
+                <td .title=${creationTime}>
+                  ${moment(creationTime).fromNow()}
+                </td>
+              </tr>
+            `;
+          } catch (e) {
+            ErrorBase.FailingPromise(e);
+          }
         })}`;
   }
   renderPageListTable() {
@@ -287,13 +312,11 @@ export class SectionPage extends EveesBaseElement<Section> {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
     return html`
-      ${this.renderHeader()}
-
-      <div class="page-body">
-        ${this.renderListActionsHeader()}
+      <div class="static-header">
+        ${this.renderHeader()} ${this.renderListActionsHeader()}
         <hr />
-        ${this.renderPageListTable()}
       </div>
+      <div class="page-body">${this.renderPageListTable()}</div>
     `;
   }
   static get styles() {
@@ -302,7 +325,12 @@ export class SectionPage extends EveesBaseElement<Section> {
       sharedStyles,
       css`
         :host {
-          margin: 3% 5%;
+          overflow: scroll;
+          padding: 3% 5%;
+          height:100%;
+        }
+        .static-header {
+          width: 100%;
         }
         .page-body {
           margin: 0 2rem;
@@ -329,6 +357,7 @@ export class SectionPage extends EveesBaseElement<Section> {
           padding: 0.5rem 1.2rem;
           border: 2px solid grey;
           border-radius: 5px;
+          display: flex;
         }
         .search-field {
           border: none;

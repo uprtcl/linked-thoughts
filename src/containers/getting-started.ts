@@ -1,15 +1,15 @@
 import { html, css, internalProperty, LitElement } from 'lit-element';
 
 import { styles } from '@uprtcl/common-ui';
-import { eveesConnect, Logger } from '@uprtcl/evees';
+import { Logger } from '@uprtcl/evees';
 
 import { EveesHttp } from '@uprtcl/evees-http';
 import { Router } from '@vaadin/router';
 
 import { Home } from '../constants/routeNames';
-import { AppSupport } from './support';
+import { ConnectedElement } from '../services/connected.element';
 
-export class GettingStartedElement extends eveesConnect(LitElement) {
+export class GettingStartedElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
   @internalProperty()
@@ -21,7 +21,7 @@ export class GettingStartedElement extends eveesConnect(LitElement) {
   remote: EveesHttp;
 
   async firstUpdated() {
-    this.remote = (await AppSupport.getRemote(this.evees)) as EveesHttp;
+    this.remote = this.evees.getRemote() as EveesHttp;
     await (this.remote.connection as any).checkLoginCallback();
     this.isLogged = await this.remote.isLogged();
 

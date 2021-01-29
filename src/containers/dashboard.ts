@@ -5,19 +5,20 @@ import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
 import {
   Entity,
-  eveesConnect,
   Logger,
   Perspective,
   Secured,
+  servicesConnect,
 } from '@uprtcl/evees';
+import { TextNode, TextType } from '@uprtcl/documents';
 
 import LockIcon from '../assets/icons/lock.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
-import { AppSupport } from './support';
-import { Dashboard } from './types';
 import { LTRouter } from '../router';
+import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
-import { TextNode, TextType } from '@uprtcl/documents';
+
+import { Dashboard } from './types';
 
 const MAX_LENGTH = 999;
 
@@ -28,7 +29,7 @@ interface SectionData {
 }
 
 type PageOrSection = 'page' | 'section';
-export class DashboardElement extends eveesConnect(LitElement) {
+export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
   @internalProperty()
@@ -49,8 +50,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
   @internalProperty()
   selectedSectionId: string | undefined;
 
-  homePerspective: Secured<Perspective>;
-  dashboardId: string;
+  dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
 
@@ -64,15 +64,17 @@ export class DashboardElement extends eveesConnect(LitElement) {
   }
 
   async firstUpdated() {
-    this.remote = (await AppSupport.getRemote(this.evees)) as EveesHttp;
+    this.remote = this.evees.getRemote() as EveesHttp;
     await (this.remote.connection as any).checkLoginCallback();
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      this.homePerspective = await this.evees.getHome(this.remote.id);
+      /** check the app scheleton is there */
+      await this.appElements.check();
+
+      this.dashboardPerspective = await this.appElements.get('/linkedThoughts');
 
       this.decodeUrl();
-      await this.checkDashboardInit();
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -102,34 +104,10 @@ export class DashboardElement extends eveesConnect(LitElement) {
     }
   }
 
-  async checkDashboardInit() {
-    const { details } = await this.evees.client.getPerspective(
-      this.homePerspective.id
-    );
-
-    /** canUpdate is used as the flag to detect if the home space exists */
-    if (!details.canUpdate) {
-      /** create the home perspective as it did not existed */
-      const id = await this.evees.createEvee({
-        partialPerspective: this.homePerspective.object.payload,
-      });
-
-      if (id !== this.homePerspective.id) {
-        throw new Error('Undexpected id for home perspective');
-      }
-
-      await AppSupport.InitWorkspace(this.evees, this.homePerspective.id);
-    }
-  }
-
   /** overwrite */
   async load() {
-    const homeData = await this.evees.getPerspectiveData(
-      this.homePerspective.id
-    );
-    this.dashboardId = homeData.object.linkedThoughts;
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
-      this.dashboardId
+      this.dashboardPerspective.id
     );
     await this.loadSections();
   }
@@ -160,12 +138,21 @@ export class DashboardElement extends eveesConnect(LitElement) {
       type: TextType.Title,
       links: [],
     };
-    await this.evees.addChild(
+    await this.evees.addNewChild(
       page,
       this.dashboardData.object.sections[onSection]
     );
 
     await this.evees.client.flush();
+  }
+
+  async movePage(
+    pageId: string,
+    toPerspectiveId: string,
+    index?: number,
+    keepInOrigin: boolean = false
+  ) {
+    await this.evees.addExistingChild(pageId, toPerspectiveId);
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -197,7 +184,7 @@ export class DashboardElement extends eveesConnect(LitElement) {
     return html`<div class="home-title">Now seeing</div>
       <uprtcl-card>
         <evees-perspective-icon
-          perspective-id=${this.dashboardId}
+          perspective-id=${this.dashboardPerspective.id}
         ></evees-perspective-icon>
       </uprtcl-card>`;
   }
@@ -222,14 +209,19 @@ export class DashboardElement extends eveesConnect(LitElement) {
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 
+  renderTopNav() {
+    return html`<share-card></share-card>`;
+  }
+
   renderPageContent() {
     return html` ${this.selectedPageId !== undefined
       ? html`
           <div class="page-container">
+            ${this.renderTopNav()}
             <documents-editor
               id="doc-editor"
               uref=${this.selectedPageId}
-              parent-id=${this.dashboardId}
+              parent-id=${this.dashboardPerspective.id}
             >
             </documents-editor>
           </div>

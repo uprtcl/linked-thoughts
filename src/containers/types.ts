@@ -1,3 +1,7 @@
+export interface Home {
+  linkedThoughts: string;
+}
+
 export interface Dashboard {
   sections: string[];
 }

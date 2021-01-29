@@ -1,8 +1,8 @@
-import { LitElement, html, css } from 'lit-element';
+import { html, css } from 'lit-element';
 
+import { ConnectedElement } from './services/connected.element';
 import { Router } from '@vaadin/router';
-import { eveesConnect } from '@uprtcl/evees';
-export class AppEntry extends eveesConnect(LitElement) {
+export class AppEntry extends ConnectedElement {
   async login() {
     const remote = this.evees.findRemote('http');
     await remote.login();

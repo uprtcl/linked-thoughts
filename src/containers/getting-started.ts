@@ -1,14 +1,15 @@
 import { html, css, internalProperty, LitElement } from 'lit-element';
 
 import { styles } from '@uprtcl/common-ui';
-import { eveesConnect, Logger } from '@uprtcl/evees';
+import { Logger } from '@uprtcl/evees';
 
 import { EveesHttp } from '@uprtcl/evees-http';
 import { Router } from '@vaadin/router';
 
 import { Home } from '../constants/routeNames';
+import { ConnectedElement } from '../services/connected.element';
 
-export class GettingStartedElement extends eveesConnect(LitElement) {
+export class GettingStartedElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
   @internalProperty()

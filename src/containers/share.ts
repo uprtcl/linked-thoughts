@@ -1,7 +1,8 @@
-import { LitElement, html, css } from 'lit-element';
+import { html, css } from 'lit-element';
 
-import { eveesConnect } from '@uprtcl/evees';
-export default class ShareCard extends eveesConnect(LitElement) {
+import { ConnectedElement } from '../services/connected.element';
+
+export default class ShareCard extends ConnectedElement {
   async movePage(
     pageId: string,
     toPerspectiveId: string,

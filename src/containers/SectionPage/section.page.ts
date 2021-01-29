@@ -113,7 +113,7 @@ export class SectionPage extends EveesBaseElement<Section> {
       links: [],
     };
 
-    await this.evees.addChild(page, this.uref);
+    await this.evees.addNewChild(page, this.uref);
 
     await this.evees.client.flush();
   }
@@ -327,7 +327,7 @@ export class SectionPage extends EveesBaseElement<Section> {
         :host {
           overflow: scroll;
           padding: 3% 5%;
-          height:100%;
+          height: 100%;
         }
         .static-header {
           width: 100%;

@@ -29,7 +29,7 @@ export const appElementsInit: AppElement = {
               getInitData: () => {
                 return {
                   text: '',
-                  type: TextType,
+                  type: TextType.Title,
                   links: [],
                 };
               },

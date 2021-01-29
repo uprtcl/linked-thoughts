@@ -222,7 +222,8 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderTopNav() {
-    return html`<share-card></share-card>`;
+    return html``;
+    // return html`<share-card></share-card>`;
   }
 
   renderPageContent() {

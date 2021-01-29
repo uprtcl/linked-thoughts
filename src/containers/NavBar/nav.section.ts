@@ -44,7 +44,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       type: TextType.Title,
       links: [],
     };
-    await this.evees.addChild(page, this.uref);
+    await this.evees.addNewChild(page, this.uref);
 
     await this.evees.client.flush();
   }

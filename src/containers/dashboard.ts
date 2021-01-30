@@ -18,7 +18,7 @@ import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard } from './types';
+import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 
 import CloseIcon from '../assets/icons/x.svg';
@@ -113,6 +113,27 @@ export class DashboardElement extends ConnectedElement {
       this.dashboardPerspective.id
     );
     await this.loadSections();
+  }
+
+  async loadSelectedPage() {
+    const privateSection = await this.appElements.get(
+      '/linkedThoughts/privateSection'
+    );
+    const blogSection = await this.appElements.get(
+      '/linkedThoughts/blogSection'
+    );
+
+    const privateSectionData = await this.evees.getPerspectiveData<Section>(
+      privateSection.id
+    );
+    const blogSectionData = await this.evees.getPerspectiveData<Section>(
+      blogSection.id
+    );
+
+    const isInPrivate = privateSectionData.object.pages.includes(
+      this.selectedPageId
+    );
+    const isInBlog = blogSectionData.object.pages.includes(this.selectedPageId);
   }
 
   async loadSections() {
@@ -248,9 +269,9 @@ export class DashboardElement extends ConnectedElement {
      * - Page is only on blog. (No share option)
      * - Sharing functionality shouldn't be there on the blog pages.
      * -
-     *
-     *
+     * PRANSHU, CHECK async loadSelectedPage() in line 118
      */
+
     return html`<button @click=${() => this.sharePage()}>
       Click to share to blog
     </button>`;

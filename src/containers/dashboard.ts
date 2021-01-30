@@ -130,10 +130,12 @@ export class DashboardElement extends ConnectedElement {
       blogSection.id
     );
 
-    const isInPrivate = privateSectionData.object.pages.includes(
-      this.selectedPageId
+    const ixInPrivate = privateSectionData.object.pages.findIndex(
+      (pageId) => pageId === this.selectedPageId
     );
-    const isInBlog = blogSectionData.object.pages.includes(this.selectedPageId);
+    const ixInBlog = blogSectionData.object.pages.findIndex(
+      (pageId) => pageId === this.selectedPageId
+    );
   }
 
   async loadSections() {

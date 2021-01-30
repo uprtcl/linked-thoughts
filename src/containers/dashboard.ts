@@ -123,18 +123,13 @@ export class DashboardElement extends ConnectedElement {
       '/linkedThoughts/blogSection'
     );
 
-    const privateSectionData = await this.evees.getPerspectiveData<Section>(
-      privateSection.id
+    const ixInPrivate = await this.evees.getChildIndex(
+      privateSection.id,
+      this.selectedPageId
     );
-    const blogSectionData = await this.evees.getPerspectiveData<Section>(
-      blogSection.id
-    );
-
-    const ixInPrivate = privateSectionData.object.pages.findIndex(
-      (pageId) => pageId === this.selectedPageId
-    );
-    const ixInBlog = blogSectionData.object.pages.findIndex(
-      (pageId) => pageId === this.selectedPageId
+    const ixInBlog = await this.evees.getChildIndex(
+      blogSection.id,
+      this.selectedPageId
     );
   }
 

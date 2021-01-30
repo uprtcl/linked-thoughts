@@ -149,13 +149,23 @@ export class DashboardElement extends ConnectedElement {
     await this.evees.client.flush();
   }
 
-  async movePage(
-    pageId: string,
-    toPerspectiveId: string,
-    index?: number,
-    keepInOrigin: boolean = false
-  ) {
-    await this.evees.addExistingChild(pageId, toPerspectiveId);
+  async sharePage(pageIndex: number = 0) {
+    const privateSection = await this.appElements.get(
+      '/linkedThoughts/privateSection'
+    );
+    const blogSection = await this.appElements.get(
+      '/linkedThoughts/blogSection'
+    );
+
+    await this.evees.moveChild(
+      pageIndex,
+      privateSection.id,
+      blogSection.id,
+      0,
+      true,
+      false
+    );
+    await this.evees.client.flush();
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -222,8 +232,28 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderTopNav() {
-    return html``;
-    // return html`<share-card></share-card>`;
+    // return html``;
+    // Need to resolve the page index from the pageID
+    // Also this has to be shown only on the private pages
+
+    /**
+     * Hence need 2 services / utils
+     * -> resolvePageIndexFromPageId(pageId: string): pageIndex: number
+     * -> resolveSectionsFromPageId(pageId: number): Array<SectionUref>
+     *
+     *
+     * Possible Cases
+     * - Page is only on the private. (Page is sharable, default share state is false)
+     * - Page is already shared. (Default share state is true)
+     * - Page is only on blog. (No share option)
+     * - Sharing functionality shouldn't be there on the blog pages.
+     * -
+     *
+     *
+     */
+    return html`<button @click=${() => this.sharePage()}>
+      Click to share to blog
+    </button>`;
   }
 
   renderPageContent() {

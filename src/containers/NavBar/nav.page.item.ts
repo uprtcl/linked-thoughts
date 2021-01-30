@@ -15,14 +15,13 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   @property({ type: Number })
   idx: number = null;
 
-  @property()
-  deleteCurrentPerspective: Function = () => null;
-
   @internalProperty()
   draggingOver = false;
 
   @internalProperty()
   title: string = '';
+
+  deleteCurrentPerspective: Function = () => null;
 
   async firstUpdated() {
     await super.firstUpdated();

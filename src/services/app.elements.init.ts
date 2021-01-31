@@ -26,6 +26,7 @@ export const appElementsInit: AppElement = {
           children: [
             {
               path: '/firstPage',
+              optional: true,
               getInitData: () => {
                 return {
                   text: '',

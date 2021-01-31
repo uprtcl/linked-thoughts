@@ -2,6 +2,7 @@ import { Router } from '@vaadin/router';
 import * as Routes from './constants/routeNames';
 import {
   GenerateDocumentRoute,
+  GenerateReadDocumentRoute,
   GenerateSectionRoute,
 } from './utils/routes.helpers';
 
@@ -15,6 +16,10 @@ export class LTRouter {
       {
         path: Routes.GettingStarted,
         component: 'app-getting-started',
+      },
+      {
+        path: GenerateReadDocumentRoute(),
+        component: 'app-visitor',
       },
       {
         path: Routes.Home,

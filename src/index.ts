@@ -6,6 +6,7 @@ import { NavSectionElement } from './containers/NavBar/nav.section';
 import { PageItemElement } from './containers/NavBar/nav.page.item';
 import { GettingStartedElement } from './containers/getting-started';
 import { SectionPage } from './containers/SectionPage/section.page';
+import { VisitorElement } from './containers/visitor';
 
 (async function () {
   await initUprtcl();
@@ -16,5 +17,6 @@ import { SectionPage } from './containers/SectionPage/section.page';
   customElements.define('app-nav-section', NavSectionElement);
   customElements.define('app-nav-page-item', PageItemElement);
   customElements.define('app-getting-started', GettingStartedElement);
+  customElements.define('app-visitor', VisitorElement);
   customElements.define('app-section-page', SectionPage);
 })();

@@ -1,6 +1,6 @@
-import { html, css, internalProperty, LitElement } from 'lit-element';
+import { html, css, internalProperty, LitElement, property } from 'lit-element';
 import { Router } from '@vaadin/router';
-
+import lodash from 'lodash';
 import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
 import {
@@ -14,11 +14,12 @@ import { TextNode, TextType } from '@uprtcl/documents';
 
 import LockIcon from '../assets/icons/lock.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
+import MoreHorizontalIcon from '../assets/icons/more-horizontal.svg';
 import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard, Section } from './types';
+import { Dashboard, Section, PageShareMeta } from './types';
 import { sharedStyles } from '../styles';
 
 import CloseIcon from '../assets/icons/x.svg';
@@ -51,7 +52,13 @@ export class DashboardElement extends ConnectedElement {
   selectedPageId: string | undefined;
 
   @internalProperty()
+  selectedPageShareMeta: PageShareMeta = { inPrivate: false, inSections: [] };
+
+  @internalProperty()
   selectedSectionId: string | undefined;
+
+  @internalProperty()
+  showShareDialog: boolean;
 
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
@@ -77,7 +84,7 @@ export class DashboardElement extends ConnectedElement {
 
       this.dashboardPerspective = await this.appElements.get('/linkedThoughts');
 
-      this.decodeUrl();
+      await this.decodeUrl();
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -91,7 +98,7 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
   }
 
-  decodeUrl() {
+  async decodeUrl() {
     // /section/private
     // /page/pageId
     // /getting-started
@@ -104,6 +111,7 @@ export class DashboardElement extends ConnectedElement {
     } else if (LTRouter.Router.location.params.docId) {
       this.pageOrSection = 'page';
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
+      await this.loadSelectedPage();
     }
   }
 
@@ -131,6 +139,15 @@ export class DashboardElement extends ConnectedElement {
       blogSection.id,
       this.selectedPageId
     );
+
+    const inSections = [];
+    if (ixInPrivate !== -1) inSections.push(privateSection.id);
+    if (ixInBlog !== -1) inSections.push(blogSection.id);
+
+    this.selectedPageShareMeta = {
+      inPrivate: ixInPrivate != -1,
+      inSections,
+    };
   }
 
   async loadSections() {
@@ -175,15 +192,52 @@ export class DashboardElement extends ConnectedElement {
       '/linkedThoughts/blogSection'
     );
 
-    await this.evees.moveChild(
-      pageIndex,
-      privateSection.id,
-      blogSection.id,
-      0,
-      true,
-      false
+    /**
+     * Unshare
+     * If page is already shared then, on unsharing we need to remove the page from the blog section
+     * -> We need to perform the general delete action of the page.
+     */
+
+    const privateSectionData = await this.evees.getPerspectiveData(
+      privateSection.id
     );
+    pageIndex = lodash.findIndex(
+      privateSectionData.object.pages,
+      (idx) => idx === this.selectedPageId,
+      0
+    );
+
+    if (
+      lodash.includes(this.selectedPageShareMeta.inSections, blogSection.id)
+    ) {
+      const blogSectionData = await this.evees.getPerspectiveData(
+        blogSection.id
+      );
+
+      lodash.remove(
+        blogSectionData.object.pages,
+        (id) => id === this.selectedPageId
+      );
+      await this.evees.updatePerspectiveData(
+        blogSection.id,
+        blogSectionData.object
+      );
+    } else {
+      /**
+       * Share
+       */
+      await this.evees.moveChild(
+        pageIndex,
+        privateSection.id,
+        blogSection.id,
+        0,
+        true,
+        false
+      );
+    }
+    await this.loadSelectedPage();
     await this.evees.client.flush();
+    this.showShareDialog = !this.showShareDialog;
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -268,10 +322,28 @@ export class DashboardElement extends ConnectedElement {
      * -
      * PRANSHU, CHECK async loadSelectedPage() in line 118
      */
-
-    return html`<button @click=${() => this.sharePage()}>
-      Click to share to blog
-    </button>`;
+    const sharedState = !!(this.selectedPageShareMeta.inSections.length >= 2);
+    return html`<div class="app-action-bar">
+        <div
+          class="clickable"
+          @click=${() => {
+            this.showShareDialog = !this.showShareDialog;
+          }}
+        >
+          Share
+        </div>
+        <div>${MoreHorizontalIcon}</div>
+      </div>
+      ${this.showShareDialog
+        ? html`
+            <div class="share-card-cont">
+              <share-card
+                .active=${sharedState}
+                .onShare=${this.sharePage.bind(this)}
+              />
+            </div>
+          `
+        : null} `;
   }
 
   renderPageContent() {
@@ -343,6 +415,25 @@ export class DashboardElement extends ConnectedElement {
           flex-direction: row;
           position: relative;
           overflow: hidden;
+        }
+        .app-action-bar {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          margin-bottom: 1rem;
+          padding-top: 1rem;
+          font-weight: 400;
+          font-size: 1.1rem;
+        }
+        .app-action-bar > * {
+          margin: 0.75rem 1rem;
+        }
+        .share-card-cont {
+          position: absolute;
+          right: 1rem;
+          top: 4rem;
+          z-index: 3;
         }
         .app-navbar {
           scrollbar-width: 0; /* Firefox */

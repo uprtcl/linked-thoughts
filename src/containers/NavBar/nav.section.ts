@@ -89,6 +89,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           return html`<app-nav-page-item
             ?selected=${this.selectedId === pageId ? true : false}
             uref=${pageId}
+            ui-parent=${this.uref}
             idx=${pageIndex}
             .deleteCurrentPerspective=${() => this.deletePerspective(pageId)}
           ></app-nav-page-item>`;

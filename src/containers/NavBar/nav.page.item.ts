@@ -6,6 +6,8 @@ import { EveesBaseElement } from '@uprtcl/evees';
 import { TextNode } from '@uprtcl/documents';
 
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
+
+import ShortcutIcon from '../../assets/icons/shortcut.svg';
 import { sharedStyles } from '../../styles';
 
 export class PageItemElement extends EveesBaseElement<TextNode> {
@@ -21,10 +23,16 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   @internalProperty()
   title: string = '';
 
+  @internalProperty()
+  isShortcut: boolean = false;
+
   deleteCurrentPerspective: Function = () => null;
 
   async firstUpdated() {
     await super.firstUpdated();
+    if (this.guardianId !== this.uiParentId) {
+      this.isShortcut = true;
+    }
   }
 
   async dataUpdated() {
@@ -49,7 +57,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
     const menuConfig: MenuConfig = {
       remove: {
         disabled: false,
-        text: 'Delete',
+        text: 'remove',
         icon: 'delete',
       },
     };
@@ -64,6 +72,9 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
 
     return html`
       <div class=${classes.join(' ')} @click=${() => this.selectPage()}>
+        ${this.isShortcut
+          ? html`<div class="item-icon-container">${ShortcutIcon}</div>`
+          : ''}
         <span class="text-container">${titleStr}</span>
 
         <span class="item-menu-container">
@@ -99,6 +110,10 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
         }
         .page-item-row:hover {
           background: #0001;
+        }
+        .item-icon-container svg {
+          height: 12px;
+          margin-right: 6px;
         }
         .text-container {
           flex: 1;

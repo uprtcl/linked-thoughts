@@ -74,11 +74,11 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      /** check the app scheleton is there */
-      await this.appElements.check();
-      this.checkBlogPermissions();
+      await this.appManager.checkStructure();
 
-      this.dashboardPerspective = await this.appElements.get('/linkedThoughts');
+      this.dashboardPerspective = await this.appManager.elements.get(
+        '/linkedThoughts'
+      );
 
       await this.decodeUrl();
       await this.load();
@@ -87,20 +87,6 @@ export class DashboardElement extends ConnectedElement {
     }
 
     this.loading = false;
-  }
-
-  /** init blog ACL to publicRead privateWrite (HTTP-remote-specific) */
-  async checkBlogPermissions() {
-    const blogSection = await this.appElements.get(
-      '/linkedThoughts/blogSection'
-    );
-    const remote = this.evees.getRemote() as EveesHttp;
-    await remote.accessControl.toggleDelegate(blogSection.id, false);
-    await remote.accessControl.setPublicPermissions(
-      blogSection.id,
-      PermissionType.Read,
-      true
-    );
   }
 
   async login() {
@@ -112,8 +98,6 @@ export class DashboardElement extends ConnectedElement {
     // /section/private
     // /page/pageId
     // /getting-started
-    // /
-    // this.sectionSelected = '';
     if (LTRouter.Router.location.params.sectionId) {
       this.pageOrSection = 'section';
       this.selectedSectionId = LTRouter.Router.location.params
@@ -134,30 +118,9 @@ export class DashboardElement extends ConnectedElement {
   }
 
   async loadSelectedPage() {
-    const privateSection = await this.appElements.get(
-      '/linkedThoughts/privateSection'
-    );
-    const blogSection = await this.appElements.get(
-      '/linkedThoughts/blogSection'
-    );
-
-    const ixInPrivate = await this.evees.getChildIndex(
-      privateSection.id,
+    this.selectedPageShareMeta = await this.appManager.getShareMeta(
       this.selectedPageId
     );
-    const ixInBlog = await this.evees.getChildIndex(
-      blogSection.id,
-      this.selectedPageId
-    );
-
-    const inSections = [];
-    if (ixInPrivate !== -1) inSections.push(privateSection.id);
-    if (ixInBlog !== -1) inSections.push(blogSection.id);
-
-    this.selectedPageShareMeta = {
-      inPrivate: ixInPrivate != -1,
-      inSections,
-    };
   }
 
   async loadSections() {
@@ -181,70 +144,13 @@ export class DashboardElement extends ConnectedElement {
   }
 
   async newPage(onSection: number = 0) {
-    const page: TextNode = {
-      text: '',
-      type: TextType.Title,
-      links: [],
-    };
-    await this.evees.addNewChild(
-      page,
+    await this.appManager.newPage(
       this.dashboardData.object.sections[onSection]
     );
-
-    await this.evees.client.flush();
   }
 
-  async sharePage(pageIndex: number = 0) {
-    const privateSection = await this.appElements.get(
-      '/linkedThoughts/privateSection'
-    );
-    const blogSection = await this.appElements.get(
-      '/linkedThoughts/blogSection'
-    );
-
-    /**
-     * Unshare
-     * If page is already shared then, on unsharing we need to remove the page from the blog section
-     * -> We need to perform the general delete action of the page.
-     */
-
-    const privateSectionData = await this.evees.getPerspectiveData(
-      privateSection.id
-    );
-    pageIndex = lodash.findIndex(
-      privateSectionData.object.pages,
-      (idx) => idx === this.selectedPageId,
-      0
-    );
-
-    if (
-      lodash.includes(this.selectedPageShareMeta.inSections, blogSection.id)
-    ) {
-      const blogSectionData = await this.evees.getPerspectiveData(
-        blogSection.id
-      );
-
-      lodash.remove(
-        blogSectionData.object.pages,
-        (id) => id === this.selectedPageId
-      );
-      await this.evees.updatePerspectiveData(
-        blogSection.id,
-        blogSectionData.object
-      );
-    } else {
-      /**
-       * Share
-       */
-      await this.evees.moveChild(
-        pageIndex,
-        privateSection.id,
-        blogSection.id,
-        0,
-        true,
-        false
-      );
-    }
+  async sharePage() {
+    await this.appManager.toggleSharePage(this.selectedPageId);
     await this.loadSelectedPage();
     await this.evees.client.flush();
     this.showShareDialog = !this.showShareDialog;

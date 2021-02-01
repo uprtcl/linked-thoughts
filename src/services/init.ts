@@ -18,8 +18,9 @@ import {
   DashboardPattern,
   SectionPattern,
 } from './app.elements.patterns';
+import { AppManager } from './app.manager';
 
-export const APP_ELEMENTS = 'app-elements-service';
+export const APP_MANAGER = 'app-manager-service';
 
 export const initUprtcl = async () => {
   const c1host = 'http://localhost:3100/uprtcl/1';
@@ -58,8 +59,8 @@ export const initUprtcl = async () => {
   const evees = eveesConstructorHelper(remotes, modules, appPatterns);
 
   const services = new Map<string, any>();
-  const appElements = new AppElements(evees, appElementsInit);
-  services.set(APP_ELEMENTS, appElements);
+  const appManager = new AppManager(evees, appElementsInit);
+  services.set(APP_MANAGER, appManager);
 
   customElements.define('app-container', MultiContainer(evees, services));
 };

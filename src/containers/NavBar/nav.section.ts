@@ -11,8 +11,9 @@ import { Section } from '../types';
 
 import PlusSquareIcon from '../../assets/icons/plus-square.svg';
 import { TextNode, TextType } from '@uprtcl/documents';
+import { ConnectedEveeElement } from 'src/services/connected.evee.element';
 
-export class NavSectionElement extends EveesBaseElement<Section> {
+export class NavSectionElement extends ConnectedEveeElement<Section> {
   @property({ type: String })
   uref: string;
 
@@ -39,14 +40,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
   async newPage() {
-    const page: TextNode = {
-      text: '',
-      type: TextType.Title,
-      links: [],
-    };
-    await this.evees.addNewChild(page, this.uref);
-
-    await this.evees.client.flush();
+    await this.appManager.newPage(this.uref);
   }
 
   navigateSection() {

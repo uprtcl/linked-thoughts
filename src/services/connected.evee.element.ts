@@ -1,9 +1,8 @@
-import { LitElement } from 'lit-element';
-import { servicesConnect } from '@uprtcl/evees';
+import { EveesBaseElement, servicesConnect } from '@uprtcl/evees';
 import { APP_MANAGER } from './init';
 import { AppManager } from './app.manager';
 
-export class ConnectedElement extends servicesConnect(LitElement) {
+export class ConnectedEveeElement<T> extends servicesConnect(EveesBaseElement) {
   appManager: AppManager;
 
   connectedCallback() {

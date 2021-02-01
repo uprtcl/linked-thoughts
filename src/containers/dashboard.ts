@@ -31,6 +31,9 @@ type PageOrSection = 'page' | 'section';
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
+  @query('#share-card-cont')
+  shareCardCont;
+
   @internalProperty()
   loading = true;
 
@@ -247,7 +250,7 @@ export class DashboardElement extends ConnectedElement {
     }
     await this.loadSelectedPage();
     await this.evees.client.flush();
-    this.showShareDialog = !this.showShareDialog;
+    setTimeout(() => this.shareCardCont.focus(), 0);
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -338,15 +341,25 @@ export class DashboardElement extends ConnectedElement {
           class="clickable"
           @click=${() => {
             this.showShareDialog = !this.showShareDialog;
+            setTimeout(() => this.shareCardCont.focus(), 0);
           }}
         >
           Share
         </div>
         <div>${MoreHorizontalIcon}</div>
       </div>
+
       ${this.showShareDialog
         ? html`
-            <div class="share-card-cont">
+            <div
+              class="share-card-cont"
+              tabindex=${0}
+              autofocus
+              id="share-card-cont"
+              @blur=${() => {
+                this.showShareDialog = !this.showShareDialog;
+              }}
+            >
               <share-card
                 .active=${sharedState}
                 .onShare=${this.sharePage.bind(this)}
@@ -444,6 +457,9 @@ export class DashboardElement extends ConnectedElement {
           right: 1rem;
           top: 4rem;
           z-index: 3;
+        }
+        .share-card-cont:focus {
+          outline: none;
         }
         .app-navbar {
           scrollbar-width: 0; /* Firefox */

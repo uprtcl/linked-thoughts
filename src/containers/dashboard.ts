@@ -1,4 +1,4 @@
-import { html, css, internalProperty } from 'lit-element';
+import { html, css, internalProperty, query } from 'lit-element';
 import { Router } from '@vaadin/router';
 import lodash from 'lodash';
 import { EveesHttp } from '@uprtcl/evees-http';
@@ -337,36 +337,49 @@ export class DashboardElement extends ConnectedElement {
      */
     const sharedState = !!(this.selectedPageShareMeta.inSections.length >= 2);
     return html`<div class="app-action-bar">
-        <div
-          class="clickable"
-          @click=${() => {
-            this.showShareDialog = !this.showShareDialog;
-            setTimeout(() => this.shareCardCont.focus(), 0);
-          }}
-        >
-          Share
-        </div>
+      ${
+        this.selectedPageShareMeta.inPrivate
+          ? html`
+              <div
+                class="clickable"
+                @click=${() => {
+                  if (this.selectedPageShareMeta.inPrivate) {
+                    this.showShareDialog = !this.showShareDialog;
+                    setTimeout(() => this.shareCardCont.focus(), 0);
+                  }
+                }}
+              >
+                Share
+              </div>
+            `
+          : null
+      }
+     
         <div>${MoreHorizontalIcon}</div>
       </div>
 
-      ${this.showShareDialog
-        ? html`
-            <div
-              class="share-card-cont"
-              tabindex=${0}
-              autofocus
-              id="share-card-cont"
-              @blur=${() => {
-                this.showShareDialog = !this.showShareDialog;
-              }}
-            >
-              <share-card
-                .active=${sharedState}
-                .onShare=${this.sharePage.bind(this)}
-              />
-            </div>
-          `
-        : null} `;
+        
+      ${
+        this.showShareDialog && this.selectedPageShareMeta.inPrivate
+          ? html`
+              <div
+                class="share-card-cont"
+                tabindex=${0}
+                autofocus
+                id="share-card-cont"
+                @blur=${() => {
+                  this.showShareDialog = !this.showShareDialog;
+                }}
+              >
+                <share-card
+                  .active=${sharedState}
+                  .onShare=${this.sharePage.bind(this)}
+                />
+              </div>
+            `
+          : null
+      }
+    </div> `;
   }
 
   renderPageContent() {

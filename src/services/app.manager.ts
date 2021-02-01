@@ -2,7 +2,7 @@ import { TextNode, TextType } from '@uprtcl/documents';
 import { AppElement, AppElements, Evees } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import lodash from 'lodash';
-import { PageShareMeta } from 'src/containers/types';
+import { Dashboard, PageShareMeta } from 'src/containers/types';
 
 export class AppManager {
   elements: AppElements;
@@ -40,63 +40,18 @@ export class AppManager {
     await this.evees.client.flush();
   }
 
-  async getShareMeta(pageId: string): Promise<PageShareMeta> {
-    const privateSection = await this.elements.get(
-      '/linkedThoughts/privateSection'
-    );
-    const blogSection = await this.elements.get('/linkedThoughts/blogSection');
-
-    const ixInPrivate = await this.evees.getChildIndex(
-      privateSection.id,
-      pageId
-    );
-    const ixInBlog = await this.evees.getChildIndex(blogSection.id, pageId);
-
-    const inSections = [];
-    if (ixInPrivate !== -1) inSections.push(privateSection.id);
-    if (ixInBlog !== -1) inSections.push(blogSection.id);
-
-    return {
-      inPrivate: ixInPrivate != -1,
-      inSections,
-    };
+  /**  */
+  async forkPage(pageId: string, onSectionId): Promise<void> {
+    const forkId = await this.evees.forkPerspective(pageId);
+    await this.evees.addExistingChild(forkId, onSectionId);
+    await this.evees.client.flush();
   }
 
-  /**  */
-  async toggleSharePage(pageId: string) {
-    const privateSection = await this.elements.get(
-      '/linkedThoughts/privateSection'
+  async getSections(): Promise<string[]> {
+    const dashboardPerspective = await this.elements.get('/linkedThoughts');
+    const dashboardData = await this.evees.getPerspectiveData<Dashboard>(
+      dashboardPerspective.id
     );
-    const blogSection = await this.elements.get('/linkedThoughts/blogSection');
-
-    const shareMeta = await this.getShareMeta(pageId);
-
-    if (lodash.includes(shareMeta.inSections, blogSection.id)) {
-      /** unshare */
-      const blogSectionData = await this.evees.getPerspectiveData(
-        blogSection.id
-      );
-
-      lodash.remove(blogSectionData.object.pages, (id) => id === pageId);
-
-      await this.evees.updatePerspectiveData(
-        blogSection.id,
-        blogSectionData.object,
-        undefined,
-        privateSection.id
-      );
-    } else {
-      /**
-       * Share
-       */
-      await this.evees.moveChild(
-        pageId,
-        privateSection.id,
-        blogSection.id,
-        0,
-        true,
-        false
-      );
-    }
+    return dashboardData.object.sections;
   }
 }

@@ -1,10 +1,8 @@
 import { html, css, internalProperty } from 'lit-element';
 import { Router } from '@vaadin/router';
-import lodash from 'lodash';
 import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
 import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
-import { TextNode, TextType } from '@uprtcl/documents';
 
 import LockIcon from '../assets/icons/lock.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
@@ -17,7 +15,6 @@ import { Dashboard, PageShareMeta } from './types';
 import { sharedStyles } from '../styles';
 
 import CloseIcon from '../assets/icons/x.svg';
-import { PermissionType } from '@uprtcl/evees-http';
 
 const MAX_LENGTH = 999;
 
@@ -55,6 +52,7 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   showShareDialog: boolean;
 
+  privateSectionPerspective: Secured<Perspective>;
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
@@ -78,6 +76,10 @@ export class DashboardElement extends ConnectedElement {
 
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
+      );
+
+      this.privateSectionPerspective = await this.appManager.elements.get(
+        '/linkedThoughts/privateSection'
       );
 
       await this.decodeUrl();
@@ -105,7 +107,6 @@ export class DashboardElement extends ConnectedElement {
     } else if (LTRouter.Router.location.params.docId) {
       this.pageOrSection = 'page';
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
-      await this.loadSelectedPage();
     }
   }
 
@@ -115,12 +116,6 @@ export class DashboardElement extends ConnectedElement {
       this.dashboardPerspective.id
     );
     await this.loadSections();
-  }
-
-  async loadSelectedPage() {
-    this.selectedPageShareMeta = await this.appManager.getShareMeta(
-      this.selectedPageId
-    );
   }
 
   async loadSections() {
@@ -147,13 +142,6 @@ export class DashboardElement extends ConnectedElement {
     await this.appManager.newPage(
       this.dashboardData.object.sections[onSection]
     );
-  }
-
-  async sharePage() {
-    await this.appManager.toggleSharePage(this.selectedPageId);
-    await this.loadSelectedPage();
-    await this.evees.client.flush();
-    this.showShareDialog = !this.showShareDialog;
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -220,25 +208,6 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderTopNav() {
-    // return html``;
-    // Need to resolve the page index from the pageID
-    // Also this has to be shown only on the private pages
-
-    /**
-     * Hence need 2 services / utils
-     * -> resolvePageIndexFromPageId(pageId: string): pageIndex: number
-     * -> resolveSectionsFromPageId(pageId: number): Array<SectionUref>
-     *
-     *
-     * Possible Cases
-     * - Page is only on the private. (Page is sharable, default share state is false)
-     * - Page is already shared. (Default share state is true)
-     * - Page is only on blog. (No share option)
-     * - Sharing functionality shouldn't be there on the blog pages.
-     * -
-     * PRANSHU, CHECK async loadSelectedPage() in line 118
-     */
-    const sharedState = !!(this.selectedPageShareMeta.inSections.length >= 2);
     return html`<div class="app-action-bar">
         <div
           class="clickable"
@@ -254,8 +223,8 @@ export class DashboardElement extends ConnectedElement {
         ? html`
             <div class="share-card-cont">
               <share-card
-                .active=${sharedState}
-                .onShare=${this.sharePage.bind(this)}
+                uref=${this.selectedPageId}
+                from=${this.privateSectionPerspective.id}
               />
             </div>
           `

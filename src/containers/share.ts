@@ -1,36 +1,67 @@
-import {LitElement} from 'lit-element'
-import { TextNode } from '@uprtcl/documents';
-import { EveesBaseElement } from '@uprtcl/evees';
-import { html, css, property } from 'lit-element';
-
+import { Entity } from '@uprtcl/evees';
+import { html, css, property, internalProperty } from 'lit-element';
 import { ConnectedElement } from '../services/connected.element';
+import { Section } from './types';
 
-export default class ShareCard extends LitElement {
-  @property()
-  onShare: Function = () => null;
+interface SectionData {
+  id: string;
+  data: Entity<Section>;
+}
+export default class ShareCard extends ConnectedElement {
+  @property({ type: String })
+  uref: string;
 
-  @property()
-  active: Boolean;
+  @property({ type: String, attribute: 'from' })
+  fromParentId: string;
 
-  async handleShare() {
-    this.onShare(0);
+  @internalProperty()
+  loading: boolean = true;
+
+  sections: SectionData[];
+
+  firstUpdated() {
+    this.load();
+  }
+
+  async load() {
+    const sectionIds = await this.appManager.getSections();
+    this.sections = await Promise.all(
+      sectionIds
+        .filter((id) => id !== this.fromParentId)
+        .map(
+          async (id): Promise<SectionData> => {
+            const data = await this.evees.getPerspectiveData(id);
+            return {
+              id,
+              data,
+            };
+          }
+        )
+    );
+    this.loading = false;
+  }
+
+  async shareTo(toSectionId: string) {
+    await this.appManager.forkPage(this.uref, toSectionId);
   }
 
   render() {
+    if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
     return html`<div class="share-card-cont">
       <div class="content">
         <div>
-          <div class="heading">Share to Blog</div>
+          <div class="heading">Add to:</div>
           <div class="description">
-            by Sharing this document on the Blog space<br />it will becomes
-            public
+            Sharing is done by adding a copy of this page somewhere else.
           </div>
         </div>
         <div class="toggle-cont">
-          <uprtcl-toggle
-            @click=${this.handleShare}
-            .active=${this.active}
-          ></uprtcl-toggle>
+          ${this.sections.map((section) => {
+            return html`<div>${section.data.object.title}</div>
+              <uprtcl-button
+                @click=${() => this.shareTo(section.id)}
+              ></uprtcl-button>`;
+          })}
         </div>
       </div>
     </div>`;

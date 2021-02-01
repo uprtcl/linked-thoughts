@@ -209,7 +209,9 @@ export class DashboardElement extends ConnectedElement {
 
   renderTopNav() {
     return html`<div class="app-action-bar">
+      <uprtcl-popper>
         <div
+          slot="icon"
           class="clickable"
           @click=${() => {
             this.showShareDialog = !this.showShareDialog;
@@ -217,18 +219,13 @@ export class DashboardElement extends ConnectedElement {
         >
           Share
         </div>
-        <div>${MoreHorizontalIcon}</div>
-      </div>
-      ${this.showShareDialog
-        ? html`
-            <div class="share-card-cont">
-              <share-card
-                uref=${this.selectedPageId}
-                from=${this.privateSectionPerspective.id}
-              />
-            </div>
-          `
-        : null} `;
+        <share-card
+          uref=${this.selectedPageId}
+          from=${this.privateSectionPerspective.id}
+        ></share-card>
+      </uprtcl-popper>
+      <div>${MoreHorizontalIcon}</div>
+    </div>`;
   }
 
   renderPageContent() {

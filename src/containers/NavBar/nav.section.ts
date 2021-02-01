@@ -7,10 +7,12 @@ import { Router } from '@vaadin/router';
 import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
-import { Section } from '../types';
 
 import PlusSquareIcon from '../../assets/icons/plus-square.svg';
-import { TextNode, TextType } from '@uprtcl/documents';
+import { APP_MANAGER } from '../../services/init';
+import { AppManager } from '../../services/app.manager';
+
+import { Section } from '../types';
 
 export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -22,8 +24,12 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   @internalProperty()
   selectedId: string;
 
+  // TODO request app mananger on an ConnectedEveeElement base class...
+  appManager: AppManager;
+
   connectedCallback() {
     super.connectedCallback();
+    this.appManager = this.request(APP_MANAGER);
     window.addEventListener('popstate', () => this.decodeUrl());
   }
 
@@ -39,14 +45,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
   async newPage() {
-    const page: TextNode = {
-      text: '',
-      type: TextType.Title,
-      links: [],
-    };
-    await this.evees.addNewChild(page, this.uref);
-
-    await this.evees.client.flush();
+    await this.appManager.newPage(this.uref);
   }
 
   navigateSection() {

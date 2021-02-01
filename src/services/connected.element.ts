@@ -1,12 +1,13 @@
 import { LitElement } from 'lit-element';
-import { AppElements, Evees, servicesConnect } from '@uprtcl/evees';
-import { APP_ELEMENTS } from './init';
+import { servicesConnect } from '@uprtcl/evees';
+import { APP_MANAGER } from './init';
+import { AppManager } from './app.manager';
 
 export class ConnectedElement extends servicesConnect(LitElement) {
-  appElements: AppElements;
+  appManager: AppManager;
 
   connectedCallback() {
     super.connectedCallback();
-    this.appElements = this.request(APP_ELEMENTS);
+    this.appManager = this.request(APP_MANAGER);
   }
 }

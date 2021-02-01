@@ -311,12 +311,6 @@ export class DashboardElement extends ConnectedElement {
         .app-action-bar > * {
           margin: 0.75rem 1rem;
         }
-        .share-card-cont {
-          position: absolute;
-          right: 1rem;
-          top: 4rem;
-          z-index: 3;
-        }
         .app-navbar {
           scrollbar-width: 0; /* Firefox */
           width: 250px;

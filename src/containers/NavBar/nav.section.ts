@@ -7,13 +7,14 @@ import { Router } from '@vaadin/router';
 import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
 import { GenerateSectionRoute } from '../../utils/routes.helpers';
-import { Section } from '../types';
 
 import PlusSquareIcon from '../../assets/icons/plus-square.svg';
-import { TextNode, TextType } from '@uprtcl/documents';
-import { ConnectedEveeElement } from 'src/services/connected.evee.element';
+import { APP_MANAGER } from '../../services/init';
+import { AppManager } from '../../services/app.manager';
 
-export class NavSectionElement extends ConnectedEveeElement<Section> {
+import { Section } from '../types';
+
+export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
   uref: string;
 
@@ -23,8 +24,12 @@ export class NavSectionElement extends ConnectedEveeElement<Section> {
   @internalProperty()
   selectedId: string;
 
+  // TODO request app mananger on an ConnectedEveeElement base class...
+  appManager: AppManager;
+
   connectedCallback() {
     super.connectedCallback();
+    this.appManager = this.request(APP_MANAGER);
     window.addEventListener('popstate', () => this.decodeUrl());
   }
 

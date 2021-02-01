@@ -1,15 +1,9 @@
-import { html, css, internalProperty, LitElement, property } from 'lit-element';
+import { html, css, internalProperty } from 'lit-element';
 import { Router } from '@vaadin/router';
 import lodash from 'lodash';
 import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
-import {
-  Entity,
-  Logger,
-  Perspective,
-  Secured,
-  servicesConnect,
-} from '@uprtcl/evees';
+import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 import { TextNode, TextType } from '@uprtcl/documents';
 
 import LockIcon from '../assets/icons/lock.svg';
@@ -19,10 +13,11 @@ import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard, Section, PageShareMeta } from './types';
+import { Dashboard, PageShareMeta } from './types';
 import { sharedStyles } from '../styles';
 
 import CloseIcon from '../assets/icons/x.svg';
+import { PermissionType } from '@uprtcl/evees-http';
 
 const MAX_LENGTH = 999;
 
@@ -81,6 +76,7 @@ export class DashboardElement extends ConnectedElement {
     if (this.isLogged) {
       /** check the app scheleton is there */
       await this.appElements.check();
+      this.checkBlogPermissions();
 
       this.dashboardPerspective = await this.appElements.get('/linkedThoughts');
 
@@ -91,6 +87,20 @@ export class DashboardElement extends ConnectedElement {
     }
 
     this.loading = false;
+  }
+
+  /** init blog ACL to publicRead privateWrite (HTTP-remote-specific) */
+  async checkBlogPermissions() {
+    const blogSection = await this.appElements.get(
+      '/linkedThoughts/blogSection'
+    );
+    const remote = this.evees.getRemote() as EveesHttp;
+    await remote.accessControl.toggleDelegate(blogSection.id, false);
+    await remote.accessControl.setPublicPermissions(
+      blogSection.id,
+      PermissionType.Read,
+      true
+    );
   }
 
   async login() {

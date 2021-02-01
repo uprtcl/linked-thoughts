@@ -30,7 +30,7 @@ export class VisitorElement extends ConnectedElement {
   }
 
   async decodeUrl() {
-    this.pageId = LTRouter.Router.location.params.pageId as string;
+    this.pageId = LTRouter.Router.location.params.docId as string;
   }
 
   render() {

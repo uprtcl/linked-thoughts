@@ -51,7 +51,7 @@ export default class ShareCard extends ConnectedElement {
     return html`<div class="share-card-cont">
       <div class="content">
         <div class="row">
-          <div class="heading">Add to:</div>
+          <div class="heading">Add to</div>
         </div>
         <div class="row">
           <div class="description">
@@ -60,10 +60,10 @@ export default class ShareCard extends ConnectedElement {
         </div>
         <div class="row section-row">
           ${this.sections.map((section) => {
-            return html`<div>${section.data.object.title}:</div>
+            return html`<div class="add-cont"><div>${section.data.object.title}:</div>
               <uprtcl-button @click=${() => this.shareTo(section.id)}
-                >add</uprtcl-button
-              >`;
+                >Add</uprtcl-button
+              ></div>`;
           })}
         </div>
       </div>
@@ -77,6 +77,9 @@ export default class ShareCard extends ConnectedElement {
         :host {
           font-family: 'Poppins', sans-serif;
         }
+        .share-card-cont {
+          width: 300px;
+        }
         .content {
           padding: 0.5rem 1rem 1rem;
         }
@@ -88,6 +91,13 @@ export default class ShareCard extends ConnectedElement {
         .description {
           font-size: 1rem;
           font-weight: 400;
+        }
+        .add-cont{
+          width:100%;
+          margin:1rem 0;
+          display:flex;
+          justify-content:space-around;
+          align-items:center;
         }
       `,
     ];

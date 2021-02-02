@@ -4,7 +4,6 @@ import { EveesHttp, HttpStore } from '@uprtcl/evees-http';
 import { HttpAuth0Connection } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
-import { WikisModule } from '@uprtcl/wikis';
 import {
   EveesContentModule,
   eveesConstructorHelper,
@@ -48,7 +47,6 @@ export const initUprtcl = async () => {
   const remotes = [httpEvees];
   const modules = new Map<string, EveesContentModule>();
   modules.set(DocumentsModule.id, new DocumentsModule());
-  modules.set(WikisModule.id, new WikisModule());
 
   const appPatterns = [
     new AppHomePattern(),

@@ -3,7 +3,7 @@
 env="$1"
 
 # incase we want to have multiple stages in the future
-if [ $env != "prd" ] && [ $env != "test" ] && [ $env != "dev" ]; then
+if [ $env != "http-prd" ]; then
   echo "Unknown env $env, valid envs are prd or test"
   exit 1
 fi

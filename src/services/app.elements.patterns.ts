@@ -19,14 +19,14 @@ export class AppHomePattern extends Pattern<any> {
 }
 
 export class AppHomeBehaviors implements HasChildren<any> {
-  links = async (node: any) => this.getChildrenLinks(node);
+  links = async (node: any) => this.children(node);
 
-  replaceChildrenLinks = (node: any) => (childrenHashes: string[]): any => ({
+  replaceChildren = (node: any) => (childrenHashes: string[]): any => ({
     ...node,
     linkedThoughts: childrenHashes[0],
   });
 
-  getChildrenLinks = (node: any): string[] => [node.linkedThoughts];
+  children = (node: any): string[] => [node.linkedThoughts];
 }
 
 export class DashboardPattern extends Pattern<Dashboard> {
@@ -42,16 +42,16 @@ export class DashboardPattern extends Pattern<Dashboard> {
 }
 
 export class DashboardBehaviors implements HasChildren<Dashboard> {
-  links = async (node: Dashboard) => this.getChildrenLinks(node);
+  links = async (node: Dashboard) => this.children(node);
 
-  replaceChildrenLinks = (node: Dashboard) => (
+  replaceChildren = (node: Dashboard) => (
     childrenHashes: string[]
   ): Dashboard => ({
     ...node,
     sections: childrenHashes,
   });
 
-  getChildrenLinks = (node: Dashboard): string[] => node.sections;
+  children = (node: Dashboard): string[] => node.sections;
 }
 
 export class SectionPattern extends Pattern<Section> {
@@ -69,14 +69,12 @@ export class SectionPattern extends Pattern<Section> {
 export class SectionBehaviors implements HasChildren<Section> {
   title = async (node: Section) => node.title;
 
-  links = async (node: Section) => this.getChildrenLinks(node);
+  links = async (node: Section) => this.children(node);
 
-  replaceChildrenLinks = (node: Section) => (
-    childrenHashes: string[]
-  ): Section => ({
+  replaceChildren = (node: Section) => (childrenHashes: string[]): Section => ({
     ...node,
     pages: childrenHashes,
   });
 
-  getChildrenLinks = (node: Section): string[] => node.pages;
+  children = (node: Section): string[] => node.pages;
 }

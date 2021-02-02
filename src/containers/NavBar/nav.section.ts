@@ -115,9 +115,11 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           padding-bottom: 0.3rem;
           padding-top: 0.3rem;
           display: flex;
+          align-items: center;
         }
         .add-page-button {
           margin-left: 1.5rem;
+          display: flex;
         }
       `,
     ];

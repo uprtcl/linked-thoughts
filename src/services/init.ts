@@ -18,11 +18,12 @@ import {
   SectionPattern,
 } from './app.elements.patterns';
 import { AppManager } from './app.manager';
+import { env } from './env';
 
 export const APP_MANAGER = 'app-manager-service';
 
 export const initUprtcl = async () => {
-  const c1host = 'http://localhost:3100/uprtcl/1';
+  const host = env.host;
 
   const httpCidConfig: any = {
     version: 1,
@@ -38,7 +39,7 @@ export const initUprtcl = async () => {
     cacheLocation: 'localstorage',
   };
 
-  const httpConnection = new HttpAuth0Connection(c1host, auth0Config);
+  const httpConnection = new HttpAuth0Connection(host, auth0Config);
   await httpConnection.ready();
 
   const httpStore = new HttpStore(httpConnection, httpCidConfig);

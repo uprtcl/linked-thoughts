@@ -56,7 +56,7 @@ export class DashboardBehaviors implements HasChildren<Dashboard> {
 
 export class SectionPattern extends Pattern<Section> {
   recognize(object: any): boolean {
-    return !!object.pages;
+    return object.title !== undefined && object.pages !== undefined;
   }
 
   type = SectionType;
@@ -67,6 +67,8 @@ export class SectionPattern extends Pattern<Section> {
 }
 
 export class SectionBehaviors implements HasChildren<Section> {
+  title = async (node: Section) => node.title;
+
   links = async (node: Section) => this.getChildrenLinks(node);
 
   replaceChildrenLinks = (node: Section) => (

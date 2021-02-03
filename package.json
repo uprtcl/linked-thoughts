@@ -9,7 +9,7 @@
     "build-dev": "webpack --mode=development",
     "start": "webpack-dev-server --mode=development",
     "dev": "npm start",
-    "deploy": "npm run build && ./deploy.sh prd"
+    "deploy": "npm run build && ./deploy.sh http-prd"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.11.0",

@@ -24,6 +24,15 @@ export default class ShareCard extends ConnectedElement {
     this.load();
   }
 
+  updated(changedProperties) {
+    if (
+      changedProperties.has('uref') &&
+      changedProperties.get('uref') !== undefined
+    ) {
+      this.load();
+    }
+  }
+
   async load() {
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -39,6 +48,8 @@ export default class ShareCard extends ConnectedElement {
           }
         )
     );
+    const forks = await this.appManager.getForkedIn(this.uref);
+    console.log({ forks });
     this.loading = false;
   }
 
@@ -60,10 +71,12 @@ export default class ShareCard extends ConnectedElement {
         </div>
         <div class="row section-row">
           ${this.sections.map((section) => {
-            return html`<div class="add-cont"><div>${section.data.object.title}:</div>
+            return html`<div class="add-cont">
+              <div>${section.data.object.title}:</div>
               <uprtcl-button @click=${() => this.shareTo(section.id)}
                 >Add</uprtcl-button
-              ></div>`;
+              >
+            </div>`;
           })}
         </div>
       </div>
@@ -92,12 +105,12 @@ export default class ShareCard extends ConnectedElement {
           font-size: 1rem;
           font-weight: 400;
         }
-        .add-cont{
-          width:100%;
-          margin:1rem 0;
-          display:flex;
-          justify-content:space-around;
-          align-items:center;
+        .add-cont {
+          width: 100%;
+          margin: 1rem 0;
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
         }
       `,
     ];

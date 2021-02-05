@@ -15,7 +15,11 @@ import { Dashboard, PageShareMeta } from './types';
 import { sharedStyles } from '../styles';
 import { GetLastVisited, SetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
-import { GenerateDocumentRoute } from '../utils/routes.helpers';
+import {
+  GenerateDocumentRoute,
+  GenerateSectionRoute,
+  RouteName,
+} from '../utils/routes.helpers';
 
 const MAX_LENGTH = 999;
 
@@ -25,7 +29,6 @@ interface SectionData {
   draggingOver: boolean;
 }
 
-type PageOrSection = 'page' | 'section';
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
@@ -39,7 +42,7 @@ export class DashboardElement extends ConnectedElement {
   showNewPageDialog = false;
 
   @internalProperty()
-  pageOrSection: PageOrSection;
+  routeName: RouteName;
 
   @internalProperty()
   selectedPageId: string | undefined;
@@ -84,6 +87,8 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.decodeUrl();
+      this.checkLastVisited();
+
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -101,14 +106,25 @@ export class DashboardElement extends ConnectedElement {
     // /section/private
     // /page/pageId
     // /getting-started
-    if (LTRouter.Router.location.params.sectionId) {
-      this.pageOrSection = 'section';
+    if (LTRouter.Router.location.route.name === RouteName.section) {
+      this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedSectionId = LTRouter.Router.location.params
         .sectionId as string;
-    } else if (LTRouter.Router.location.params.docId) {
-      this.pageOrSection = 'page';
+    } else if (LTRouter.Router.location.route.name === RouteName.page) {
+      this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
-      SetLastVisited(this.selectedPageId);
+    }
+  }
+
+  async checkLastVisited() {
+    const lastVisited = GetLastVisited();
+    if (lastVisited) {
+      if (lastVisited.type === RouteName.page) {
+        Router.go(GenerateDocumentRoute(lastVisited.id));
+      }
+      if (lastVisited.type === RouteName.section) {
+        Router.go(GenerateSectionRoute(lastVisited.id));
+      }
     }
   }
 
@@ -178,14 +194,6 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderHome() {
-    // window.location.href  = `${window.location.origin}${GenerateDocumentRoute()}`
-    const lastVisitedPageId = GetLastVisited();
-    if (lastVisitedPageId) {
-      window.location.href = `${window.location.origin}${GenerateDocumentRoute(
-        lastVisitedPageId
-      )}`;
-    }
-
     return html`<div class="home-title">Now seeing</div>
       <uprtcl-card>
         <evees-perspective-icon
@@ -272,9 +280,9 @@ export class DashboardElement extends ConnectedElement {
 
           <div class="app-content">
             ${
-              this.pageOrSection === 'page'
+              this.routeName === RouteName.page
                 ? this.renderPageContent()
-                : this.pageOrSection === 'section'
+                : this.routeName === RouteName.section
                 ? this.renderSectionContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }

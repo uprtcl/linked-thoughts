@@ -4,6 +4,12 @@ import {
   SectionBaseRoute,
 } from '../constants/routeNames';
 
+export enum RouteName {
+  dashboard = 'dashboard',
+  page = 'page',
+  section = 'section',
+}
+
 export const GenerateDocumentRoute = (docId: string = ':docId') =>
   `${DocumentBaseRoute}/${docId}`;
 

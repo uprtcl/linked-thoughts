@@ -1,4 +1,4 @@
-import { html, css, internalProperty, property } from 'lit-element';
+import { html, css, internalProperty, property, query } from 'lit-element';
 import lodash from 'lodash';
 import { EveesBaseElement } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
@@ -13,6 +13,8 @@ import { APP_MANAGER } from '../../services/init';
 import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
+
+const sectionHeight = 150;
 
 export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -74,6 +76,13 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       classes.push('selected-item');
     }
 
+    /** same as value */
+    let overlayClass = [];
+
+    if (this.data.object.pages.length > 4) {
+      overlayClass.push('list-overlay');
+    }
+
     return html`<section
         class=${classes.join(' ')}
         @click=${this.navigateSection}
@@ -83,17 +92,23 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           >${PlusSquareIcon}</span
         >
       </section>
-      <uprtcl-list class="page-list">
-        ${this.data.object.pages.map((pageId, pageIndex) => {
-          return html`<app-nav-page-item
-            ?selected=${this.selectedId === pageId ? true : false}
-            uref=${pageId}
-            ui-parent=${this.uref}
-            idx=${pageIndex}
-            .deleteCurrentPerspective=${() => this.deletePerspective(pageId)}
-          ></app-nav-page-item>`;
-        })}
-      </uprtcl-list>`;
+      <div class="page-list-container">
+        <div class="page-list-scroller">
+          <uprtcl-list id="pages-list" class="page-list">
+            ${this.data.object.pages.map((pageId, pageIndex) => {
+              return html`<app-nav-page-item
+                ?selected=${this.selectedId === pageId ? true : false}
+                uref=${pageId}
+                ui-parent=${this.uref}
+                idx=${pageIndex}
+                .deleteCurrentPerspective=${() =>
+                  this.deletePerspective(pageId)}
+              ></app-nav-page-item>`;
+            })}
+          </uprtcl-list>
+        </div>
+        <div class=${overlayClass.join(' ')}></div>
+      </div>`;
   }
   static get styles() {
     return [
@@ -107,19 +122,40 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           margin-top: 2rem;
         }
 
-        .page-list {
-          overflow-y: scroll;
-          max-height: 40vh;
+        .page-list-container {
+          position: relative;
+          /* SAME AS scroller and condition for overlay in the render function!!! */
+          max-height: ${css`
+            ${sectionHeight}px
+          `};
+          overflow: hidden;
+        }
+        .page-list-scroller {
+          max-height: ${css`
+            ${sectionHeight}px
+          `};
+          overflow-y: auto;
+        }
+        .list-overlay {
+          position: absolute;
+          height: 100%;
+          width: 100%;
+          top: 0px;
+          left: 0px;
+          pointer-events: none;
           background-image: linear-gradient(
             0deg,
-            rgba(255, 0, 0, 0),
-            rgba(220, 220, 220, 0.5)
+            rgba(255, 255, 255, 1),
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0)
           );
         }
-        .page-list::-webkit-scrollbar {
-          width: 5px;
+
+        .page-list-scroller::-webkit-scrollbar {
+          width: 0px;
           display: block;
-          scrollbar-width: 8px; /* Firefox */
+          scrollbar-width: 0px; /* Firefox */
+          overflow-y: scroll;
         }
 
         .page-list::-webkit-scrollbar-track {
@@ -140,6 +176,8 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           padding-top: 0.3rem;
           display: flex;
           align-items: center;
+          height: 30px;
+          margin-bottom: 6px;
         }
         .add-page-button {
           margin-left: 1.5rem;

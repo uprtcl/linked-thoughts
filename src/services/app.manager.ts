@@ -1,8 +1,8 @@
 import { TextNode, TextType } from '@uprtcl/documents';
 import { AppElement, AppElements, Evees } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
-import lodash from 'lodash';
-import { Dashboard, PageShareMeta } from 'src/containers/types';
+
+import { Dashboard } from '../containers/types';
 
 export class AppManager {
   elements: AppElements;

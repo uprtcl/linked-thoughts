@@ -6,22 +6,19 @@ import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
 import LockIcon from '../assets/icons/lock.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
-import MoreHorizontalIcon from '../assets/icons/more-horizontal.svg';
 import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard, PageShareMeta } from './types';
+import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-import { GetLastVisited, SetLastVisited } from '../utils/localStorage';
+import { GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
 import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
   RouteName,
 } from '../utils/routes.helpers';
-
-const MAX_LENGTH = 999;
 
 interface SectionData {
   id: string;
@@ -48,15 +45,8 @@ export class DashboardElement extends ConnectedElement {
   selectedPageId: string | undefined;
 
   @internalProperty()
-  selectedPageShareMeta: PageShareMeta = { inPrivate: false, inSections: [] };
-
-  @internalProperty()
   selectedSectionId: string | undefined;
 
-  @internalProperty()
-  showShareDialog: boolean;
-
-  privateSectionPerspective: Secured<Perspective>;
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
@@ -80,10 +70,6 @@ export class DashboardElement extends ConnectedElement {
 
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
-      );
-
-      this.privateSectionPerspective = await this.appManager.elements.get(
-        '/linkedThoughts/privateSection'
       );
 
       await this.decodeUrl();
@@ -225,47 +211,12 @@ export class DashboardElement extends ConnectedElement {
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 
-  renderTopNav() {
-    return html`<div class="app-action-bar">
-      <uprtcl-popper>
-        <div
-          slot="icon"
-          class="clickable"
-          @click=${() => {
-            this.showShareDialog = !this.showShareDialog;
-          }}
-        >
-          Share
-        </div>
-        <share-card
-          uref=${this.selectedPageId}
-          from=${this.privateSectionPerspective.id}
-        ></share-card>
-      </uprtcl-popper>
-      <div>${MoreHorizontalIcon}</div>
-    </div>`;
-  }
-
-  renderPageContent() {
-    return html` ${this.selectedPageId !== undefined
-      ? html`
-          <div class="page-container">
-            ${this.renderTopNav()}
-            <documents-editor
-              id="doc-editor"
-              uref=${this.selectedPageId}
-              parent-id=${this.dashboardPerspective.id}
-            >
-            </documents-editor>
-          </div>
-        `
-      : null}`;
-  }
   renderSectionContent() {
     return html` ${this.selectedSectionId !== undefined
       ? html` <app-section-page uref=${this.selectedSectionId} /> `
       : null}`;
   }
+
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
 
@@ -281,7 +232,7 @@ export class DashboardElement extends ConnectedElement {
           <div class="app-content">
             ${
               this.routeName === RouteName.page
-                ? this.renderPageContent()
+                ? html`<app-document-page page-id=${this.selectedPageId} />`
                 : this.routeName === RouteName.section
                 ? this.renderSectionContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
@@ -316,16 +267,6 @@ export class DashboardElement extends ConnectedElement {
           position: relative;
           overflow: hidden;
         }
-        .app-action-bar {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          margin-bottom: 1rem;
-          padding-top: 1rem;
-          font-weight: 400;
-          font-size: 1.1rem;
-        }
         .app-action-bar > * {
           margin: 0.75rem 1rem;
         }
@@ -339,7 +280,6 @@ export class DashboardElement extends ConnectedElement {
           height: 100%;
           overflow: scroll;
         }
-
         .app-navbar::-webkit-scrollbar {
           display: none;
         }
@@ -435,23 +375,9 @@ export class DashboardElement extends ConnectedElement {
           margin: 0 auto;
           /* width: 180px; */
         }
-        .page-container {
-          margin: 0 auto;
-          width: 100%;
-          flex-grow: 1;
-          display: flex;
-          flex-direction: column;
-          max-height: 100vh;
-          overflow: scroll;
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-          padding-bottom: 30vmin;
-        }
-
         .page-container::-webkit-scrollbar {
           display: none;
         }
-
         .home-container {
           margin: 0 auto;
           max-width: 900px;

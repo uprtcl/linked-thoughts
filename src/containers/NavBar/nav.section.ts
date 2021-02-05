@@ -83,7 +83,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           >${PlusSquareIcon}</span
         >
       </section>
-      <uprtcl-list>
+      <uprtcl-list class="page-list">
         ${this.data.object.pages.map((pageId, pageIndex) => {
           return html`<app-nav-page-item
             ?selected=${this.selectedId === pageId ? true : false}
@@ -105,6 +105,30 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           flex: 1 1 0;
           flex-direction: column;
           margin-top: 2rem;
+        }
+
+        .page-list {
+          overflow-y: scroll;
+          max-height: 40vh;
+          background-image: linear-gradient(
+            0deg,
+            rgba(255, 0, 0, 0),
+            rgba(220, 220, 220, 0.5)
+          );
+        }
+        .page-list::-webkit-scrollbar {
+          width: 5px;
+          display: block;
+          scrollbar-width: 8px; /* Firefox */
+        }
+
+        .page-list::-webkit-scrollbar-track {
+          /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
+        }
+
+        .page-list::-webkit-scrollbar-thumb {
+          background-color: var(--black-transparent, #0003);
+          border-radius: 1rem;
         }
         .section-heading {
           font-size: 1.2rem;

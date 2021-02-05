@@ -13,8 +13,9 @@ import { GettingStarted } from '../constants/routeNames';
 
 import { Dashboard, PageShareMeta } from './types';
 import { sharedStyles } from '../styles';
-
+import { GetLastVisited, SetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
+import { GenerateDocumentRoute } from '../utils/routes.helpers';
 
 const MAX_LENGTH = 999;
 
@@ -107,6 +108,7 @@ export class DashboardElement extends ConnectedElement {
     } else if (LTRouter.Router.location.params.docId) {
       this.pageOrSection = 'page';
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
+      SetLastVisited(this.selectedPageId);
     }
   }
 
@@ -176,6 +178,14 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderHome() {
+    // window.location.href  = `${window.location.origin}${GenerateDocumentRoute()}`
+    const lastVisitedPageId = GetLastVisited();
+    if (lastVisitedPageId) {
+      window.location.href = `${window.location.origin}${GenerateDocumentRoute(
+        lastVisitedPageId
+      )}`;
+    }
+
     return html`<div class="home-title">Now seeing</div>
       <uprtcl-card>
         <evees-perspective-icon
@@ -321,25 +331,11 @@ export class DashboardElement extends ConnectedElement {
           height: 100%;
           overflow: scroll;
         }
-        .app-navbar:hover {
-          overflow: scroll;
-        }
+
         .app-navbar::-webkit-scrollbar {
           display: none;
         }
-        .app-navbar:hover::-webkit-scrollbar {
-          width: 8px;
-          display: block;
-          scrollbar-width: 8px; /* Firefox */
-        }
-        .app-navbar::-webkit-scrollbar-track {
-          /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
-        }
 
-        .app-navbar::-webkit-scrollbar-thumb {
-          background-color: var(--black-transparent, #0003);
-          border-radius: 1rem;
-        }
         .padding-div {
           height: 10%;
           max-height: 5rem;

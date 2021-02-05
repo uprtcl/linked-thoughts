@@ -3,7 +3,7 @@ import { html, css, property, internalProperty } from 'lit-element';
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
 import { Section } from './types';
-
+import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 interface SectionData {
   id: string;
   data: Entity<Section>;
@@ -18,10 +18,24 @@ export default class ShareCard extends ConnectedElement {
   @internalProperty()
   loading: boolean = true;
 
+  @internalProperty()
+  lastSharedPageId: string = null;
   sections: SectionData[];
 
   firstUpdated() {
     this.load();
+  }
+
+  async copyShareURL() {
+    try {
+      await window.navigator.clipboard.writeText(
+        `${window.location.origin}${GenerateReadDocumentRoute(
+          this.lastSharedPageId
+        )}`
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   updated(changedProperties) {
@@ -54,12 +68,25 @@ export default class ShareCard extends ConnectedElement {
   }
 
   async shareTo(toSectionId: string) {
-    await this.appManager.forkPage(this.uref, toSectionId);
+    const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
+    this.lastSharedPageId = sharedURI;
   }
 
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
     return html`<div class="share-card-cont">
+      ${this.lastSharedPageId
+        ? html` <div class="action-copy-cont">
+            <div class="url-cont">
+              ${window.location.origin}${GenerateReadDocumentRoute(
+                this.lastSharedPageId
+              )}
+            </div>
+            <div @click=${this.copyShareURL} class="copy-url-button clickable">
+              COPY
+            </div>
+          </div>`
+        : null}
       <div class="content">
         <div class="row">
           <div class="heading">Add to</div>

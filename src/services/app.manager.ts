@@ -41,10 +41,11 @@ export class AppManager {
   }
 
   /**  */
-  async forkPage(pageId: string, onSectionId): Promise<void> {
+  async forkPage(pageId: string, onSectionId): Promise<string> {
     const forkId = await this.evees.forkPerspective(pageId);
     await this.evees.addExistingChild(forkId, onSectionId);
     await this.evees.client.flush();
+    return forkId;
   }
 
   async getSections(): Promise<string[]> {

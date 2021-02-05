@@ -1,6 +1,7 @@
-import { html, css, internalProperty, property } from 'lit-element';
+import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import { Secured, Perspective } from '@uprtcl/evees';
+import { Secured, Perspective, Evees } from '@uprtcl/evees';
+import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
@@ -12,9 +13,17 @@ export class DocumentPage extends ConnectedElement {
   pageId: string;
 
   @internalProperty()
+  hasPull = false;
+
+  @internalProperty()
   loading = true;
 
+  @query('#doc-editor')
+  documentEditor: DocumentEditor;
+
+  eveesPull: Evees;
   privateSectionPerspective: Secured<Perspective>;
+  originId: string;
 
   async firstUpdated() {
     this.privateSectionPerspective = await this.appManager.elements.get(
@@ -23,10 +32,58 @@ export class DocumentPage extends ConnectedElement {
     this.load();
   }
 
+  updated(changedProperties) {
+    if (
+      changedProperties.has('pageId') &&
+      changedProperties.get('pageId') !== undefined
+    ) {
+      this.load();
+    }
+  }
+
   async load() {
+    this.hasPull = false;
     const { details } = await this.evees.client.getPerspective(this.pageId);
-    // Compare guardianId with privateSectionPerspective.id to know if private or blog page.
+    // Compare details.guardianId with privateSectionPerspective.id to know if private or blog page.
+
+    const perspective = await this.evees.client.store.getEntity(this.pageId);
+
+    if (
+      perspective.object.payload.meta &&
+      perspective.object.payload.meta.forking
+    ) {
+      // this page is a fork of another
+      this.originId = perspective.object.payload.meta.forking.perspectiveId;
+      this.checkOrigin();
+    }
+
     this.loading = false;
+  }
+
+  async checkOrigin() {
+    const config = {
+      forceOwner: true,
+    };
+
+    // Create a temporary workspaces to compute the merge
+    this.eveesPull = this.evees.clone();
+
+    await this.evees.merge.mergePerspectivesExternal(
+      this.pageId,
+      this.originId,
+      this.eveesPull,
+      config
+    );
+
+    // see if the temporary workspaces has updated any perspective
+    const diff = await this.eveesPull.client.diff();
+    this.hasPull = diff.updates ? diff.updates.length > 0 : false;
+  }
+
+  async pull() {
+    await this.eveesPull.client.flush();
+    this.checkOrigin();
+    this.documentEditor.reload();
   }
 
   renderTopNav() {
@@ -39,6 +96,9 @@ export class DocumentPage extends ConnectedElement {
         ></share-card>
       </uprtcl-popper>
       <div>${MoreHorizontalIcon}</div>
+      ${this.hasPull
+        ? html`<uprtcl-button @click=${() => this.pull()}>pull</uprtcl-button>`
+        : ``}
     </div>`;
   }
 

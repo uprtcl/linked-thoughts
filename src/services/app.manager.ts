@@ -55,4 +55,11 @@ export class AppManager {
     );
     return dashboardData.object.sections;
   }
+
+  /** find all the sections where other perspectives of a page have been
+   * created */
+  async getForkedIn(pageId: string): Promise<string[]> {
+    const locations = await this.evees.client.searchEngine.locate(pageId, true);
+    return locations;
+  }
 }

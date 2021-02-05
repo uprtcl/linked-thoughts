@@ -38,6 +38,15 @@ export default class ShareCard extends ConnectedElement {
     }
   }
 
+  updated(changedProperties) {
+    if (
+      changedProperties.has('uref') &&
+      changedProperties.get('uref') !== undefined
+    ) {
+      this.load();
+    }
+  }
+
   async load() {
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -53,6 +62,8 @@ export default class ShareCard extends ConnectedElement {
           }
         )
     );
+    const forks = await this.appManager.getForkedIn(this.uref);
+    console.log({ forks });
     this.loading = false;
   }
 
@@ -127,47 +138,6 @@ export default class ShareCard extends ConnectedElement {
           display: flex;
           justify-content: space-around;
           align-items: center;
-        }
-        .action-copy-cont {
-          display: flex;
-          padding: 0.5rem;
-        }
-        .action-copy-cont > * {
-          margin: 0.25rem;
-          padding: 0.25rem;
-        }
-        .url-cont {
-          overflow-x: scroll;
-          background: #ccc3;
-        }
-        /* width */
-        .url-cont::-webkit-scrollbar {
-          height: 4px;
-        }
-
-        /* Track */
-        .url-cont::-webkit-scrollbar-track {
-          background: #f1f1f1;
-        }
-
-        /* Handle */
-        .url-cont::-webkit-scrollbar-thumb {
-          background: #888;
-        }
-
-        /* Handle on hover */
-        .url-cont::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-        .copy-url-button {
-          background-color: var(--primary);
-          color: var(---white, #fff);
-          border-radius: 5px;
-          font-size: 0.8rem;
-          padding: 0.5rem;
-        }
-        .copy-url-button:active {
-          opacity: 0.9;
         }
       `,
     ];

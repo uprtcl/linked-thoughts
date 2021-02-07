@@ -100,7 +100,6 @@ export default class ShareCard extends ConnectedElement {
     const ForkedIn = await this.appManager.getForkedIn(this.uref);
     if (lodash.includes(ForkedIn, BlogSection.id, 0)) {
       this.disableAddButton = true;
-      
     }
     console.log(lodash.includes(ForkedIn, BlogSection.id, 0));
     // debugger;
@@ -148,7 +147,7 @@ export default class ShareCard extends ConnectedElement {
             class="add-to-blog-button"
             ?disabled=${this.disableAddButton}
           >
-            Add
+            ${this.disableAddButton ? html`Added` : html`Add`}
           </div>`
         : html` <div class="action-copy-cont">
             <div class="url-cont">

@@ -21,6 +21,9 @@ export class DocumentPage extends ConnectedElement {
   @query('#doc-editor')
   documentEditor: DocumentEditor;
 
+  @property()
+  isPagePrivate: boolean = true;
+
   eveesPull: Evees;
   privateSectionPerspective: Secured<Perspective>;
   originId: string;
@@ -55,6 +58,12 @@ export class DocumentPage extends ConnectedElement {
       // this page is a fork of another
       this.originId = perspective.object.payload.meta.forking.perspectiveId;
       this.checkOrigin();
+    }
+
+    const sectionsList = await this.appManager.getSections();
+
+    if (details.guardianId && details.guardianId == sectionsList[1]) {
+      this.isPagePrivate = false;
     }
 
     this.loading = false;
@@ -93,12 +102,24 @@ export class DocumentPage extends ConnectedElement {
         <share-card
           uref=${this.pageId}
           from=${this.privateSectionPerspective.id}
+          .isPagePrivate=${this.isPagePrivate}
         ></share-card>
       </uprtcl-popper>
-      <div>${MoreHorizontalIcon}</div>
+
       ${this.hasPull
-        ? html`<uprtcl-button @click=${() => this.pull()}>pull</uprtcl-button>`
+        ? html`<uprtcl-button
+            @click=${() => {
+              const resp = confirm(
+                'This may overwrite the content of the page.'
+              );
+              if (resp) {
+                this.pull();
+              }
+            }}
+            >Pull</uprtcl-button
+          >`
         : ``}
+      <div>${MoreHorizontalIcon}</div>
     </div>`;
   }
 
@@ -139,6 +160,9 @@ export class DocumentPage extends ConnectedElement {
           padding-top: 1rem;
           font-weight: 400;
           font-size: 1.1rem;
+        }
+        .app-action-bar > * {
+          margin: 0 0.5rem;
         }
       `,
     ];

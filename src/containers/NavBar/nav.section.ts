@@ -14,7 +14,7 @@ import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 
-const sectionHeight = 150;
+const sectionHeight = 30;
 
 export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -28,6 +28,8 @@ export class NavSectionElement extends EveesBaseElement<Section> {
 
   // TODO request app mananger on an ConnectedEveeElement base class...
   appManager: AppManager;
+
+  showPaddingDiv: boolean = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -79,8 +81,9 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     /** same as value */
     let overlayClass = [];
 
-    if (this.data.object.pages.length > 4) {
+    if (this.data.object.pages.length > 10) {
       overlayClass.push('list-overlay');
+      this.showPaddingDiv = true;
     }
 
     return html`<section
@@ -105,6 +108,9 @@ export class NavSectionElement extends EveesBaseElement<Section> {
                   this.deletePerspective(pageId)}
               ></app-nav-page-item>`;
             })}
+            ${this.showPaddingDiv
+              ? html`<div class="padding-div"></div>`
+              : null}
           </uprtcl-list>
         </div>
         <div class=${overlayClass.join(' ')}></div>
@@ -126,13 +132,13 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           position: relative;
           /* SAME AS scroller and condition for overlay in the render function!!! */
           max-height: ${css`
-            ${sectionHeight}px
+            ${sectionHeight}vh
           `};
           overflow: hidden;
         }
         .page-list-scroller {
           max-height: ${css`
-            ${sectionHeight}px
+            ${sectionHeight}vh
           `};
           overflow-y: auto;
         }
@@ -150,7 +156,11 @@ export class NavSectionElement extends EveesBaseElement<Section> {
             rgba(255, 255, 255, 0)
           );
         }
-
+        .padding-div {
+          height: ${css`
+            ${sectionHeight / 4}vh
+          `};
+        }
         .page-list-scroller::-webkit-scrollbar {
           width: 0px;
           display: block;

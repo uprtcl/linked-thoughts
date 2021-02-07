@@ -267,9 +267,7 @@ export class DashboardElement extends ConnectedElement {
           position: relative;
           overflow: hidden;
         }
-        .app-action-bar > * {
-          margin: 0.75rem 1rem;
-        }
+
         .app-navbar {
           scrollbar-width: 0; /* Firefox */
           width: 250px;

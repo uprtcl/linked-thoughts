@@ -45,8 +45,8 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
     Router.go(GenerateDocumentRoute(this.uref));
   }
 
-  async optionOnPage(option: string) {
-    switch (option) {
+  async optionOnPage(e) {
+    switch (e.detail.key) {
       case 'remove':
         this.deleteCurrentPerspective();
         break;
@@ -80,12 +80,13 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
         <span class="item-menu-container">
           <uprtcl-options-menu
             class="options-menu"
-            @option-click=${(e) => this.optionOnPage(e.detail.key)}
+            @option-click=${this.optionOnPage}
             .config=${menuConfig}
             skinny
           >
           </uprtcl-options-menu>
         </span>
+        
         ${this.draggingOver
           ? html`<div class="title-dragging-over"></div>`
           : ''}

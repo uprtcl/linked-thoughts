@@ -1,5 +1,5 @@
 import { TextNode, TextType } from '@uprtcl/documents';
-import { AppElement, AppElements, Evees } from '@uprtcl/evees';
+import { AppElement, AppElements, Evees, ParentAndChild } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 
 import { Dashboard } from '../containers/types';
@@ -62,7 +62,7 @@ export class AppManager {
 
   /** find all the sections where other perspectives of a page have been
    * created */
-  async getForkedIn(pageId: string): Promise<string[]> {
+  async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
     const locations = await this.evees.client.searchEngine.locate(pageId, true);
     return locations;
   }

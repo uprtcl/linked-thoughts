@@ -21,9 +21,6 @@ export class DocumentPage extends ConnectedElement {
   @query('#doc-editor')
   documentEditor: DocumentEditor;
 
-  @property()
-  isPagePrivate: boolean = true;
-
   eveesPull: Evees;
   privateSectionPerspective: Secured<Perspective>;
   originId: string;
@@ -46,7 +43,7 @@ export class DocumentPage extends ConnectedElement {
 
   async load() {
     this.hasPull = false;
-    const { details } = await this.evees.client.getPerspective(this.pageId);
+
     // Compare details.guardianId with privateSectionPerspective.id to know if private or blog page.
 
     const perspective = await this.evees.client.store.getEntity(this.pageId);
@@ -58,12 +55,6 @@ export class DocumentPage extends ConnectedElement {
       // this page is a fork of another
       this.originId = perspective.object.payload.meta.forking.perspectiveId;
       this.checkOrigin();
-    }
-
-    const sectionsList = await this.appManager.getSections();
-
-    if (details.guardianId && details.guardianId == sectionsList[1]) {
-      this.isPagePrivate = false;
     }
 
     this.loading = false;
@@ -102,7 +93,6 @@ export class DocumentPage extends ConnectedElement {
         <share-card
           uref=${this.pageId}
           from=${this.privateSectionPerspective.id}
-          .isPagePrivate=${this.isPagePrivate}
         ></share-card>
       </uprtcl-popper>
 

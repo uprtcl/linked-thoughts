@@ -1,8 +1,8 @@
 import { TextNode, TextType } from '@uprtcl/documents';
-import { AppElement, AppElements, Evees } from '@uprtcl/evees';
+import { AppElement, AppElements, Evees, ParentAndChild } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
-import lodash from 'lodash';
-import { Dashboard, PageShareMeta } from 'src/containers/types';
+
+import { Dashboard } from '../containers/types';
 
 export class AppManager {
   elements: AppElements;
@@ -41,10 +41,15 @@ export class AppManager {
   }
 
   /**  */
-  async forkPage(pageId: string, onSectionId): Promise<void> {
-    const forkId = await this.evees.forkPerspective(pageId);
+  async forkPage(pageId: string, onSectionId): Promise<string> {
+    const forkId = await this.evees.forkPerspective(
+      pageId,
+      undefined,
+      onSectionId
+    );
     await this.evees.addExistingChild(forkId, onSectionId);
     await this.evees.client.flush();
+    return forkId;
   }
 
   async getSections(): Promise<string[]> {
@@ -53,5 +58,12 @@ export class AppManager {
       dashboardPerspective.id
     );
     return dashboardData.object.sections;
+  }
+
+  /** find all the sections where other perspectives of a page have been
+   * created */
+  async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
+    const locations = await this.evees.client.searchEngine.locate(pageId, true);
+    return locations;
   }
 }

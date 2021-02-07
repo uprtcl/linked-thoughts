@@ -6,17 +6,19 @@ import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
 import LockIcon from '../assets/icons/lock.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
-import MoreHorizontalIcon from '../assets/icons/more-horizontal.svg';
 import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard, PageShareMeta } from './types';
+import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-
+import { GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
-
-const MAX_LENGTH = 999;
+import {
+  GenerateDocumentRoute,
+  GenerateSectionRoute,
+  RouteName,
+} from '../utils/routes.helpers';
 
 interface SectionData {
   id: string;
@@ -24,7 +26,6 @@ interface SectionData {
   draggingOver: boolean;
 }
 
-type PageOrSection = 'page' | 'section';
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
@@ -38,21 +39,14 @@ export class DashboardElement extends ConnectedElement {
   showNewPageDialog = false;
 
   @internalProperty()
-  pageOrSection: PageOrSection;
+  routeName: RouteName;
 
   @internalProperty()
   selectedPageId: string | undefined;
 
   @internalProperty()
-  selectedPageShareMeta: PageShareMeta = { inPrivate: false, inSections: [] };
-
-  @internalProperty()
   selectedSectionId: string | undefined;
 
-  @internalProperty()
-  showShareDialog: boolean;
-
-  privateSectionPerspective: Secured<Perspective>;
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
@@ -78,11 +72,9 @@ export class DashboardElement extends ConnectedElement {
         '/linkedThoughts'
       );
 
-      this.privateSectionPerspective = await this.appManager.elements.get(
-        '/linkedThoughts/privateSection'
-      );
-
       await this.decodeUrl();
+      this.checkLastVisited();
+
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -100,13 +92,25 @@ export class DashboardElement extends ConnectedElement {
     // /section/private
     // /page/pageId
     // /getting-started
-    if (LTRouter.Router.location.params.sectionId) {
-      this.pageOrSection = 'section';
+    if (LTRouter.Router.location.route.name === RouteName.section) {
+      this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedSectionId = LTRouter.Router.location.params
         .sectionId as string;
-    } else if (LTRouter.Router.location.params.docId) {
-      this.pageOrSection = 'page';
+    } else if (LTRouter.Router.location.route.name === RouteName.page) {
+      this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
+    }
+  }
+
+  async checkLastVisited() {
+    const lastVisited = GetLastVisited();
+    if (lastVisited) {
+      if (lastVisited.type === RouteName.page) {
+        Router.go(GenerateDocumentRoute(lastVisited.id));
+      }
+      if (lastVisited.type === RouteName.section) {
+        Router.go(GenerateSectionRoute(lastVisited.id));
+      }
     }
   }
 
@@ -207,47 +211,12 @@ export class DashboardElement extends ConnectedElement {
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 
-  renderTopNav() {
-    return html`<div class="app-action-bar">
-      <uprtcl-popper>
-        <div
-          slot="icon"
-          class="clickable"
-          @click=${() => {
-            this.showShareDialog = !this.showShareDialog;
-          }}
-        >
-          Share
-        </div>
-        <share-card
-          uref=${this.selectedPageId}
-          from=${this.privateSectionPerspective.id}
-        ></share-card>
-      </uprtcl-popper>
-      <div>${MoreHorizontalIcon}</div>
-    </div>`;
-  }
-
-  renderPageContent() {
-    return html` ${this.selectedPageId !== undefined
-      ? html`
-          <div class="page-container">
-            ${this.renderTopNav()}
-            <documents-editor
-              id="doc-editor"
-              uref=${this.selectedPageId}
-              parent-id=${this.dashboardPerspective.id}
-            >
-            </documents-editor>
-          </div>
-        `
-      : null}`;
-  }
   renderSectionContent() {
     return html` ${this.selectedSectionId !== undefined
       ? html` <app-section-page uref=${this.selectedSectionId} /> `
       : null}`;
   }
+
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
 
@@ -262,9 +231,9 @@ export class DashboardElement extends ConnectedElement {
 
           <div class="app-content">
             ${
-              this.pageOrSection === 'page'
-                ? this.renderPageContent()
-                : this.pageOrSection === 'section'
+              this.routeName === RouteName.page
+                ? html`<app-document-page page-id=${this.selectedPageId} />`
+                : this.routeName === RouteName.section
                 ? this.renderSectionContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }
@@ -298,19 +267,7 @@ export class DashboardElement extends ConnectedElement {
           position: relative;
           overflow: hidden;
         }
-        .app-action-bar {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          margin-bottom: 1rem;
-          padding-top: 1rem;
-          font-weight: 400;
-          font-size: 1.1rem;
-        }
-        .app-action-bar > * {
-          margin: 0.75rem 1rem;
-        }
+
         .app-navbar {
           scrollbar-width: 0; /* Firefox */
           width: 250px;
@@ -321,25 +278,10 @@ export class DashboardElement extends ConnectedElement {
           height: 100%;
           overflow: scroll;
         }
-        .app-navbar:hover {
-          overflow: scroll;
-        }
         .app-navbar::-webkit-scrollbar {
           display: none;
         }
-        .app-navbar:hover::-webkit-scrollbar {
-          width: 8px;
-          display: block;
-          scrollbar-width: 8px; /* Firefox */
-        }
-        .app-navbar::-webkit-scrollbar-track {
-          /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
-        }
 
-        .app-navbar::-webkit-scrollbar-thumb {
-          background-color: var(--black-transparent, #0003);
-          border-radius: 1rem;
-        }
         .padding-div {
           height: 10%;
           max-height: 5rem;
@@ -431,23 +373,9 @@ export class DashboardElement extends ConnectedElement {
           margin: 0 auto;
           /* width: 180px; */
         }
-        .page-container {
-          margin: 0 auto;
-          width: 100%;
-          flex-grow: 1;
-          display: flex;
-          flex-direction: column;
-          max-height: 100vh;
-          overflow: scroll;
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-          padding-bottom: 30vmin;
-        }
-
         .page-container::-webkit-scrollbar {
           display: none;
         }
-
         .home-container {
           margin: 0 auto;
           max-width: 900px;

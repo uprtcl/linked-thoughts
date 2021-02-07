@@ -1,9 +1,11 @@
 import { Router } from '@vaadin/router';
 import * as Routes from './constants/routeNames';
+import { SetLastVisited } from './utils/localStorage';
 import {
   GenerateDocumentRoute,
   GenerateReadDocumentRoute,
   GenerateSectionRoute,
+  RouteName,
 } from './utils/routes.helpers';
 
 export class LTRouter {
@@ -26,16 +28,31 @@ export class LTRouter {
         component: 'app-dashboard', // Slot
         children: [
           {
+            name: RouteName.dashboard,
             path: '/',
             component: 'div',
           },
           {
+            name: RouteName.page,
             path: GenerateDocumentRoute(),
             component: 'div',
+            action: (context) => {
+              SetLastVisited(
+                context.route.name,
+                context.params.docId as string
+              );
+            },
           },
           {
+            name: RouteName.section,
             path: GenerateSectionRoute(),
             component: 'div',
+            action: (context) => {
+              SetLastVisited(
+                context.route.name,
+                context.params.sectionId as string
+              );
+            },
           },
         ],
       },

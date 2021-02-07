@@ -77,8 +77,6 @@ export default class ShareCard extends ConnectedElement {
           }
         )
     );
-    const forks = await this.appManager.getForkedIn(this.uref);
-    console.log({ forks });
 
     const { details } = await this.evees.client.getPerspective(this.uref);
 
@@ -97,12 +95,15 @@ export default class ShareCard extends ConnectedElement {
     const BlogSection = await this.appManager.elements.get(
       '/linkedThoughts/blogSection'
     );
-    const ForkedIn = await this.appManager.getForkedIn(this.uref);
-    if (lodash.includes(ForkedIn, BlogSection.id, 0)) {
+    const forkedIn = await this.appManager.getForkedIn(this.uref);
+
+    const inBlogIx = forkedIn.findIndex((e) => e.parentId === BlogSection.id);
+    if (inBlogIx !== -1) {
+      const parentAndChild = forkedIn[inBlogIx];
+      console.log({ forkId: parentAndChild.childId });
       this.disableAddButton = true;
     }
-    console.log(lodash.includes(ForkedIn, BlogSection.id, 0));
-    // debugger;
+
     this.loading = false;
   }
 

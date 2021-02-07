@@ -1,4 +1,5 @@
 import { Entity } from '@uprtcl/evees';
+import lodash from 'lodash';
 import { html, css, property, internalProperty } from 'lit-element';
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
@@ -6,6 +7,7 @@ import { Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
+
 interface SectionData {
   id: string;
   data: Entity<Section>;
@@ -14,7 +16,7 @@ export default class ShareCard extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
-  @property({ type: Boolean })
+  @internalProperty()
   isPagePrivate: boolean;
 
   @property({ type: String, attribute: 'from' })
@@ -23,6 +25,8 @@ export default class ShareCard extends ConnectedElement {
   @internalProperty()
   loading: boolean = true;
 
+  @internalProperty()
+  disableAddButton: boolean = false;
   @internalProperty()
   lastSharedPageId: string = null;
   sections: SectionData[];
@@ -36,6 +40,8 @@ export default class ShareCard extends ConnectedElement {
       await window.navigator.clipboard.writeText(
         `${window.location.origin}${GenerateReadDocumentRoute(
           this.lastSharedPageId
+            ? this.lastSharedPageId
+            : (LTRouter.Router.location.params.docId as string)
         )}`
       );
     } catch (e) {
@@ -54,6 +60,8 @@ export default class ShareCard extends ConnectedElement {
 
   async load() {
     // alert(this.isPagePrivate);
+    this.lastSharedPageId = null;
+    this.disableAddButton = false;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -71,12 +79,37 @@ export default class ShareCard extends ConnectedElement {
     );
     const forks = await this.appManager.getForkedIn(this.uref);
     console.log({ forks });
+
+    const { details } = await this.evees.client.getPerspective(this.uref);
+
+    const privateSectionPerspective = await this.appManager.elements.get(
+      '/linkedThoughts/privateSection'
+    );
+    if (
+      details.guardianId &&
+      details.guardianId != privateSectionPerspective.id
+    ) {
+      this.isPagePrivate = false;
+    } else {
+      this.isPagePrivate = true;
+    }
+
+    const BlogSection = await this.appManager.elements.get(
+      '/linkedThoughts/blogSection'
+    );
+    const ForkedIn = await this.appManager.getForkedIn(this.uref);
+    if (lodash.includes(ForkedIn, BlogSection.id, 0)) {
+      this.disableAddButton = true;
+    }
+    console.log(lodash.includes(ForkedIn, BlogSection.id, 0));
+    // debugger;
     this.loading = false;
   }
 
   async shareTo(toSectionId: string) {
     const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
     this.lastSharedPageId = sharedURI;
+    this.disableAddButton = true;
   }
 
   render() {
@@ -97,7 +130,6 @@ export default class ShareCard extends ConnectedElement {
           </div>
         </div>
 
-       
         <!-- <div class="row section-row">
           ${this.sections.map((section) => {
           return html`<div class="add-cont">
@@ -110,27 +142,23 @@ export default class ShareCard extends ConnectedElement {
         </div> -->
       </div>
       ${this.isPagePrivate
-          ? html`<div
-              @click=${() => this.shareTo(this.sections[0].id)}
-              class="add-to-blog-button"
-            >
-              Add
-            </div>`
-          : html` <div class="action-copy-cont">
-              <div class="url-cont">
-                ${window.location.origin}${GenerateReadDocumentRoute(
-                  LTRouter.Router.location.params.docId as string
-                )}
-              </div>
-              <div
-                @click=${this.copyShareURL}
-                class="copy-url-button clickable"
-              >
-                ${ClipboardIcon}
-              </div>
-            </div>`}
-        
-
+        ? html`<div
+            @click=${() => this.shareTo(this.sections[0].id)}
+            class="add-to-blog-button"
+            ?disabled=${this.disableAddButton}
+          >
+            ${this.disableAddButton ? html`Added` : html`Add`}
+          </div>`
+        : html` <div class="action-copy-cont">
+            <div class="url-cont">
+              ${window.location.origin}${GenerateReadDocumentRoute(
+                LTRouter.Router.location.params.docId as string
+              )}
+            </div>
+            <div @click=${this.copyShareURL} class="copy-url-button clickable">
+              ${ClipboardIcon}
+            </div>
+          </div>`}
       ${this.lastSharedPageId && this.isPagePrivate
         ? html` <div class="action-copy-cont">
             <div class="url-cont">
@@ -187,8 +215,13 @@ export default class ShareCard extends ConnectedElement {
             inset 0px -1px 0px rgba(14, 14, 44, 0.4);
           border-radius: 8px;
           margin-top: 0.5rem;
-          margin-left:1rem;
-          margin-bottom:1rem;
+          margin-left: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .add-to-blog-button[disabled] {
+          pointer-events: none;
+          opacity: 0.7;
         }
         .action-copy-cont {
           margin: 1rem;
@@ -205,7 +238,6 @@ export default class ShareCard extends ConnectedElement {
 
           box-shadow: inset 0px 2px 2px -1px rgba(74, 74, 104, 0.1);
           border-radius: 0.5rem;
-          
         }
         .url-cont {
           overflow-x: scroll;

@@ -108,9 +108,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
                   this.deletePerspective(pageId)}
               ></app-nav-page-item>`;
             })}
-            ${this.showPaddingDiv
-              ? html`<div class="padding-div"></div>`
-              : null}
+            <div class="padding-div"></div>
           </uprtcl-list>
         </div>
         <div class=${overlayClass.join(' ')}></div>

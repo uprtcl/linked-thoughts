@@ -1,7 +1,7 @@
-import { GetLastVisited, SetLastVisited } from '../utils/localStorage';
+import { DeleteLastVisited } from '../utils/localStorage';
 
 export class AppError {
   clearLastVisited() {
-    SetLastVisited('page', '');
+    DeleteLastVisited();
   }
 }

@@ -7,10 +7,10 @@ import { Dashboard } from '../containers/types';
 export class AppManager {
   elements: AppElements;
   appError: AppError;
+
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
     this.appError = new AppError();
-    // ADD HERE 2
   }
 
   async checkStructure() {

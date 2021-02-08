@@ -219,8 +219,6 @@ export class DashboardElement extends ConnectedElement {
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
 
-    this.logger.log('rendering wiki after loading');
-
     return html`
       <div class="app-content-with-nav">
         <div class="app-navbar">

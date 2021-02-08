@@ -50,10 +50,14 @@ export const initUprtcl = async () => {
   connections.set(AUTH0_CONNECTION, auth0HttpConnection);
   connections.set(ETH_ACCOUNT_CONNECTION, ethHttpConnection);
 
+  /** use ETH connection only if its already logged */
+  const isLoggedEth = await ethHttpConnection.isLogged();
+  const connectionId = isLoggedEth ? ETH_ACCOUNT_CONNECTION : AUTH0_CONNECTION;
+
   const httpConnection = new HttpMultiConnection(
     c1host,
     connections,
-    AUTH0_CONNECTION
+    connectionId
   );
 
   const httpStore = new HttpStore(httpConnection, httpCidConfig);

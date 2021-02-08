@@ -1,5 +1,4 @@
 import { Entity } from '@uprtcl/evees';
-import lodash from 'lodash';
 import { html, css, property, internalProperty } from 'lit-element';
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';

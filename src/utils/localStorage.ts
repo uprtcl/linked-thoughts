@@ -8,3 +8,7 @@ export const SetLastVisited = (type: string, id: string) => {
 export const GetLastVisited = (): { type: RouteName; id: string } => {
   return JSON.parse(localStorage.getItem(LastVisitedKey));
 };
+
+export const DeleteLastVisited = () => {
+  localStorage.removeItem(LastVisitedKey);
+};

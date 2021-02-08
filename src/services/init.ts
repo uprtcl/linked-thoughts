@@ -1,13 +1,16 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
 import { EveesHttp, HttpStore } from '@uprtcl/evees-http';
-import { HttpAuth0Connection } from '@uprtcl/http-provider';
+import {
+  HttpMultiConnection,
+  HttpAuth0Connection,
+  HttpEthConnection,
+} from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
 import {
   EveesContentModule,
   eveesConstructorHelper,
-  AppElements,
   MultiContainer,
 } from '@uprtcl/evees';
 
@@ -20,6 +23,8 @@ import {
 import { AppManager } from './app.manager';
 
 export const APP_MANAGER = 'app-manager-service';
+export const AUTH0_CONNECTION = 'AUTH0_CONNECTION';
+export const ETH_ACCOUNT_CONNECTION = 'ETH_HTTP_CONNECTION';
 
 export const initUprtcl = async () => {
   const c1host = 'http://localhost:3100/uprtcl/1';
@@ -38,8 +43,22 @@ export const initUprtcl = async () => {
     cacheLocation: 'localstorage',
   };
 
-  const httpConnection = new HttpAuth0Connection(c1host, auth0Config);
-  await httpConnection.ready();
+  const auth0HttpConnection = new HttpAuth0Connection(c1host, auth0Config);
+  const ethHttpConnection = new HttpEthConnection(c1host);
+
+  const connections = new Map();
+  connections.set(AUTH0_CONNECTION, auth0HttpConnection);
+  connections.set(ETH_ACCOUNT_CONNECTION, ethHttpConnection);
+
+  /** use ETH connection only if its already logged */
+  const isLoggedEth = await ethHttpConnection.isLogged();
+  const connectionId = isLoggedEth ? ETH_ACCOUNT_CONNECTION : AUTH0_CONNECTION;
+
+  const httpConnection = new HttpMultiConnection(
+    c1host,
+    connections,
+    connectionId
+  );
 
   const httpStore = new HttpStore(httpConnection, httpCidConfig);
   const httpEvees = new EveesHttp(httpConnection, httpStore);

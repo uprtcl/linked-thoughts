@@ -15,6 +15,7 @@
     "@auth0/auth0-spa-js": "^1.11.0",
     "@uprtcl/common-ui": "0.2.0",
     "@uprtcl/documents": "0.2.0",
+    "@uprtcl/ethereum-provider": "0.2.0",
     "@uprtcl/evees": "0.2.0",
     "@uprtcl/evees-http": "0.2.0",
     "@uprtcl/http-provider": "0.2.0",

@@ -23,8 +23,8 @@ import {
 import { AppManager } from './app.manager';
 
 export const APP_MANAGER = 'app-manager-service';
-export const AUTH0_CONNECTION = 'AUTH0';
-export const ETH_ACCOUNT_CONNECTION = 'AUTH0';
+export const AUTH0_CONNECTION = 'AUTH0_CONNECTION';
+export const ETH_ACCOUNT_CONNECTION = 'ETH_HTTP_CONNECTION';
 
 export const initUprtcl = async () => {
   const c1host = 'http://localhost:3100/uprtcl/1';

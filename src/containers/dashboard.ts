@@ -62,7 +62,6 @@ export class DashboardElement extends ConnectedElement {
 
   async firstUpdated() {
     this.remote = this.evees.getRemote() as EveesHttp;
-    await (this.remote.connection as any).checkLoginCallback();
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {

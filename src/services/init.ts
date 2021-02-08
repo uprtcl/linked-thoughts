@@ -2,11 +2,10 @@ import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
 import { EveesHttp, HttpStore } from '@uprtcl/evees-http';
 import {
-  HttpAuth0Connection,
-  HttpEthAuthConnection,
   HttpMultiConnection,
+  HttpAuth0Connection,
+  HttpEthConnection,
 } from '@uprtcl/http-provider';
-import { EthereumConnection } from '@uprtcl/ethereum-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
 import {
@@ -45,9 +44,7 @@ export const initUprtcl = async () => {
   };
 
   const auth0HttpConnection = new HttpAuth0Connection(c1host, auth0Config);
-
-  const ethConnection = new EthereumConnection();
-  const ethHttpConnection = new HttpEthAuthConnection(c1host, ethConnection);
+  const ethHttpConnection = new HttpEthConnection(c1host);
 
   const connections = new Map();
   connections.set(AUTH0_CONNECTION, auth0HttpConnection);
@@ -58,8 +55,6 @@ export const initUprtcl = async () => {
     connections,
     AUTH0_CONNECTION
   );
-
-  await httpConnection.ready();
 
   const httpStore = new HttpStore(httpConnection, httpCidConfig);
   const httpEvees = new EveesHttp(httpConnection, httpStore);

@@ -9,6 +9,7 @@ import { Router } from '@vaadin/router';
 import { Home } from '../constants/routeNames';
 import { ConnectedElement } from '../services/connected.element';
 import { AUTH0_CONNECTION, ETH_ACCOUNT_CONNECTION } from '../services/init';
+import { HttpMultiConnection } from '@uprtcl/http-provider';
 
 export class GettingStartedElement extends ConnectedElement {
   logger = new Logger('Dashboard');
@@ -37,8 +38,10 @@ export class GettingStartedElement extends ConnectedElement {
   }
 
   async login(connectionId: string) {
-    this.remote.connection.select(connectionId);
-    const connection = this.remote.connection.connection();
+    const multiConnection = this.remote.connection as HttpMultiConnection;
+
+    multiConnection.select(connectionId);
+    const connection = multiConnection.connection();
     await connection.login();
 
     this.isLogged = await this.remote.isLogged();

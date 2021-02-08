@@ -12,7 +12,11 @@ import { GettingStarted } from '../constants/routeNames';
 
 import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-import { GetLastVisited } from '../utils/localStorage';
+import {
+  DeleteLastVisited,
+  GetLastVisited,
+  SetLastVisited,
+} from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
 import {
   GenerateDocumentRoute,
@@ -85,6 +89,11 @@ export class DashboardElement extends ConnectedElement {
   async login() {
     await this.remote.login();
     this.isLogged = await this.remote.isLogged();
+  }
+
+  async loggedUserChanged() {
+    DeleteLastVisited();
+    await this.firstUpdated();
   }
 
   async decodeUrl() {
@@ -188,7 +197,9 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderNavbar() {
-    return html`<evees-login-widget showName=${true}></evees-login-widget>
+    return html`<evees-login-widget
+        @changed=${() => this.loggedUserChanged()}
+      ></evees-login-widget>
       <div class="row align-center">
         <uprtcl-button
           class="button-new-page"

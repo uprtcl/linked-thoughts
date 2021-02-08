@@ -63,7 +63,7 @@ export class GettingStartedElement extends ConnectedElement {
         login web3
       </uprtcl-button>
       ${!this.hasWeb3
-        ? html`<a target="_blank" href="https://metamask.io/">rabit hole</a>`
+        ? html`<a target="_blank" href="https://metamask.io/">rabbit hole</a>`
         : ''}
     `;
   }

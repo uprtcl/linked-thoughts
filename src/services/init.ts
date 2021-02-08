@@ -78,6 +78,7 @@ export const initUprtcl = async () => {
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);
   services.set(APP_MANAGER, appManager);
+  // ADD HERE
 
   customElements.define('app-container', MultiContainer(evees, services));
 };

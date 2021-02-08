@@ -9,5 +9,6 @@ export class ConnectedElement extends servicesConnect(LitElement) {
   connectedCallback() {
     super.connectedCallback();
     this.appManager = this.request(APP_MANAGER);
+    // ADD HERE
   }
 }

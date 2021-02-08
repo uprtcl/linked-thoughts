@@ -56,6 +56,7 @@ export class LTRouter {
           },
         ],
       },
+      { path: '(.*)', component: 'app-error-page' },
     ]);
 
     this.Router = router;

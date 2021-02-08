@@ -1,14 +1,16 @@
 import { TextNode, TextType } from '@uprtcl/documents';
 import { AppElement, AppElements, Evees, ParentAndChild } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
-
+import { AppError } from './app.error';
 import { Dashboard } from '../containers/types';
 
 export class AppManager {
   elements: AppElements;
-
+  appError: AppError;
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
+    this.appError = new AppError();
+    // ADD HERE 2
   }
 
   async checkStructure() {

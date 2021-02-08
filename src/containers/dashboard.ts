@@ -73,8 +73,8 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.decodeUrl();
+      // debugger;
       this.checkLastVisited();
-
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -92,6 +92,7 @@ export class DashboardElement extends ConnectedElement {
     // /section/private
     // /page/pageId
     // /getting-started
+
     if (LTRouter.Router.location.route.name === RouteName.section) {
       this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedSectionId = LTRouter.Router.location.params
@@ -99,11 +100,20 @@ export class DashboardElement extends ConnectedElement {
     } else if (LTRouter.Router.location.route.name === RouteName.page) {
       this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
+      try {
+        const PageExist = await this.evees.getPerspectiveData(
+          this.selectedPageId
+        );
+      } catch (e) {
+        this.appManager.appError.clearLastVisited();
+        Router.go('/404');
+      }
     }
   }
 
   async checkLastVisited() {
     const lastVisited = GetLastVisited();
+    if (!lastVisited.id) return;
     if (lastVisited) {
       if (lastVisited.type === RouteName.page) {
         Router.go(GenerateDocumentRoute(lastVisited.id));

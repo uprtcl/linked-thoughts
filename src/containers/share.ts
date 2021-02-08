@@ -83,6 +83,9 @@ export default class ShareCard extends ConnectedElement {
     const privateSectionPerspective = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
+    const BlogSection = await this.appManager.elements.get(
+      '/linkedThoughts/blogSection'
+    );
     if (
       details.guardianId &&
       details.guardianId != privateSectionPerspective.id
@@ -92,16 +95,21 @@ export default class ShareCard extends ConnectedElement {
       this.isPagePrivate = true;
     }
 
-    const BlogSection = await this.appManager.elements.get(
-      '/linkedThoughts/blogSection'
-    );
     const forkedIn = await this.appManager.getForkedIn(this.uref);
 
     const inBlogIx = forkedIn.findIndex((e) => e.parentId === BlogSection.id);
     if (inBlogIx !== -1) {
       const parentAndChild = forkedIn[inBlogIx];
       console.log({ forkId: parentAndChild.childId });
+      const PreviouslyForkedIn = lodash.find(
+        forkedIn,
+        (obj) => obj.parentId == BlogSection.id
+      );
+      if (PreviouslyForkedIn) {
+        this.lastSharedPageId = PreviouslyForkedIn.childId;
+      }
       this.disableAddButton = true;
+      // debugger;
     }
 
     this.loading = false;

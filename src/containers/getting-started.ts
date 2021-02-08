@@ -38,7 +38,7 @@ export class GettingStartedElement extends ConnectedElement {
   }
 
   async login(connectionId: string) {
-    const multiConnection = this.remote.connection as HttpMultiConnection;
+    const multiConnection: HttpMultiConnection = this.remote.connection as any;
 
     multiConnection.select(connectionId);
     const connection = multiConnection.connection();

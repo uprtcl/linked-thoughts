@@ -23,6 +23,9 @@ export class DocumentPage extends ConnectedElement {
   @internalProperty()
   loading = true;
 
+  @internalProperty()
+  readOnly = false;
+
   @query('#doc-editor')
   documentEditor: DocumentEditor;
 
@@ -49,7 +52,8 @@ export class DocumentPage extends ConnectedElement {
   async load() {
     this.hasPull = false;
 
-    // Compare details.guardianId with privateSectionPerspective.id to know if private or blog page.
+    const { details } = await this.evees.client.getPerspective(this.pageId);
+    this.readOnly = details.guardianId !== this.privateSectionPerspective.id;
 
     const perspective = await this.evees.client.store.getEntity(this.pageId);
 
@@ -72,9 +76,7 @@ export class DocumentPage extends ConnectedElement {
 
     // Create a temporary workspaces to compute the merge
     this.eveesPull = this.evees.clone();
-
     const merger = new RecursiveContextMergeStrategy(this.eveesPull);
-
     await merger.mergePerspectivesExternal(this.pageId, this.originId, config);
 
     // see if the temporary workspaces has updated any perspective
@@ -121,7 +123,11 @@ export class DocumentPage extends ConnectedElement {
     return html`
       <div class="page-container">
         ${this.renderTopNav()}
-        <documents-editor id="doc-editor" uref=${this.pageId}>
+        <documents-editor
+          id="doc-editor"
+          uref=${this.pageId}
+          ?read-only=${this.readOnly}
+        >
         </documents-editor>
       </div>
     `;

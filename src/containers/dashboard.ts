@@ -12,7 +12,11 @@ import { GettingStarted } from '../constants/routeNames';
 
 import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-import { GetLastVisited } from '../utils/localStorage';
+import {
+  DeleteLastVisited,
+  GetLastVisited,
+  SetLastVisited,
+} from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
 import {
   GenerateDocumentRoute,
@@ -62,7 +66,6 @@ export class DashboardElement extends ConnectedElement {
 
   async firstUpdated() {
     this.remote = this.evees.getRemote() as EveesHttp;
-    await (this.remote.connection as any).checkLoginCallback();
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
@@ -73,8 +76,8 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.decodeUrl();
+      
       this.checkLastVisited();
-
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -88,10 +91,16 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
   }
 
+  async loggedUserChanged() {
+    DeleteLastVisited();
+    await this.firstUpdated();
+  }
+
   async decodeUrl() {
     // /section/private
     // /page/pageId
     // /getting-started
+
     if (LTRouter.Router.location.route.name === RouteName.section) {
       this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedSectionId = LTRouter.Router.location.params
@@ -99,11 +108,20 @@ export class DashboardElement extends ConnectedElement {
     } else if (LTRouter.Router.location.route.name === RouteName.page) {
       this.routeName = LTRouter.Router.location.route.name as RouteName;
       this.selectedPageId = LTRouter.Router.location.params.docId as string;
+      try {
+        const PageExist = await this.evees.getPerspectiveData(
+          this.selectedPageId
+        );
+      } catch (e) {
+        this.appManager.appError.clearLastVisited();
+        Router.go('/404');
+      }
     }
   }
 
   async checkLastVisited() {
     const lastVisited = GetLastVisited();
+
     if (lastVisited) {
       if (lastVisited.type === RouteName.page) {
         Router.go(GenerateDocumentRoute(lastVisited.id));
@@ -189,7 +207,9 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderNavbar() {
-    return html`<evees-login-widget showName=${true}></evees-login-widget>
+    return html`<evees-login-widget
+        @changed=${() => this.loggedUserChanged()}
+      ></evees-login-widget>
       <div class="row align-center">
         <uprtcl-button
           class="button-new-page"
@@ -219,8 +239,6 @@ export class DashboardElement extends ConnectedElement {
 
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
-
-    this.logger.log('rendering wiki after loading');
 
     return html`
       <div class="app-content-with-nav">

@@ -1,6 +1,11 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import { Secured, Perspective, Evees } from '@uprtcl/evees';
+import {
+  Secured,
+  Perspective,
+  Evees,
+  RecursiveContextMergeStrategy,
+} from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';
@@ -68,12 +73,9 @@ export class DocumentPage extends ConnectedElement {
     // Create a temporary workspaces to compute the merge
     this.eveesPull = this.evees.clone();
 
-    await this.evees.merge.mergePerspectivesExternal(
-      this.pageId,
-      this.originId,
-      this.eveesPull,
-      config
-    );
+    const merger = new RecursiveContextMergeStrategy(this.eveesPull);
+
+    await merger.mergePerspectivesExternal(this.pageId, this.originId, config);
 
     // see if the temporary workspaces has updated any perspective
     const diff = await this.eveesPull.client.diff();

@@ -26,6 +26,9 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   @internalProperty()
   selectedId: string;
 
+  @internalProperty()
+  canCreate = false;
+
   // TODO request app mananger on an ConnectedEveeElement base class...
   appManager: AppManager;
 
@@ -39,6 +42,10 @@ export class NavSectionElement extends EveesBaseElement<Section> {
 
   async firstUpdated() {
     await super.firstUpdated();
+    const privateSection = await this.appManager.elements.get(
+      '/linkedThoughts/privateSection'
+    );
+    this.canCreate = privateSection.id === this.uref;
     this.decodeUrl();
   }
 
@@ -86,15 +93,19 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       this.showPaddingDiv = true;
     }
 
-    return html`<section
-        class=${classes.join(' ')}
-        @click=${this.navigateSection}
-      >
-        ${this.data.object.title}
-        <span @click=${this.newPage} class="add-page-button"
-          >${PlusSquareIcon}</span
-        >
-      </section>
+    return html`<div class=${classes.join(' ')} @click=${this.navigateSection}>
+        <span class="section-text">${this.data.object.title}</span>
+        ${this.canCreate
+          ? html`<span @click=${this.newPage} class="add-page-button"
+              >${PlusSquareIcon}</span
+            >`
+          : html`<uprtcl-help position="bottom-right">
+              <span>
+                To add a page on the blog section, chose a private page and
+                select "share".
+              </span>
+            </uprtcl-help>`}
+      </div>
       <div class="page-list-container">
         <div class="page-list-scroller">
           <uprtcl-list id="pages-list" class="page-list">
@@ -179,13 +190,14 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           text-transform: uppercase;
           font-weight: 600;
           color: grey;
-          padding-left: 2rem;
-          padding-bottom: 0.3rem;
-          padding-top: 0.3rem;
+          padding: 0.3rem 0.3rem 0.3rem 2rem;
           display: flex;
           align-items: center;
           height: 30px;
           margin-bottom: 6px;
+        }
+        .section-text {
+          flex-grow: 1;
         }
         .add-page-button {
           margin-left: 1.5rem;

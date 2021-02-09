@@ -1,5 +1,5 @@
 import { html, css, internalProperty } from 'lit-element';
-import lodash, { pad } from 'lodash';
+import lodash from 'lodash';
 import moment from 'moment';
 import { Router } from '@vaadin/router';
 
@@ -13,15 +13,18 @@ import {
   PerspectiveDetails,
   Entity,
 } from '@uprtcl/evees';
+import { TextNode } from '@uprtcl/documents';
 
 import { ErrorBase } from '../../utils/error.base';
 import FileAddIcon from '../../assets/icons/file-add.svg';
 import DropDownIcon from '../../assets/icons/drop-down.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
-import { Section } from '../types';
 import { sharedStyles } from '../../styles';
-import { TextNode, TextType } from '@uprtcl/documents';
 import SearchIcon from '../../assets/icons/search.svg';
+import { APP_MANAGER } from '../../services/init';
+import { AppManager } from '../../services/app.manager';
+
+import { Section } from '../types';
 
 enum SortType {
   title,
@@ -68,6 +71,13 @@ export class SectionPage extends EveesBaseElement<Section> {
   @internalProperty()
   filterDropDown: boolean = false;
 
+  appManager!: AppManager;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.appManager = this.request(APP_MANAGER);
+  }
+
   async load() {
     await super.load();
 
@@ -107,15 +117,7 @@ export class SectionPage extends EveesBaseElement<Section> {
   }
 
   async newPage() {
-    const page: TextNode = {
-      text: '',
-      type: TextType.Title,
-      links: [],
-    };
-
-    await this.evees.addNewChild(page, this.uref);
-
-    await this.evees.client.flush();
+    this.appManager.newPage(this.uref);
   }
 
   sortPagesBy(sortType: SortType) {

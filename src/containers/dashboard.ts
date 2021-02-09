@@ -76,7 +76,7 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.decodeUrl();
-      // debugger;
+      
       this.checkLastVisited();
       await this.load();
     } else {
@@ -121,7 +121,7 @@ export class DashboardElement extends ConnectedElement {
 
   async checkLastVisited() {
     const lastVisited = GetLastVisited();
-    if (!lastVisited.id) return;
+
     if (lastVisited) {
       if (lastVisited.type === RouteName.page) {
         Router.go(GenerateDocumentRoute(lastVisited.id));

@@ -111,7 +111,7 @@ export default class ShareCard extends ConnectedElement {
         this.lastSharedPageId = PreviouslyForkedIn.childId;
       }
       this.disableAddButton = true;
-      // debugger;
+      
     }
 
     this.loading = false;

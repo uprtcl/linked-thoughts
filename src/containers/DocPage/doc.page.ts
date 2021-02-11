@@ -70,18 +70,11 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async checkOrigin() {
-    const config = {
-      forceOwner: true,
-    };
-
-    // Create a temporary workspaces to compute the merge
-    this.eveesPull = this.evees.clone();
-    const merger = new RecursiveContextMergeStrategy(this.eveesPull);
-    await merger.mergePerspectivesExternal(this.pageId, this.originId, config);
-
-    // see if the temporary workspaces has updated any perspective
-    const diff = await this.eveesPull.client.diff();
-    this.hasPull = diff.updates ? diff.updates.length > 0 : false;
+    this.eveesPull = await this.appManager.compareForks(
+      this.pageId,
+      this.originId
+    );
+    this.hasPull = await this.appManager.workspaceHasChanges(this.eveesPull);
   }
 
   async pull() {

@@ -36,6 +36,9 @@ export default class ShareCard extends ConnectedElement {
   @internalProperty()
   addingPage = false;
 
+  @internalProperty()
+  hasPush = false;
+
   sections: SectionData[];
 
   firstUpdated() {
@@ -69,6 +72,7 @@ export default class ShareCard extends ConnectedElement {
     // alert(this.isPagePrivate);
     this.lastSharedPageId = null;
     this.disableAddButton = false;
+    this.hasPush = false;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -116,6 +120,12 @@ export default class ShareCard extends ConnectedElement {
         this.lastSharedPageId = PreviouslyForkedIn.childId;
       }
       this.disableAddButton = true;
+
+      const workspace = await this.appManager.compareForks(
+        PreviouslyForkedIn.childId,
+        this.uref
+      );
+      this.hasPush = await this.appManager.workspaceHasChanges(workspace);
     }
 
     this.loading = false;
@@ -148,14 +158,15 @@ export default class ShareCard extends ConnectedElement {
       </div>
       ${this.isPagePrivate
         ? html`<uprtcl-button-loading
-            class="add-to-blog-button"
-            @click=${() =>
-              !this.disableAddButton ? this.shareTo(this.sections[0].id) : {}}
-            ?disabled=${this.disableAddButton}
-            ?loading=${this.addingPage}
-          >
-            ${this.disableAddButton ? html`Added` : html`Add`}
-          </uprtcl-button-loading>`
+              class="add-to-blog-button"
+              @click=${() =>
+                !this.disableAddButton ? this.shareTo(this.sections[0].id) : {}}
+              ?disabled=${this.disableAddButton}
+              ?loading=${this.addingPage}
+            >
+              ${this.disableAddButton ? html`Added` : html`Add`}
+            </uprtcl-button-loading>
+            ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`
         : html` <div class="action-copy-cont">
             <div class="url-cont">
               ${window.location.origin}${GenerateReadDocumentRoute(

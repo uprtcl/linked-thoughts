@@ -109,8 +109,8 @@ export class NavSectionElement extends EveesBaseElement<Section> {
             ></uprtcl-icon-button>`
           : html`<uprtcl-help position="bottom-right">
               <span>
-                To add a page on the blog section, chose a private page and
-                select "share".
+                To add a page on the "Blog" section, create or select a Private
+                page and then "share" it.
               </span>
             </uprtcl-help>`}
       </div>

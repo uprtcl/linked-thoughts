@@ -204,9 +204,12 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderNavbar() {
-    return html`<evees-login-widget
-        @changed=${() => this.loggedUserChanged()}
-      ></evees-login-widget>
+    return html`<div class="user-container">
+        <evees-login-widget
+          slot="icon"
+          @changed=${() => this.loggedUserChanged()}
+        ></evees-login-widget>
+      </div>
       <div class="row align-center">
         <uprtcl-button
           class="button-new-page"
@@ -291,11 +294,18 @@ export class DashboardElement extends ConnectedElement {
           background: var(--white);
           box-shadow: 1px 0px 10px rgba(0, 0, 0, 0.1);
           z-index: 1;
-          height: 100%;
-          overflow: scroll;
+          display: flex;
+          flex-direction: column;
         }
         .app-navbar::-webkit-scrollbar {
           display: none;
+        }
+        .user-container {
+          padding: 1rem;
+          flex: 0 0 auto;
+        }
+        .row {
+          flex: 0 0 auto;
         }
 
         .padding-div {
@@ -304,7 +314,8 @@ export class DashboardElement extends ConnectedElement {
         }
 
         .section-cont {
-          /* margin-left:2rem; */
+          overflow: auto;
+          flex: 1 0 auto;
         }
         .app-content {
           background: var(--background-color);

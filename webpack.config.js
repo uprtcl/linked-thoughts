@@ -6,6 +6,7 @@ module.exports = {
   output: {
     filename: 'main.[hash].bundle.js',
     path: path.resolve(__dirname, 'dist-pages'),
+    publicPath: '/',
   },
   resolve: {
     alias: {

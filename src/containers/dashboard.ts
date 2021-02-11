@@ -10,7 +10,7 @@ import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard } from './types';
+import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
@@ -97,13 +97,12 @@ export class DashboardElement extends ConnectedElement {
     // /page/pageId
     // /getting-started
 
-    if (LTRouter.Router.location.route.name === RouteName.section) {
-      this.routeName = LTRouter.Router.location.route.name as RouteName;
-      this.selectedSectionId = LTRouter.Router.location.params
-        .sectionId as string;
-    } else if (LTRouter.Router.location.route.name === RouteName.page) {
-      this.routeName = LTRouter.Router.location.route.name as RouteName;
-      this.selectedPageId = LTRouter.Router.location.params.docId as string;
+    this.routeName = LTRouter.Router.location.route.name as RouteName;
+    const routeParams = LTRouter.Router.location.params as any;
+    if (this.routeName === RouteName.section) {
+      this.selectedSectionId = routeParams.sectionId;
+    } else if (this.routeName === RouteName.page) {
+      this.selectedPageId = routeParams.docId;
       try {
         const PageExist = await this.evees.getPerspectiveData(
           this.selectedPageId
@@ -111,6 +110,18 @@ export class DashboardElement extends ConnectedElement {
       } catch (e) {
         this.appManager.appError.clearLastVisited();
         Router.go('/404');
+      }
+    } else if (this.routeName === RouteName.dashboard) {
+      // go to the first private page if nothing is selected.
+      const privateSection = await this.appManager.elements.get(
+        '/linkedThoughts/privateSection'
+      );
+      const privateSectionData = await this.evees.getPerspectiveData<Section>(
+        privateSection.id
+      );
+
+      if (privateSectionData && privateSectionData.object.pages.length > 0) {
+        Router.go(GenerateDocumentRoute(privateSectionData.object.pages[0]));
       }
     }
   }
@@ -195,12 +206,7 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderHome() {
-    return html`<div class="home-title">Now seeing</div>
-      <uprtcl-card>
-        <evees-perspective-icon
-          perspective-id=${this.dashboardPerspective.id}
-        ></evees-perspective-icon>
-      </uprtcl-card>`;
+    return html``;
   }
 
   renderNavbar() {

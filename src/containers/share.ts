@@ -29,8 +29,16 @@ export default class ShareCard extends ConnectedElement {
 
   @internalProperty()
   disableAddButton: boolean = false;
+
   @internalProperty()
   lastSharedPageId: string = null;
+
+  @internalProperty()
+  addingPage = false;
+
+  @internalProperty()
+  hasPush = false;
+
   sections: SectionData[];
 
   firstUpdated() {
@@ -64,6 +72,7 @@ export default class ShareCard extends ConnectedElement {
     // alert(this.isPagePrivate);
     this.lastSharedPageId = null;
     this.disableAddButton = false;
+    this.hasPush = false;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -111,16 +120,23 @@ export default class ShareCard extends ConnectedElement {
         this.lastSharedPageId = PreviouslyForkedIn.childId;
       }
       this.disableAddButton = true;
-      
+
+      const workspace = await this.appManager.compareForks(
+        PreviouslyForkedIn.childId,
+        this.uref
+      );
+      this.hasPush = await this.appManager.workspaceHasChanges(workspace);
     }
 
     this.loading = false;
   }
 
   async shareTo(toSectionId: string) {
+    this.addingPage = true;
     const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
     this.lastSharedPageId = sharedURI;
     this.disableAddButton = true;
+    this.addingPage = false;
   }
 
   render() {
@@ -135,31 +151,22 @@ export default class ShareCard extends ConnectedElement {
         <div class="row">
           <div class="description">
             ${this.isPagePrivate
-              ? html`Sharinng is done by adding a copy of this block somewhere
-                else.`
-              : html`Anyone with this link can view/comment on this.`}
+              ? html`Share this page by forking it in your Blog section`
+              : html`Anyone with this link can view this page.`}
           </div>
         </div>
-
-        <!-- <div class="row section-row">
-          ${this.sections.map((section) => {
-          return html`<div class="add-cont">
-            <div>${section.data.object.title}:</div>
-            <uprtcl-button @click=${() => this.shareTo(section.id)}
-              >Add</uprtcl-button
-            >
-          </div>`;
-        })}
-        </div> -->
       </div>
       ${this.isPagePrivate
-        ? html`<div
-            @click=${() => this.shareTo(this.sections[0].id)}
-            class="add-to-blog-button"
-            ?disabled=${this.disableAddButton}
-          >
-            ${this.disableAddButton ? html`Added` : html`Add`}
-          </div>`
+        ? html`<uprtcl-button-loading
+              class="add-to-blog-button"
+              @click=${() =>
+                !this.disableAddButton ? this.shareTo(this.sections[0].id) : {}}
+              ?disabled=${this.disableAddButton}
+              ?loading=${this.addingPage}
+            >
+              ${this.disableAddButton ? html`Added` : html`Add`}
+            </uprtcl-button-loading>
+            ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`
         : html` <div class="action-copy-cont">
             <div class="url-cont">
               ${window.location.origin}${GenerateReadDocumentRoute(
@@ -215,25 +222,10 @@ export default class ShareCard extends ConnectedElement {
           align-items: center;
         }
         .add-to-blog-button {
-          display: inline-flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          padding: 0.5rem 1rem;
-          color: var(--white, #fff);
-          background: #4260f6;
-          box-shadow: 0px 6px 2px -4px rgba(14, 14, 44, 0.1),
-            inset 0px -1px 0px rgba(14, 14, 44, 0.4);
-          border-radius: 8px;
-          margin-top: 0.5rem;
-          margin-left: 1rem;
-          margin-bottom: 1rem;
+          width: 120px;
+          margin: 1rem;
         }
 
-        .add-to-blog-button[disabled] {
-          pointer-events: none;
-          opacity: 0.7;
-        }
         .action-copy-cont {
           margin: 1rem;
           display: flex;

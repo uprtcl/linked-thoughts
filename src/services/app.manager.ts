@@ -1,5 +1,11 @@
 import { TextNode, TextType } from '@uprtcl/documents';
-import { AppElement, AppElements, Evees, ParentAndChild } from '@uprtcl/evees';
+import {
+  AppElement,
+  AppElements,
+  Evees,
+  ParentAndChild,
+  RecursiveContextMergeStrategy,
+} from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard } from '../containers/types';
@@ -31,15 +37,16 @@ export class AppManager {
     );
   }
 
-  async newPage(onSectionId: string) {
+  async newPage(onSectionId: string): Promise<string> {
     const page: TextNode = {
       text: '',
       type: TextType.Title,
       links: [],
     };
-    await this.evees.addNewChild(page, onSectionId);
-
+    const childId = await this.evees.addNewChild(page, onSectionId);
     await this.evees.client.flush();
+
+    return childId;
   }
 
   /**  */
@@ -67,5 +74,25 @@ export class AppManager {
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
     const locations = await this.evees.client.searchEngine.locate(pageId, true);
     return locations;
+  }
+
+  /** returns an Evees service with its state modified with the effect of the merge */
+  async compareForks(to: string, from: string): Promise<Evees> {
+    const config = {
+      forceOwner: true,
+    };
+
+    // Create a temporary workspaces to compute the merge
+    const evees = this.evees.clone();
+    const merger = new RecursiveContextMergeStrategy(evees);
+    await merger.mergePerspectivesExternal(to, from, config);
+
+    return evees;
+  }
+
+  async workspaceHasChanges(evees: Evees) {
+    // see if the temporary workspaces has updated any perspective
+    const diff = await evees.client.diff();
+    return diff.updates ? diff.updates.length > 0 : false;
   }
 }

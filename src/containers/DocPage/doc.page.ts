@@ -70,18 +70,11 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async checkOrigin() {
-    const config = {
-      forceOwner: true,
-    };
-
-    // Create a temporary workspaces to compute the merge
-    this.eveesPull = this.evees.clone();
-    const merger = new RecursiveContextMergeStrategy(this.eveesPull);
-    await merger.mergePerspectivesExternal(this.pageId, this.originId, config);
-
-    // see if the temporary workspaces has updated any perspective
-    const diff = await this.eveesPull.client.diff();
-    this.hasPull = diff.updates ? diff.updates.length > 0 : false;
+    this.eveesPull = await this.appManager.compareForks(
+      this.pageId,
+      this.originId
+    );
+    this.hasPull = await this.appManager.workspaceHasChanges(this.eveesPull);
   }
 
   async pull() {
@@ -93,7 +86,7 @@ export class DocumentPage extends ConnectedElement {
   renderTopNav() {
     return html`<div class="app-action-bar">
       <uprtcl-popper>
-        <div slot="icon">Share</div>
+        <uprtcl-button slot="icon" skinny secondary>Share</uprtcl-button>
         <share-card
           uref=${this.pageId}
           from=${this.privateSectionPerspective.id}
@@ -113,7 +106,6 @@ export class DocumentPage extends ConnectedElement {
             >Pull</uprtcl-button
           >`
         : ``}
-      <div>${MoreHorizontalIcon}</div>
     </div>`;
   }
 
@@ -144,7 +136,7 @@ export class DocumentPage extends ConnectedElement {
           display: flex;
           flex-direction: column;
           max-height: 100vh;
-          overflow: scroll;
+          overflow-y: auto;
           -ms-overflow-style: none; /* IE and Edge */
           scrollbar-width: none; /* Firefox */
           padding-bottom: 30vmin;

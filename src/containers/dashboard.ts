@@ -10,13 +10,9 @@ import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard } from './types';
+import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
-import {
-  DeleteLastVisited,
-  GetLastVisited,
-  SetLastVisited,
-} from '../utils/localStorage';
+import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
 import {
   GenerateDocumentRoute,
@@ -76,7 +72,7 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.decodeUrl();
-      
+
       this.checkLastVisited();
       await this.load();
     } else {
@@ -101,13 +97,12 @@ export class DashboardElement extends ConnectedElement {
     // /page/pageId
     // /getting-started
 
-    if (LTRouter.Router.location.route.name === RouteName.section) {
-      this.routeName = LTRouter.Router.location.route.name as RouteName;
-      this.selectedSectionId = LTRouter.Router.location.params
-        .sectionId as string;
-    } else if (LTRouter.Router.location.route.name === RouteName.page) {
-      this.routeName = LTRouter.Router.location.route.name as RouteName;
-      this.selectedPageId = LTRouter.Router.location.params.docId as string;
+    this.routeName = LTRouter.Router.location.route.name as RouteName;
+    const routeParams = LTRouter.Router.location.params as any;
+    if (this.routeName === RouteName.section) {
+      this.selectedSectionId = routeParams.sectionId;
+    } else if (this.routeName === RouteName.page) {
+      this.selectedPageId = routeParams.docId;
       try {
         const PageExist = await this.evees.getPerspectiveData(
           this.selectedPageId
@@ -115,6 +110,18 @@ export class DashboardElement extends ConnectedElement {
       } catch (e) {
         this.appManager.appError.clearLastVisited();
         Router.go('/404');
+      }
+    } else if (this.routeName === RouteName.dashboard) {
+      // go to the first private page if nothing is selected.
+      const privateSection = await this.appManager.elements.get(
+        '/linkedThoughts/privateSection'
+      );
+      const privateSectionData = await this.evees.getPerspectiveData<Section>(
+        privateSection.id
+      );
+
+      if (privateSectionData && privateSectionData.object.pages.length > 0) {
+        Router.go(GenerateDocumentRoute(privateSectionData.object.pages[0]));
       }
     }
   }
@@ -161,9 +168,10 @@ export class DashboardElement extends ConnectedElement {
   }
 
   async newPage(onSection: number = 0) {
-    await this.appManager.newPage(
+    const pageId = await this.appManager.newPage(
       this.dashboardData.object.sections[onSection]
     );
+    Router.go(GenerateDocumentRoute(pageId));
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -184,32 +192,30 @@ export class DashboardElement extends ConnectedElement {
         >
           ${LockIcon} Private
         </div>
-        <div
+        <!-- <div
           @click=${() => {
-            this.showNewPageDialog = false;
-            this.newPage(1);
-          }}
+          this.showNewPageDialog = false;
+          this.newPage(1);
+        }}
           class="clickable"
         >
           ${GlobeIcon} Blog
-        </div>
+        </div> -->
       </div>
     </uprtcl-dialog>`;
   }
 
   renderHome() {
-    return html`<div class="home-title">Now seeing</div>
-      <uprtcl-card>
-        <evees-perspective-icon
-          perspective-id=${this.dashboardPerspective.id}
-        ></evees-perspective-icon>
-      </uprtcl-card>`;
+    return html``;
   }
 
   renderNavbar() {
-    return html`<evees-login-widget
-        @changed=${() => this.loggedUserChanged()}
-      ></evees-login-widget>
+    return html`<div class="user-container">
+        <evees-login-widget
+          slot="icon"
+          @changed=${() => this.loggedUserChanged()}
+        ></evees-login-widget>
+      </div>
       <div class="row align-center">
         <uprtcl-button
           class="button-new-page"
@@ -270,6 +276,7 @@ export class DashboardElement extends ConnectedElement {
           display: flex;
           flex: 1 1 0;
           flex-direction: column;
+          justify-content: center;
         }
         .row {
           display: flex;
@@ -293,11 +300,18 @@ export class DashboardElement extends ConnectedElement {
           background: var(--white);
           box-shadow: 1px 0px 10px rgba(0, 0, 0, 0.1);
           z-index: 1;
-          height: 100%;
-          overflow: scroll;
+          display: flex;
+          flex-direction: column;
         }
         .app-navbar::-webkit-scrollbar {
           display: none;
+        }
+        .user-container {
+          padding: 1rem;
+          flex: 0 0 auto;
+        }
+        .row {
+          flex: 0 0 auto;
         }
 
         .padding-div {
@@ -306,7 +320,8 @@ export class DashboardElement extends ConnectedElement {
         }
 
         .section-cont {
-          /* margin-left:2rem; */
+          overflow: auto;
+          flex: 1 0 auto;
         }
         .app-content {
           background: var(--background-color);

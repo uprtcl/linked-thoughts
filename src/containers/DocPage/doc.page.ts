@@ -136,7 +136,7 @@ export class DocumentPage extends ConnectedElement {
           display: flex;
           flex-direction: column;
           max-height: 100vh;
-          overflow: scroll;
+          overflow-y: auto;
           -ms-overflow-style: none; /* IE and Edge */
           scrollbar-width: none; /* Firefox */
           padding-bottom: 30vmin;

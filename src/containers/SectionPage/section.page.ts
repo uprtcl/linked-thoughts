@@ -291,7 +291,8 @@ export class SectionPage extends EveesBaseElement<Section> {
               <tr>
                 <td
                   class="clickable"
-                  @click=${() => this.navigateToDoc(pageData.data.id)}
+                  @click=${() =>
+                    this.navigateToDoc(pageData.meta.perspective.id)}
                 >
                   ${pageData.data.object.text
                     ? html`<b>${pageData.data.object.text}</b>`

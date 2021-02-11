@@ -12,15 +12,10 @@ import { GettingStarted } from '../constants/routeNames';
 
 import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-import {
-  DeleteLastVisited,
-  GetLastVisited,
-  SetLastVisited,
-} from '../utils/localStorage';
+import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
 import {
   GenerateDocumentRoute,
-  GenerateReadDocumentRoute,
   GenerateSectionRoute,
   RouteName,
 } from '../utils/routes.helpers';
@@ -272,6 +267,7 @@ export class DashboardElement extends ConnectedElement {
           display: flex;
           flex: 1 1 0;
           flex-direction: column;
+          justify-content: center;
         }
         .row {
           display: flex;

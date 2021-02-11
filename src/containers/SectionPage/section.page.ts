@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import moment from 'moment';
 import { Router } from '@vaadin/router';
 
-import { styles } from '@uprtcl/common-ui';
+import { MenuConfig, styles } from '@uprtcl/common-ui';
 import {
   Secured,
   Commit,
@@ -71,6 +71,9 @@ export class SectionPage extends EveesBaseElement<Section> {
   @internalProperty()
   filterDropDown: boolean = false;
 
+  @internalProperty()
+  canCreate = false;
+
   appManager!: AppManager;
 
   connectedCallback() {
@@ -80,6 +83,11 @@ export class SectionPage extends EveesBaseElement<Section> {
 
   async load() {
     await super.load();
+
+    const privateSection = await this.appManager.elements.get(
+      '/linkedThoughts/privateSection'
+    );
+    this.canCreate = privateSection.id === this.uref;
 
     this.pageList = await Promise.all(
       this.data.object.pages.map(async (pageId) => {
@@ -189,6 +197,20 @@ export class SectionPage extends EveesBaseElement<Section> {
     });
   }
 
+  sortBasedOn(e) {
+    switch (e.detail.key) {
+      case 'dataCreated':
+        this.sortPagesBy(SortType.dateCreated);
+        break;
+      case 'lastUpdated':
+        this.sortPagesBy(SortType.dataUpdated);
+        break;
+      case 'title':
+        this.sortPagesBy(SortType.title);
+        break;
+    }
+  }
+
   handleSearch(e) {
     this.searchQuery = e.target.value;
     this.searchFilter();
@@ -216,41 +238,34 @@ export class SectionPage extends EveesBaseElement<Section> {
     `;
   }
   renderListActionsHeader() {
+    const sortMenuConfig: MenuConfig = {
+      dateCreated: {
+        text: 'Date Created',
+      },
+      lastUpdated: {
+        text: 'Last Updated',
+      },
+      title: {
+        text: 'Title',
+      },
+    };
     return html`
       <div class="list-actions-cont">
         <div class="list-actions-heading">${this.title} Pages</div>
-        <div class="action-new-page clickable" @click=${this.newPage}>
-          ${FileAddIcon} New Page
-        </div>
+        ${this.canCreate
+          ? html`<uprtcl-button skinny @click=${() => this.newPage()}>
+              New Page
+            </uprtcl-button>`
+          : ''}
         <div>
-          ${this.filterDropDown
-            ? html`<div class="filter-drop-down">
-                <div
-                  class="filter-drop-down-item clickable"
-                  @click=${() => this.sortPagesBy(SortType.dateCreated)}
-                >
-                  Date Created
-                </div>
-                <div
-                  class="filter-drop-down-item clickable"
-                  @click=${() => this.sortPagesBy(SortType.dataUpdated)}
-                >
-                  Last Updated
-                </div>
-                <div
-                  class="filter-drop-down-item clickable"
-                  @click=${() => this.sortPagesBy(SortType.title)}
-                >
-                  Title
-                </div>
-              </div>`
-            : null}
-          <span
-            @click=${() => {
-              this.filterDropDown = !this.filterDropDown;
-            }}
-            >${DropDownIcon}</span
+          <uprtcl-options-menu
+            icon="orderby"
+            @option-click=${this.sortBasedOn}
+            .config=${sortMenuConfig}
+            skinny
+            secondary
           >
+          </uprtcl-options-menu>
         </div>
       </div>
     `;
@@ -360,6 +375,7 @@ export class SectionPage extends EveesBaseElement<Section> {
           padding: 0.5rem 1.2rem;
           border: 2px solid grey;
           border-radius: 5px;
+          border-width: 1.1px;
           display: flex;
         }
         .search-field {

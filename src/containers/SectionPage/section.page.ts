@@ -117,7 +117,8 @@ export class SectionPage extends EveesBaseElement<Section> {
   }
 
   async newPage() {
-    this.appManager.newPage(this.uref);
+    const pageId = await this.appManager.newPage(this.uref);
+    Router.go(GenerateDocumentRoute(pageId));
   }
 
   sortPagesBy(sortType: SortType) {

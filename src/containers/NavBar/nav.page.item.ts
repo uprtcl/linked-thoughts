@@ -83,10 +83,11 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
             @option-click=${this.optionOnPage}
             .config=${menuConfig}
             skinny
+            secondary
           >
           </uprtcl-options-menu>
         </span>
-        
+
         ${this.draggingOver
           ? html`<div class="title-dragging-over"></div>`
           : ''}

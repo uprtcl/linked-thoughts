@@ -20,6 +20,7 @@ import {
 import CloseIcon from '../assets/icons/x.svg';
 import {
   GenerateDocumentRoute,
+  GenerateReadDocumentRoute,
   GenerateSectionRoute,
   RouteName,
 } from '../utils/routes.helpers';
@@ -76,7 +77,7 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.decodeUrl();
-      
+
       this.checkLastVisited();
       await this.load();
     } else {
@@ -161,9 +162,10 @@ export class DashboardElement extends ConnectedElement {
   }
 
   async newPage(onSection: number = 0) {
-    await this.appManager.newPage(
+    const pageId = await this.appManager.newPage(
       this.dashboardData.object.sections[onSection]
     );
+    Router.go(GenerateDocumentRoute(pageId));
   }
 
   renderNewPageDialog(showOptions = true) {
@@ -184,15 +186,15 @@ export class DashboardElement extends ConnectedElement {
         >
           ${LockIcon} Private
         </div>
-        <div
+        <!-- <div
           @click=${() => {
-            this.showNewPageDialog = false;
-            this.newPage(1);
-          }}
+          this.showNewPageDialog = false;
+          this.newPage(1);
+        }}
           class="clickable"
         >
           ${GlobeIcon} Blog
-        </div>
+        </div> -->
       </div>
     </uprtcl-dialog>`;
   }

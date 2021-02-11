@@ -6,15 +6,17 @@ import { Router } from '@vaadin/router';
 
 import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
-import { GenerateSectionRoute } from '../../utils/routes.helpers';
+import {
+  GenerateDocumentRoute,
+  GenerateSectionRoute,
+} from '../../utils/routes.helpers';
 
-import PlusSquareIcon from '../../assets/icons/plus-square.svg';
 import { APP_MANAGER } from '../../services/init';
 import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 
-const sectionHeight = 30;
+const sectionHeight = 150;
 
 export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -55,8 +57,10 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     } else if (LTRouter.Router.location.params.sectionId)
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
-  async newPage() {
-    await this.appManager.newPage(this.uref);
+  async newPage(e: Event) {
+    e.stopPropagation();
+    const pageId = await this.appManager.newPage(this.uref);
+    Router.go(GenerateDocumentRoute(pageId));
   }
 
   navigateSection() {
@@ -88,7 +92,8 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     /** same as value */
     let overlayClass = [];
 
-    if (this.data.object.pages.length > 10) {
+    // WARNING the number of pages most be related to the scroll height
+    if (this.data.object.pages.length >= Math.floor(sectionHeight / 30)) {
       overlayClass.push('list-overlay');
       this.showPaddingDiv = true;
     }
@@ -96,9 +101,12 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     return html`<div class=${classes.join(' ')} @click=${this.navigateSection}>
         <span class="section-text">${this.data.object.title}</span>
         ${this.canCreate
-          ? html`<span @click=${this.newPage} class="add-page-button"
-              >${PlusSquareIcon}</span
-            >`
+          ? html`<uprtcl-icon-button
+              skinny
+              secondary
+              @click=${(e) => this.newPage(e)}
+              icon="add_box"
+            ></uprtcl-icon-button>`
           : html`<uprtcl-help position="bottom-right">
               <span>
                 To add a page on the blog section, chose a private page and
@@ -141,13 +149,13 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           position: relative;
           /* SAME AS scroller and condition for overlay in the render function!!! */
           max-height: ${css`
-            ${sectionHeight}vh
+            ${sectionHeight}px
           `};
           overflow: hidden;
         }
         .page-list-scroller {
           max-height: ${css`
-            ${sectionHeight}vh
+            ${sectionHeight}px
           `};
           overflow-y: auto;
         }
@@ -166,9 +174,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           );
         }
         .padding-div {
-          height: ${css`
-            ${sectionHeight / 4}vh
-          `};
+          height: 30px;
         }
         .page-list-scroller::-webkit-scrollbar {
           width: 0px;
@@ -190,7 +196,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           text-transform: uppercase;
           font-weight: 600;
           color: grey;
-          padding: 0.3rem 0.3rem 0.3rem 2rem;
+          padding: 0.3rem 0.2rem 0.3rem 2rem;
           display: flex;
           align-items: center;
           height: 30px;

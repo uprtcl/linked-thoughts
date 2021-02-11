@@ -93,7 +93,7 @@ export class DocumentPage extends ConnectedElement {
   renderTopNav() {
     return html`<div class="app-action-bar">
       <uprtcl-popper>
-        <div slot="icon">Share</div>
+        <uprtcl-button slot="icon" skinny secondary>Share</uprtcl-button>
         <share-card
           uref=${this.pageId}
           from=${this.privateSectionPerspective.id}
@@ -113,7 +113,6 @@ export class DocumentPage extends ConnectedElement {
             >Pull</uprtcl-button
           >`
         : ``}
-      <div>${MoreHorizontalIcon}</div>
     </div>`;
   }
 

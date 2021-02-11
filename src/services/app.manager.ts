@@ -31,15 +31,16 @@ export class AppManager {
     );
   }
 
-  async newPage(onSectionId: string) {
+  async newPage(onSectionId: string): Promise<string> {
     const page: TextNode = {
       text: '',
       type: TextType.Title,
       links: [],
     };
-    await this.evees.addNewChild(page, onSectionId);
-
+    const childId = await this.evees.addNewChild(page, onSectionId);
     await this.evees.client.flush();
+
+    return childId;
   }
 
   /**  */

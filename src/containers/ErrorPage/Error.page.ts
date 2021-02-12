@@ -5,7 +5,7 @@ import { Router } from '@vaadin/router';
 
 import { styles } from '@uprtcl/common-ui';
 import { EveesBaseElement } from '@uprtcl/evees';
-import  Image404 from '../../assets/404.png';
+import Image404 from '../../assets/404.png';
 import { sharedStyles } from '../../styles';
 
 export class ErrorPage extends EveesBaseElement {
@@ -17,7 +17,7 @@ export class ErrorPage extends EveesBaseElement {
           THE PAGE YOU ARE LOOKING FOR DOES NOT EXIST :'(
         </div>
         <br />
-        <a href="http://localhost:8002/">Go back to Home</a>
+        <a href=${window.location.origin}>Go back to Home</a>
         <img class="banner" src=${Image404} />
       </div>
     `;

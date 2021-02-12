@@ -9,6 +9,12 @@ import { SectionPage } from './containers/SectionPage/section.page';
 import { VisitorElement } from './containers/visitor';
 import { DocumentPage } from './containers/DocPage/doc.page';
 import { ErrorPage } from './containers/ErrorPage';
+
+// 3rd Party Components
+import '@ui5/webcomponents/dist/Carousel';
+
+//
+
 (async function () {
   await initUprtcl();
 

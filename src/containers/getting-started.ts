@@ -178,6 +178,7 @@ export class GettingStartedElement extends ConnectedElement {
           display: flex;
           flex: 1 1 0;
           color: #262641;
+          font-family: 'Inter', sans-serif;
         }
 
         h1 {
@@ -214,7 +215,7 @@ export class GettingStartedElement extends ConnectedElement {
         }
 
         .loginButton[disabled] {
-          opacity: 0.5;
+          opacity: 0.6;
           cursor: not-allowed;
         }
         .root {

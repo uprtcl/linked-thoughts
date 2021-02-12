@@ -15,6 +15,7 @@ import Home1Background from '../assets/illustrations/home-1.svg';
 import IntercreativityLogo from '../assets/intercreativity.svg';
 import GoogleIcon from '../assets/icons/google.svg';
 import FBIcon from '../assets/icons/facebook.svg';
+import MMIcon from '../assets/icons/metamask.svg';
 export class GettingStartedElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
@@ -63,22 +64,22 @@ export class GettingStartedElement extends ConnectedElement {
           <div class="login-card">
             <h1>Log In</h1>
             <div
-              class="loginButton"
+              class="login-button"
               @click=${() => this.login(AUTH0_CONNECTION)}
             >
-              Continue with Web2 ( ${GoogleIcon} | ${FBIcon} )
+              Social/Password ${GoogleIcon} | ${FBIcon}
             </div>
             <div
-              class="loginButton"
+              class="login-button"
               ?disabled=${!this.hasWeb3}
               @click=${() => this.login(ETH_ACCOUNT_CONNECTION)}
             >
-              Continue with Web3(Metamask)
+              Ethereum ${MMIcon}
             </div>
 
             ${!this.hasWeb3
               ? html`<a target="_blank" href="https://metamask.io/"
-                  >Rabbit Hole</a
+                  >What's this</a
                 >`
               : ''}
           </div>
@@ -115,7 +116,7 @@ export class GettingStartedElement extends ConnectedElement {
         a {
           color: #da3e52;
         }
-        .loginButton {
+        .login-button {
           display: flex;
           flex-direction: row;
           justify-content: center;
@@ -134,11 +135,16 @@ export class GettingStartedElement extends ConnectedElement {
           margin-bottom: 0.7rem;
         }
 
-        .loginButton > svg {
+        .login-button > svg {
           height: 1.1rem;
+          margin: 0px 6px;
         }
 
-        .loginButton[disabled] {
+        .login-button:hover {
+          background: #f3f3f3;
+        }
+
+        .login-button[disabled] {
           border: 2px solid #efeffd;
           color: #5c5c77;
           cursor: not-allowed;

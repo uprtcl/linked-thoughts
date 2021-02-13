@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.11.0",
+    "@ui5/webcomponents": "^1.0.0-rc.11",
     "@uprtcl/common-ui": "0.2.0",
     "@uprtcl/documents": "0.2.0",
     "@uprtcl/ethereum-provider": "0.2.0",

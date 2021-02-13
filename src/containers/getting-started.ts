@@ -231,7 +231,7 @@ export class GettingStartedElement extends ConnectedElement {
                 <img src="src/assets/icons/twitter.png"
               /></a>
             </div>
-            <div class="social-icon">
+            <div class="social-icon discord">
               <a target="_blank" href="https://discord.gg/QRt6WdyGNx">
                 <img src="src/assets/icons/discord.png"
               /></a>
@@ -326,6 +326,7 @@ export class GettingStartedElement extends ConnectedElement {
         .carousel-container {
           width: 50%;
           float: left;
+          overflow: hidden;
         }
         .footer {
           height: 10vh;
@@ -458,6 +459,7 @@ export class GettingStartedElement extends ConnectedElement {
         }
         .footer .left img {
           margin-left: 0.75rem;
+          height: 28px;
         }
         .footer .left .uprtcl-link {
           display: flex;
@@ -468,10 +470,14 @@ export class GettingStartedElement extends ConnectedElement {
           flex: 0 0 auto;
           display: flex;
         }
+        .footer .right .social-icon.discord {
+          height: 24px;
+        }
         .footer .right .social-icon {
           padding: 0 2vw;
           height: 20px;
         }
+
         .footer .right .social-icon img {
           height: 100%;
         }

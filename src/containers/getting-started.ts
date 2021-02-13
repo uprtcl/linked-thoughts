@@ -326,6 +326,7 @@ export class GettingStartedElement extends ConnectedElement {
         .carousel-container {
           width: 50%;
           float: left;
+          overflow: hidden;
         }
         .footer {
           height: 10vh;

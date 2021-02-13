@@ -123,7 +123,7 @@ export class GettingStartedElement extends ConnectedElement {
                 ?disabled=${!this.hasWeb3}
                 @click=${() => this.login(ETH_ACCOUNT_CONNECTION)}
               >
-                Continue with Etherum (${MetamaskIcon})
+                Continue with Ethereum (${MetamaskIcon})
               </div>
 
               ${!this.hasWeb3
@@ -190,9 +190,9 @@ export class GettingStartedElement extends ConnectedElement {
                 <div class="content">
                   <h2>Explore A Decentralized World</h2>
                   <h3 class="description">
-                    Use familiar web-hosting or dive into emerging decentralized
-                    technologies to publish and govern your content and that of
-                    your community onchain.
+                    Use a familiar web-hosting service or dive into emerging
+                    decentralized technologies to publish and govern your
+                    content and that of your community, onchain.
                   </h3>
                 </div>
               </div>
@@ -202,12 +202,8 @@ export class GettingStartedElement extends ConnectedElement {
                 <div class="content">
                   <h2>Open your Mind</h2>
                   <h3 class="description">
-                    Connect your content with that of others. Track its origin.
-                    Remix it. Branch and evolve it. Make proposals.
-                    <br />
-                    <br />
-                    Embrace the information chaos we now live in, and learn how
-                    to make sense of it.
+                    Combine and remix your content with that of others. Fork and
+                    evolve. Propose and merge.
                   </h3>
                 </div>
               </div>
@@ -282,6 +278,7 @@ export class GettingStartedElement extends ConnectedElement {
           max-width: 400px;
           cursor: pointer;
           margin-bottom: 0.7rem;
+          user-select: none;
         }
 
         .login-button > svg {

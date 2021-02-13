@@ -123,7 +123,7 @@ export class GettingStartedElement extends ConnectedElement {
                 ?disabled=${!this.hasWeb3}
                 @click=${() => this.login(ETH_ACCOUNT_CONNECTION)}
               >
-                Continue with Etherum (${MetamaskIcon})
+                Continue with Ethereum (${MetamaskIcon})
               </div>
 
               ${!this.hasWeb3
@@ -282,6 +282,7 @@ export class GettingStartedElement extends ConnectedElement {
           max-width: 400px;
           cursor: pointer;
           margin-bottom: 0.7rem;
+          user-select: none;
         }
 
         .login-button > svg {

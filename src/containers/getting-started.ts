@@ -63,7 +63,7 @@ export class GettingStartedElement extends ConnectedElement {
     this.carouselSelectedIndexIntervel = setInterval(() => {
       self.carouselSelectedIndex =
         (self.carouselSelectedIndex + 1) % self.carouselLength;
-    }, 5000);
+    }, 10000);
   }
   carouselDetachTimer() {
     clearInterval(this.carouselSelectedIndexIntervel);
@@ -85,7 +85,7 @@ export class GettingStartedElement extends ConnectedElement {
       this.carouselSelectedIndex =
         (this.carouselSelectedIndex + 1) % this.carouselLength;
     }
-    this.carouselResetTimer();
+    this.carouselDetachTimer();
   }
 
   disconnectedCallback() {
@@ -111,7 +111,7 @@ export class GettingStartedElement extends ConnectedElement {
           ${IntercreativityLogo}
 
           <div class="login-card">
-            <h1>Log In</h1>
+            <div class="heading">Log In</div>
             <div
               class="login-button"
               @click=${() => this.login(AUTH0_CONNECTION)}
@@ -151,18 +151,19 @@ export class GettingStartedElement extends ConnectedElement {
           </div>
           <ui5-carousel
             class="carousel-cont"
-            cyclic="true"
+            cyclic="false"
             selected-index=${this.carouselSelectedIndex}
             hide-navigation
+            @click=${() => this.carouselNavigation('next')}
           >
             <div class="carousel-item">
               <div class="bkg-illustration right top">${Home1Background}</div>
               <div class="content">
-                <h2>Smash the Walls</h2>
+                <h2>Borderless Creation</h2>
                 <h3 class="description">
-                  Create and share your ideas the way you want, on an open
-                  ecosystem of linked and cross-referenced content made of
-                  different platforms, rules, and content types.
+                  Create and share your ideas the way <i>you</i> want, on an
+                  open ecosystem of multiple applications, platforms, rules, and
+                  types of content.
                 </h3>
               </div>
             </div>
@@ -174,9 +175,8 @@ export class GettingStartedElement extends ConnectedElement {
               <div class="content">
                 <h2>Connect with Others</h2>
                 <h3 class="description">
-                  Build your personal "graph" of ideas. Flexibly decide which
-                  portion you want to share, discover other's work, and connect
-                  it with yours.
+                  Build your personal "graph" of ideas. Decide what your want to
+                  share. Discover other's work, and connect it with yours.
                 </h3>
               </div>
             </div>
@@ -188,9 +188,9 @@ export class GettingStartedElement extends ConnectedElement {
               <div class="content">
                 <h2>Explore A Decentralized World</h2>
                 <h3 class="description">
-                  Use familiar web-hosting services or leverage emerging
-                  decentralized technologies to govern and free your ideas and
-                  those of your community.
+                  Use familiar web-hosting or dive into emerging decentralized
+                  technologies to publish and govern your content and that of
+                  your community onchain.
                 </h3>
               </div>
             </div>
@@ -203,8 +203,9 @@ export class GettingStartedElement extends ConnectedElement {
                   Connect your content with that of others. Track its origin.
                   Remix it. Branch and evolve it. Make proposals.
                   <br />
-                  Embrace the information chaos we now live in, and learn, with
-                  us, how to make sense of it. risus.
+                  <br />
+                  Embrace the information chaos we now live in, and learn how to
+                  make sense of it.
                 </h3>
               </div>
             </div>
@@ -262,6 +263,11 @@ export class GettingStartedElement extends ConnectedElement {
           opacity: 0.6;
           cursor: not-allowed;
         }
+
+        .login-button:hover {
+          background-color: #efeffd;
+        }
+
         .root {
           flex-direction: row;
           justify-content: center;
@@ -287,7 +293,7 @@ export class GettingStartedElement extends ConnectedElement {
           top: 10%;
         }
         .right {
-          right: 0;
+          right: 10px;
         }
         .left {
           left: 0;
@@ -309,16 +315,31 @@ export class GettingStartedElement extends ConnectedElement {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+          max-width: 550px;
+          max-height: 500px;
+        }
+        .login-card .heading {
+          font-weight: bold;
+          font-size: 40px;
+          line-height: 140%;
+          color: #262641;
+          margin-bottom: 2rem;
         }
         .content {
           text-align: center;
           width: 70%;
           font-weight: 700;
           width: 100%;
+          max-width: 600px;
+        }
+        .content h2 {
+          margin-bottom: 2.5rem;
         }
         .description {
           color: #5c5c77;
           font-weight: 500;
+          font-size: 20px;
+          line-height: 176%;
         }
         .login-cont {
           background-image: url('src/assets/trees.png');
@@ -334,6 +355,11 @@ export class GettingStartedElement extends ConnectedElement {
           align-items: center;
           padding: 0 20%;
           background: var(--white, #fff);
+          width: 100%;
+        }
+        ui5-carousel::shadow .ui5-carousel-item {
+          padding: 0 0rem !important;
+          background-color: red;
         }
         .carousel-action {
           position: absolute;

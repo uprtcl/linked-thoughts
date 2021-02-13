@@ -40,6 +40,8 @@ export class GettingStartedElement extends ConnectedElement {
 
   remote: EveesHttp;
 
+  carouselLength = 4;
+
   async firstUpdated() {
     this.hasWeb3 = window['ethereum'] !== undefined;
     this.remote = this.evees.getRemote() as EveesHttp;
@@ -48,19 +50,46 @@ export class GettingStartedElement extends ConnectedElement {
     if (this.isLogged) {
       Router.go(Home);
     }
-
+    this.carouselAttachTimer();
     this.loading = false;
   }
 
   connectedCallback() {
-    const self = this;
     super.connectedCallback();
+  }
+
+  carouselAttachTimer() {
+    const self = this;
     this.carouselSelectedIndexIntervel = setInterval(() => {
-      self.carouselSelectedIndex = (self.carouselSelectedIndex + 1) % 4;
+      self.carouselSelectedIndex =
+        (self.carouselSelectedIndex + 1) % self.carouselLength;
     }, 5000);
   }
-  disconnectedCallback() {
+  carouselDetachTimer() {
     clearInterval(this.carouselSelectedIndexIntervel);
+  }
+  carouselResetTimer() {
+    this.carouselDetachTimer();
+    this.carouselAttachTimer();
+  }
+
+  carouselNavigation(action: 'prev' | 'next') {
+    if (action === 'prev') {
+      let newPosition = this.carouselSelectedIndex - 1;
+      if (newPosition < 0) {
+        newPosition = this.carouselLength - 1;
+      }
+
+      this.carouselSelectedIndex = newPosition;
+    } else if (action === 'next') {
+      this.carouselSelectedIndex =
+        (this.carouselSelectedIndex + 1) % this.carouselLength;
+    }
+    this.carouselResetTimer();
+  }
+
+  disconnectedCallback() {
+    this.carouselDetachTimer();
   }
   async login(connectionId: string) {
     const multiConnection: HttpMultiConnection = this.remote.connection as any;
@@ -106,10 +135,25 @@ export class GettingStartedElement extends ConnectedElement {
         </div>
 
         <div>
+          <div class="carousel-action">
+            <div
+              class="carousel-prev carousel-navigation-button"
+              @click=${() => this.carouselNavigation('prev')}
+            >
+              <-
+            </div>
+            <div
+              class="carousel-next carousel-navigation-button"
+              @click=${() => this.carouselNavigation('next')}
+            >
+              ->
+            </div>
+          </div>
           <ui5-carousel
             class="carousel-cont"
             cyclic="true"
             selected-index=${this.carouselSelectedIndex}
+            hide-navigation
           >
             <div class="carousel-item">
               <div class="bkg-illustration right top">${Home1Background}</div>
@@ -290,6 +334,38 @@ export class GettingStartedElement extends ConnectedElement {
           align-items: center;
           padding: 0 20%;
           background: var(--white, #fff);
+        }
+        .carousel-action {
+          position: absolute;
+          z-index: 3;
+          width: 100%;
+        }
+        .carousel-navigation-button {
+          cursor: pointer;
+          font-size: 2rem;
+          font-weight: bold;
+          display: inline-block;
+          position: absolute;
+          opacity: 0.3;
+          transition: all 0.2s ease;
+          padding: 0.5rem 0.7rem;
+          transform: scale(0.7);
+        }
+        .carousel-navigation-button:hover {
+          opacity: 1;
+          background: #fafafa;
+          transform: scale(1);
+          box-shadow: 0px 10px 20px rgba(14, 14, 44, 0.1);
+          border-radius: 200px;
+        }
+        .carousel-navigation-button:active {
+          transform: scale(0.8);
+        }
+        .carousel-prev {
+          left: 1.2rem;
+        }
+        .carousel-next {
+          right: 1.2rem;
         }
         uprtcl-button {
           width: 300px;

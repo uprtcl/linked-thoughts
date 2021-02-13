@@ -147,7 +147,9 @@ export class DocumentPage extends ConnectedElement {
         })()}
         <div
           class="snackbar-action"
-          @click=${() => (this.showSnackBar = false)}
+          @click=${() => {
+            this.showSnackBar = false;
+          }}
         >
           ${CloseIcon}
         </div>
@@ -219,6 +221,23 @@ export class DocumentPage extends ConnectedElement {
           box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15),
             0px 4px 8px rgba(0, 0, 0, 0.2);
           border-radius: 8px;
+          animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .snackbar-hide {
+          animation: slideDown 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        @keyframes slideUp {
+          from {
+            bottom: 0;
+          }
+          to {
+            bottom: 10%;
+          }
+        }
+        @keyframes slideDown {
+          to {
+            bottom: 0%;
+          }
         }
         .snackbar {
           display: flex;

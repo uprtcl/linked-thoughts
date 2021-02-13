@@ -208,30 +208,26 @@ export class DocumentPage extends ConnectedElement {
         .snackbar-cont {
           font-family: 'Inter', sans-serif;
           position: absolute;
-
-          background: #0ff;
           bottom: 10%;
-          /* top: 50%; */
           left: 50%;
           transform: translate(-50%, -50%);
-
           background: #262641;
-          /* Alert Shadow */
-
           box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15),
             0px 4px 8px rgba(0, 0, 0, 0.2);
           border-radius: 8px;
-          animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+          animation: slideUp 0.7s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .snackbar-hide {
           animation: slideDown 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
         @keyframes slideUp {
-          from {
-            bottom: 0;
+          0% {
+            bottom: -5%;
+            opacity: 0.3;
           }
-          to {
+          100% {
             bottom: 10%;
+            opacity: 1;
           }
         }
         @keyframes slideDown {

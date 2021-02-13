@@ -174,7 +174,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           );
         }
         .padding-div {
-          height: 30px;
+          height: 55px;
         }
         .page-list-scroller::-webkit-scrollbar {
           width: 0px;

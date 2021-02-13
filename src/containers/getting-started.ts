@@ -10,7 +10,6 @@ import { Home } from '../constants/routeNames';
 import { ConnectedElement } from '../services/connected.element';
 import { AUTH0_CONNECTION, ETH_ACCOUNT_CONNECTION } from '../services/init';
 import { HttpMultiConnection } from '@uprtcl/http-provider';
-import TreesBackground from '../assets/trees.png';
 import IntercreativityLogo from '../assets/intercreativity.svg';
 import GoogleIcon from '../assets/icons/google.svg';
 import FBIcon from '../assets/icons/facebook.svg';
@@ -107,109 +106,141 @@ export class GettingStartedElement extends ConnectedElement {
 
     return html`
       <div class="root">
-        <div class="login-cont">
-          ${IntercreativityLogo}
+        <div class="main-space">
+          <div class="login-cont">
+            ${IntercreativityLogo}
 
-          <div class="login-card">
-            <div class="heading">Log In</div>
-            <div
-              class="login-button"
-              @click=${() => this.login(AUTH0_CONNECTION)}
-            >
-              Continue with social networks (${GoogleIcon},${FBIcon})
-            </div>
-            <div
-              class="login-button"
-              ?disabled=${!this.hasWeb3}
-              @click=${() => this.login(ETH_ACCOUNT_CONNECTION)}
-            >
-              Continue with Etherum (${MetamaskIcon})
-            </div>
+            <div class="login-card">
+              <div class="heading">Log In</div>
+              <div
+                class="login-button"
+                @click=${() => this.login(AUTH0_CONNECTION)}
+              >
+                Continue with social networks (${GoogleIcon},${FBIcon})
+              </div>
+              <div
+                class="login-button"
+                ?disabled=${!this.hasWeb3}
+                @click=${() => this.login(ETH_ACCOUNT_CONNECTION)}
+              >
+                Continue with Etherum (${MetamaskIcon})
+              </div>
 
-            ${!this.hasWeb3
-              ? html`<a target="_blank" href="https://metamask.io/"
-                  >What’s this?</a
-                >`
-              : ''}
+              ${!this.hasWeb3
+                ? html`<a target="_blank" href="https://metamask.io/"
+                    >What’s this?</a
+                  >`
+                : ''}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <div class="carousel-action">
-            <div
-              class="carousel-prev carousel-navigation-button"
-              @click=${() => this.carouselNavigation('prev')}
-            >
-              <-
+          <div class="carousel-container">
+            <div class="carousel-action">
+              <div
+                class="carousel-prev carousel-navigation-button"
+                @click=${() => this.carouselNavigation('prev')}
+              >
+                <-
+              </div>
+              <div
+                class="carousel-next carousel-navigation-button"
+                @click=${() => this.carouselNavigation('next')}
+              >
+                ->
+              </div>
             </div>
-            <div
-              class="carousel-next carousel-navigation-button"
+            <ui5-carousel
+              class="carousel-cont"
+              cyclic="false"
+              selected-index=${this.carouselSelectedIndex}
+              hide-navigation
               @click=${() => this.carouselNavigation('next')}
             >
-              ->
+              <div class="carousel-item">
+                <div class="bkg-illustration right top">${Home1Background}</div>
+                <div class="content">
+                  <h2>Borderless</h2>
+                  <h3 class="description">
+                    Create and share your ideas the way <i>you</i> want, on an
+                    open ecosystem of multiple applications, platforms, rules,
+                    and types of content.
+                  </h3>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="bkg-illustration right top">
+                  ${Home21Background}
+                </div>
+                <div class="bkg-illustration left bottom">
+                  ${Home22Background}
+                </div>
+                <div class="content">
+                  <h2>Connect with Others</h2>
+                  <h3 class="description">
+                    Build your personal "graph" of ideas. Decide what your want
+                    to share. Discover other's work, and connect it with yours.
+                  </h3>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="bkg-illustration right bottom">
+                  ${Home3Background}
+                </div>
+
+                <div class="content">
+                  <h2>Explore A Decentralized World</h2>
+                  <h3 class="description">
+                    Use familiar web-hosting or dive into emerging decentralized
+                    technologies to publish and govern your content and that of
+                    your community onchain.
+                  </h3>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="bkg-illustration right top">${Home4Background}</div>
+
+                <div class="content">
+                  <h2>Open your Mind</h2>
+                  <h3 class="description">
+                    Connect your content with that of others. Track its origin.
+                    Remix it. Branch and evolve it. Make proposals.
+                    <br />
+                    <br />
+                    Embrace the information chaos we now live in, and learn how
+                    to make sense of it.
+                  </h3>
+                </div>
+              </div>
+            </ui5-carousel>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="left">
+            <a
+              class="uprtcl-link"
+              target="_blank"
+              href="https://github.com/uprtcl"
+            >
+              Powered by <img src="src/assets/icons/logo-uprtcl.png" />
+            </a>
+          </div>
+          <div class="right">
+            <div class="social-icon">
+              <a target="_blank" href="https://t.me/joinchat/FAyNso5dWuZN3-MO">
+                <img src="src/assets/icons/telegram.png"
+              /></a>
+            </div>
+            <div class="social-icon">
+              <a target="_blank" href="https://twitter.com/uprtcl">
+                <img src="src/assets/icons/twitter.png"
+              /></a>
+            </div>
+            <div class="social-icon">
+              <a target="_blank" href="https://discord.gg/QRt6WdyGNx">
+                <img src="src/assets/icons/discord.png"
+              /></a>
             </div>
           </div>
-          <ui5-carousel
-            class="carousel-cont"
-            cyclic="false"
-            selected-index=${this.carouselSelectedIndex}
-            hide-navigation
-            @click=${() => this.carouselNavigation('next')}
-          >
-            <div class="carousel-item">
-              <div class="bkg-illustration right top">${Home1Background}</div>
-              <div class="content">
-                <h2>Borderless Creation</h2>
-                <h3 class="description">
-                  Create and share your ideas the way <i>you</i> want, on an
-                  open ecosystem of multiple applications, platforms, rules, and
-                  types of content.
-                </h3>
-              </div>
-            </div>
-            <div class="carousel-item">
-              <div class="bkg-illustration right top">${Home21Background}</div>
-              <div class="bkg-illustration left bottom">
-                ${Home22Background}
-              </div>
-              <div class="content">
-                <h2>Connect with Others</h2>
-                <h3 class="description">
-                  Build your personal "graph" of ideas. Decide what your want to
-                  share. Discover other's work, and connect it with yours.
-                </h3>
-              </div>
-            </div>
-            <div class="carousel-item">
-              <div class="bkg-illustration right bottom">
-                ${Home3Background}
-              </div>
-
-              <div class="content">
-                <h2>Explore A Decentralized World</h2>
-                <h3 class="description">
-                  Use familiar web-hosting or dive into emerging decentralized
-                  technologies to publish and govern your content and that of
-                  your community onchain.
-                </h3>
-              </div>
-            </div>
-            <div class="carousel-item">
-              <div class="bkg-illustration right top">${Home4Background}</div>
-
-              <div class="content">
-                <h2>Open your Mind</h2>
-                <h3 class="description">
-                  Connect your content with that of others. Track its origin.
-                  Remix it. Branch and evolve it. Make proposals.
-                  <br />
-                  <br />
-                  Embrace the information chaos we now live in, and learn how to
-                  make sense of it.
-                </h3>
-              </div>
-            </div>
-          </ui5-carousel>
         </div>
       </div>
     `;
@@ -269,14 +300,13 @@ export class GettingStartedElement extends ConnectedElement {
         }
 
         .root {
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
           height: 100%;
           width: 100%;
           display: flex;
+          flex-direction: column;
         }
-        .root > * {
+        .main-space > * {
+          flex: 1 0 auto;
           justify-content: center;
           align-items: center;
           display: flex;
@@ -285,6 +315,28 @@ export class GettingStartedElement extends ConnectedElement {
           flex-direction: column;
           position: relative;
         }
+        .main-space {
+          height: 100%;
+          width: 100%;
+        }
+        .login-cont {
+          background-image: url('src/assets/trees.png');
+          background-repeat: no-repeat;
+          background-size: cover;
+          width: 50%;
+          float: left;
+        }
+        .carousel-container {
+          width: 50%;
+          float: left;
+        }
+        .footer {
+          height: 10vh;
+          width: 100%;
+          display: flex;
+          align-items: center;
+        }
+
         .bkg-illustration {
           position: absolute;
           z-index: 1;
@@ -304,6 +356,9 @@ export class GettingStartedElement extends ConnectedElement {
         .bkg-img {
           position: absolute;
           z-index: -2;
+        }
+        .carousel-cont {
+          --sapBackgroundColor: #f5f5f5;
         }
         .login-card {
           background: #ffffff;
@@ -331,6 +386,7 @@ export class GettingStartedElement extends ConnectedElement {
           font-weight: 700;
           width: 100%;
           max-width: 600px;
+          z-index: 2;
         }
         .content h2 {
           margin-bottom: 2.5rem;
@@ -341,12 +397,7 @@ export class GettingStartedElement extends ConnectedElement {
           font-size: 20px;
           line-height: 176%;
         }
-        .login-cont {
-          background-image: url('src/assets/trees.png');
-          background-repeat: no-repeat;
-          background-size: cover;
-          width: 100%;
-        }
+
         .carousel-item {
           position: relative;
           height: 100%;
@@ -354,12 +405,8 @@ export class GettingStartedElement extends ConnectedElement {
           justify-content: center;
           align-items: center;
           padding: 0 20%;
-          background: var(--white, #fff);
+          background-color: #f5f5f5;
           width: 100%;
-        }
-        ui5-carousel::shadow .ui5-carousel-item {
-          padding: 0 0rem !important;
-          background-color: red;
         }
         .carousel-action {
           position: absolute;
@@ -376,6 +423,7 @@ export class GettingStartedElement extends ConnectedElement {
           transition: all 0.2s ease;
           padding: 0.5rem 0.7rem;
           transform: scale(0.7);
+          user-select: none;
         }
         .carousel-navigation-button:hover {
           opacity: 1;
@@ -401,16 +449,49 @@ export class GettingStartedElement extends ConnectedElement {
           width: 50vw;
         }
 
+        .footer a {
+          text-decoration: none;
+          color: black;
+        }
+        .footer .left {
+          padding: 0 7vw;
+          flex: 1 1 auto;
+          display: flex;
+          align-items: center;
+        }
+        .footer .left img {
+          margin-left: 0.75rem;
+        }
+        .footer .left .uprtcl-link {
+          display: flex;
+          align-items: center;
+        }
+        .footer .right {
+          padding: 0 7vw;
+          flex: 0 0 auto;
+          display: flex;
+        }
+        .footer .right .social-icon {
+          padding: 0 2vw;
+          height: 20px;
+        }
+        .footer .right .social-icon img {
+          height: 100%;
+        }
+
         @media only screen and (max-width: 900px) {
           .root {
             display: block;
           }
-          .root > * {
-            height: 70%;
+          .main-space > * {
+            /* height: 70%; */
           }
-          /* .bkg-illustration {
-            display: none;
-          } */
+          .login-cont {
+            width: 100%;
+          }
+          .carousel-container {
+            width: 100%;
+          }
           ui5-carousel {
             width: 100vw;
           }

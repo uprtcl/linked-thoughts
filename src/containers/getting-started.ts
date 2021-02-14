@@ -20,6 +20,10 @@ import Home21Background from '../assets/illustrations/home-2-1.svg';
 import Home22Background from '../assets/illustrations/home-2-2.svg';
 import Home3Background from '../assets/illustrations/home-3.svg';
 import Home4Background from '../assets/illustrations/home-4.svg';
+import UprtclLogo from '../assets/uprtcl.png';
+import DiscordLogo from '../assets/icons/discord.svg';
+import TwitterLogo from '../assets/icons/twitter.svg';
+import TelegramLogo from '../assets/icons/telegram.svg';
 
 export class GettingStartedElement extends ConnectedElement {
   logger = new Logger('Dashboard');
@@ -211,6 +215,17 @@ export class GettingStartedElement extends ConnectedElement {
           </ui5-carousel>
         </div>
       </div>
+      <footer>
+        <div>
+          <span class="footer-powered-by">Powered By</span>
+          <img src=${UprtclLogo} />
+        </div>
+        <div class="footer-socials">
+          <span>${TelegramLogo} </span>
+          <span>${TwitterLogo} </span>
+          <span>${DiscordLogo} </span>
+        </div>
+      </footer>
     `;
   }
 
@@ -223,6 +238,7 @@ export class GettingStartedElement extends ConnectedElement {
           flex: 1 1 0;
           color: #262641;
           font-family: 'Inter', sans-serif;
+          flex-direction: column;
         }
 
         h1 {
@@ -279,10 +295,7 @@ export class GettingStartedElement extends ConnectedElement {
           flex-direction: column;
           position: relative;
         }
-        .bkg-illustration {
-          position: absolute;
-          z-index: 1;
-        }
+
         .top {
           top: 10%;
         }
@@ -333,8 +346,10 @@ export class GettingStartedElement extends ConnectedElement {
           justify-content: center;
           align-items: center;
           padding: 0 20%;
-          background: var(--white, #fff);
+          background: #f5f5f5;
+          z-index: 5;
         }
+
         .carousel-action {
           position: absolute;
           z-index: 3;
@@ -367,12 +382,33 @@ export class GettingStartedElement extends ConnectedElement {
         .carousel-next {
           right: 1.2rem;
         }
-        uprtcl-button {
-          width: 300px;
-          margin: 16px 0px 6px 0px;
+        .bkg-illustration {
+          position: absolute;
+          z-index: -1;
         }
+
         ui5-carousel {
           width: 50vw;
+        }
+        footer {
+          display: flex;
+          padding: 1rem;
+          flex-direction: row;
+          justify-content: space-between;
+          padding: 2rem 5%;
+        }
+        footer > * {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .footer-socials > * {
+          margin: 0 calc(1rem + 1vmin);
+        }
+        .footer-powered-by {
+          font-size: 1rem;
+          margin-right: 0.5rem;
+          font-weight: 500;
         }
 
         @media only screen and (max-width: 900px) {
@@ -382,11 +418,21 @@ export class GettingStartedElement extends ConnectedElement {
           .root > * {
             height: 70%;
           }
-          /* .bkg-illustration {
-            display: none;
-          } */
+
           ui5-carousel {
             width: 100vw;
+          }
+          footer {
+            flex-direction: column-reverse;
+            position: absolute;
+            align-items: flex-start;
+            bottom: 0;
+            background: #fff;
+            width: 100%;
+            padding: 1rem;
+          }
+          footer > * {
+            margin-top: 1rem;
           }
         }
       `,

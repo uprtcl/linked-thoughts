@@ -154,7 +154,6 @@ export class GettingStartedElement extends ConnectedElement {
               cyclic="false"
               selected-index=${this.carouselSelectedIndex}
               hide-navigation
-              @click=${() => this.carouselNavigation('next')}
             >
               <div class="carousel-item">
                 <div class="bkg-illustration right top">${Home1Background}</div>

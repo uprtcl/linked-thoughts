@@ -154,7 +154,6 @@ export class GettingStartedElement extends ConnectedElement {
               cyclic="false"
               selected-index=${this.carouselSelectedIndex}
               hide-navigation
-              @click=${() => this.carouselNavigation('next')}
             >
               <div class="carousel-item">
                 <div class="bkg-illustration right top">${Home1Background}</div>
@@ -177,7 +176,7 @@ export class GettingStartedElement extends ConnectedElement {
                 <div class="content">
                   <h2>Connect with Others</h2>
                   <h3 class="description">
-                    Build your personal "graph" of ideas. Decide what your want
+                    Build your personal "graph" of ideas. Decide what you want
                     to share. Discover other's work, and connect it with yours.
                   </h3>
                 </div>

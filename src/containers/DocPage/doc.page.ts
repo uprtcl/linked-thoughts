@@ -119,7 +119,7 @@ export class DocumentPage extends ConnectedElement {
 
     function pullChanges() {
       return html`
-        <div>The origin of this block as been updated</div>
+        <div>The origin of this block has been updated</div>
         <div
           class="snackbar-action"
           @click=${() => {

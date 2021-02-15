@@ -26,12 +26,28 @@ npm i
 npm run debug
 ```
 
-Then run this app
+Then, to run this app first create env file:
 
 ```
 cd ../linked-thoughts
+cd src/services
+touch env.ts
+```
+
+And fill it with:
+
+```
+export const env = {
+  // host: 'https://api.intercreativity.io/uprtcl/1',
+  host: 'http://localhost:3100/uprtcl/1',
+};
+```
+
+Then install dependencies and run in dev mode.
+
+```
 npm i
 npm run dev
 ```
 
-Head to http://localhost:8002
+You can now gead to http://localhost:8002!

@@ -350,6 +350,7 @@ export class SectionPage extends EveesBaseElement<Section> {
           -ms-overflow-style: none; /* IE and Edge */
           scrollbar-width: none; /* Firefox */
         }
+
         :host::-webkit-scrollbar {
           display: none;
         }
@@ -357,7 +358,7 @@ export class SectionPage extends EveesBaseElement<Section> {
           width: 100%;
         }
         .page-body {
-          margin: 0 2rem;
+          padding: 0 1rem;
         }
         .header-cont {
           display: flex;
@@ -412,6 +413,7 @@ export class SectionPage extends EveesBaseElement<Section> {
 
         table {
           text-align: left;
+          padding: 0 1rem;
         }
         th {
           text-transform: uppercase;
@@ -424,6 +426,10 @@ export class SectionPage extends EveesBaseElement<Section> {
           line-height: 2rem;
           color: grey;
           font-size: 1.1rem;
+          transition: all 0.1s ease-in;
+        }
+        tr:hover {
+          background: #0001;
         }
         .filter-drop-down {
           min-width: 120px;

@@ -1,15 +1,17 @@
-import { html, css, internalProperty, LitElement, property } from 'lit-element';
+import { html, css, internalProperty } from 'lit-element';
+import { Router } from '@vaadin/router';
 
 import { styles } from '@uprtcl/common-ui';
 import { Logger } from '@uprtcl/evees';
+import { HttpMultiConnection } from '@uprtcl/http-provider';
 
 import { EveesHttp } from '@uprtcl/evees-http';
-import { Router } from '@vaadin/router';
 
 import { Home } from '../constants/routeNames';
 import { ConnectedElement } from '../services/connected.element';
+import { DeleteLastVisited } from '../utils/localStorage';
 import { AUTH0_CONNECTION, ETH_ACCOUNT_CONNECTION } from '../services/init';
-import { HttpMultiConnection } from '@uprtcl/http-provider';
+
 import IntercreativityLogo from '../assets/intercreativity.svg';
 import GoogleIcon from '../assets/icons/google.svg';
 import FBIcon from '../assets/icons/facebook.svg';
@@ -34,6 +36,9 @@ export class GettingStartedElement extends ConnectedElement {
 
   @internalProperty()
   carouselSelectedIndex: number = 0;
+
+  @internalProperty()
+  loginError: string;
 
   carouselSelectedIndexIntervel;
 
@@ -95,10 +100,20 @@ export class GettingStartedElement extends ConnectedElement {
 
     multiConnection.select(connectionId);
     const connection = multiConnection.connection();
-    await connection.login();
 
-    this.isLogged = await this.remote.isLogged();
-    Router.go(Home);
+    try {
+      await connection.login();
+
+      this.isLogged = await this.remote.isLogged();
+      if (this.isLogged) {
+        Router.go(Home);
+      } else {
+        this.loginError = 'Error loggin in';
+      }
+    } catch (e) {
+      DeleteLastVisited();
+      this.loginError = 'Error loggin in';
+    }
   }
 
   render() {
@@ -131,6 +146,7 @@ export class GettingStartedElement extends ConnectedElement {
                     >What’s this?</a
                   >`
                 : ''}
+              ${!this.loginError ? html`<div>${this.loginError}</div>` : ''}
             </div>
           </div>
 

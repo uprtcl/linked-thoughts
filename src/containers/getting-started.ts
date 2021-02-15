@@ -32,7 +32,7 @@ export class GettingStartedElement extends ConnectedElement {
   @internalProperty()
   hasWeb3 = false;
 
-  @property()
+  @internalProperty()
   carouselSelectedIndex: number = 0;
 
   carouselSelectedIndexIntervel;

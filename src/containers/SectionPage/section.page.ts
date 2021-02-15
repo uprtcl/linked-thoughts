@@ -347,6 +347,11 @@ export class SectionPage extends EveesBaseElement<Section> {
           overflow: scroll;
           padding: 3% 5%;
           height: 100%;
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+        :host::-webkit-scrollbar {
+          display: none;
         }
         .static-header {
           width: 100%;

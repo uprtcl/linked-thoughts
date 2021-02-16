@@ -59,7 +59,6 @@ export class ErrorPage extends EveesBaseElement {
           margin: 0 0.5rem;
           border-radius: 8px;
           padding: 1rem 1.5rem;
-          animation: vibrate 2s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
         }
         .header4 {
           background: #7e7e91;
@@ -92,40 +91,6 @@ export class ErrorPage extends EveesBaseElement {
         }
         .button:hover {
           background: #233fce;
-        }
-
-        @keyframes vibrate {
-          0%,
-          2%,
-          4%,
-          6%,
-          8%,
-          10%,
-          12%,
-          14%,
-          16%,
-          18% {
-            -webkit-transform: translate3d(-1px, 0, 0);
-            transform: translate3d(-1px, 0, 0);
-          }
-          1%,
-          3%,
-          5%,
-          7%,
-          9%,
-          11%,
-          13%,
-          15%,
-          17%,
-          19% {
-            -webkit-transform: translate3d(1px, 0, 0);
-            transform: translate3d(1px, 0, 0);
-          }
-          20%,
-          100% {
-            -webkit-transform: translate3d(0, 0, 0);
-            transform: translate3d(0, 0, 0);
-          }
         }
       `,
     ];

@@ -62,7 +62,7 @@ export const initUprtcl = async () => {
   );
 
   const httpStore = new HttpStore(httpConnection, httpCidConfig);
-  const httpEvees = new EveesHttp(httpConnection, httpStore);
+  const httpEvees = new EveesHttp(httpConnection, httpStore.casID);
 
   const remotes = [httpEvees];
   const modules = new Map<string, EveesContentModule>();
@@ -74,7 +74,12 @@ export const initUprtcl = async () => {
     new SectionPattern(),
   ];
 
-  const evees = eveesConstructorHelper(remotes, modules, appPatterns);
+  const evees = eveesConstructorHelper(
+    remotes,
+    [httpStore],
+    modules,
+    appPatterns
+  );
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

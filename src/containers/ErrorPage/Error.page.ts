@@ -88,11 +88,10 @@ export class ErrorPage extends EveesBaseElement {
             inset 0px -1px 0px rgba(14, 14, 44, 0.4);
           border-radius: 8px;
           font-weight: 500;
-          transition: all 0.1s cubic-bezier(0.755, 0.05, 0.855, 0.06)
+          transition: all 0.2s ease-in-out;
         }
         .button:hover {
-          transform: scale(1.3) rotate(3deg);
-          
+          background: #233fce;
         }
 
         @keyframes vibrate {
@@ -106,8 +105,8 @@ export class ErrorPage extends EveesBaseElement {
           14%,
           16%,
           18% {
-            -webkit-transform: translate3d(-5px, 0, 0);
-            transform: translate3d(-5px, 0, 0);
+            -webkit-transform: translate3d(-1px, 0, 0);
+            transform: translate3d(-1px, 0, 0);
           }
           1%,
           3%,
@@ -119,8 +118,8 @@ export class ErrorPage extends EveesBaseElement {
           15%,
           17%,
           19% {
-            -webkit-transform: translate3d(5px, 0, 0);
-            transform: translate3d(5px, 0, 0);
+            -webkit-transform: translate3d(1px, 0, 0);
+            transform: translate3d(1px, 0, 0);
           }
           20%,
           100% {

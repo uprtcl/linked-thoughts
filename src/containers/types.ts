@@ -1,3 +1,5 @@
+import { TextNode } from '@uprtcl/documents';
+
 export interface Home {
   linkedThoughts: string;
 }
@@ -9,4 +11,10 @@ export interface Dashboard {
 export interface Section {
   title: string;
   pages: string[];
+}
+
+export interface Concept_TextNode extends TextNode {
+  meta: {
+    isA: string[];
+  };
 }

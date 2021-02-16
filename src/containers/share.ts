@@ -5,15 +5,17 @@ import { Entity } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
-import { Section } from './types';
+import { Concept_TextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
+import { ConceptId } from 'src/services/app.manager';
 
 interface SectionData {
   id: string;
   data: Entity<Section>;
 }
+
 export default class ShareCard extends ConnectedElement {
   @property({ type: String })
   uref: string;
@@ -134,6 +136,19 @@ export default class ShareCard extends ConnectedElement {
   async shareTo(toSectionId: string) {
     this.addingPage = true;
     const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
+
+    const data = await this.evees.getPerspectiveData<Concept_TextNode>(sharedURI);
+    const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
+
+    const newObject: Concept_TextNode = {
+      ...data.object,
+      meta: {
+        isA: data.object.meta.isA.concat([blogConcept.id]),
+      },
+    };
+
+    await this.evees.updatePerspectiveData(sharedURI, newObject);
+
     this.lastSharedPageId = sharedURI;
     this.disableAddButton = true;
     this.addingPage = false;

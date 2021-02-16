@@ -1,8 +1,10 @@
-import { Pattern, HasChildren } from '@uprtcl/evees';
+import { TextNodePattern } from '@uprtcl/documents';
+import { Pattern, HasChildren, HasLinks } from '@uprtcl/evees';
 
-import { Dashboard, Section } from '../containers/types';
+import { Dashboard, Concept_TextNode, Section } from '../containers/types';
 
 export const DashboardType = 'LinkedThoughts:Dashboard';
+export const Concept_TextNodeType = 'LinkedThoughts:Concept_TextNode';
 export const SectionType = 'LinkedThoughts:Section';
 export const HomeType = 'LinkedThoughts:UserHome';
 
@@ -54,6 +56,32 @@ export class DashboardBehaviors implements HasChildren<Dashboard> {
   children = (node: Dashboard): string[] => node.sections;
 }
 
+export class Concept_TextNodePattern extends TextNodePattern {
+  recognize(object: any): boolean {
+    return (
+      super.recognize(object) &&
+      object.meta !== undefined &&
+      object.meta.isA !== undefined
+    );
+  }
+
+  type = Concept_TextNodeType;
+
+  constructor() {
+    super([new Concept_TextNodeBehaviors()]);
+  }
+}
+
+export class Concept_TextNodeBehaviors implements HasLinks<Concept_TextNode> {
+  links = async (node: Concept_TextNode) => node.meta.isA;
+  replaceLinks = (node: Concept_TextNode) => (links: string[]): Concept_TextNode => ({
+    ...node,
+    meta: {
+      isA: links,
+    },
+  });
+}
+
 export class SectionPattern extends Pattern<Section> {
   recognize(object: any): boolean {
     return object.title !== undefined && object.pages !== undefined;
@@ -78,3 +106,4 @@ export class SectionBehaviors implements HasChildren<Section> {
 
   children = (node: Section): string[] => node.pages;
 }
+

@@ -9,7 +9,7 @@ import { Concept_TextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
-import { ConceptId } from 'src/services/app.manager';
+import { ConceptId } from '../services/app.manager';
 
 interface SectionData {
   id: string;

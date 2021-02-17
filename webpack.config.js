@@ -71,6 +71,6 @@ module.exports = {
       template: 'index.html',
       minify: true,
     }),
-    new CopyWebpackPlugin([{ from: 'src/img', to: 'img' }]),
+    new CopyWebpackPlugin([{ from: 'src/assets', to: 'src/assets' }]),
   ],
 };

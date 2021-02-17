@@ -58,7 +58,7 @@ export class AppManager {
       type: TextType.Title,
       links: [],
     };
-    const childId = await this.evees.addNewChild(page, onSectionId);
+    const childId = await this.evees.addNewChild(onSectionId, page);
     await this.evees.client.flush();
 
     return childId;

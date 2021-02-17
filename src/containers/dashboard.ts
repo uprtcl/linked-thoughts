@@ -263,7 +263,10 @@ export class DashboardElement extends ConnectedElement {
             }
           </div>
         </div>
+        
+        
       </div>
+        <app-explore-card ></app-explore-card>
     `;
   }
 
@@ -277,6 +280,10 @@ export class DashboardElement extends ConnectedElement {
           flex: 1 1 0;
           flex-direction: column;
           justify-content: center;
+        }
+        app-explore-card{
+          position:absolute;
+          right:0;
         }
         .row {
           display: flex;

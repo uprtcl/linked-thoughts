@@ -13,7 +13,7 @@ export interface Section {
   pages: string[];
 }
 
-export interface Concept_TextNode extends TextNode {
+export interface ThoughtsTextNode extends TextNode {
   meta: {
     isA: string[];
   };

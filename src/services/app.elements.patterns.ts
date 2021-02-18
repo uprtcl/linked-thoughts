@@ -1,10 +1,10 @@
 import { TextNodePattern } from '@uprtcl/documents';
 import { Pattern, HasChildren, HasLinks } from '@uprtcl/evees';
 
-import { Dashboard, Concept_TextNode, Section } from '../containers/types';
+import { Dashboard, ThoughtsTextNode, Section } from '../containers/types';
 
 export const DashboardType = 'LinkedThoughts:Dashboard';
-export const Concept_TextNodeType = 'LinkedThoughts:Concept_TextNode';
+export const ThoughtsTextNodeType = 'LinkedThoughts:ThoughtsTextNode';
 export const SectionType = 'LinkedThoughts:Section';
 export const HomeType = 'LinkedThoughts:UserHome';
 
@@ -56,7 +56,7 @@ export class DashboardBehaviors implements HasChildren<Dashboard> {
   children = (node: Dashboard): string[] => node.sections;
 }
 
-export class Concept_TextNodePattern extends TextNodePattern {
+export class ThoughtsTextNodePattern extends TextNodePattern {
   recognize(object: any): boolean {
     return (
       super.recognize(object) &&
@@ -65,16 +65,16 @@ export class Concept_TextNodePattern extends TextNodePattern {
     );
   }
 
-  type = Concept_TextNodeType;
+  type = ThoughtsTextNodeType;
 
   constructor() {
-    super([new Concept_TextNodeBehaviors()]);
+    super([new ThoughtsTextNodeBehaviors()]);
   }
 }
 
-export class Concept_TextNodeBehaviors implements HasLinks<Concept_TextNode> {
-  links = async (node: Concept_TextNode) => node.meta.isA;
-  replaceLinks = (node: Concept_TextNode) => (links: string[]): Concept_TextNode => ({
+export class ThoughtsTextNodeBehaviors implements HasLinks<ThoughtsTextNode> {
+  links = async (node: ThoughtsTextNode) => node.meta.isA;
+  replaceLinks = (node: ThoughtsTextNode) => (links: string[]): ThoughtsTextNode => ({
     ...node,
     meta: {
       isA: links,

@@ -5,7 +5,7 @@ import { Entity } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
-import { Concept_TextNode, Section } from './types';
+import { ThoughtsTextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
@@ -137,10 +137,10 @@ export default class ShareCard extends ConnectedElement {
     this.addingPage = true;
     const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
 
-    const data = await this.evees.getPerspectiveData<Concept_TextNode>(sharedURI);
+    const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(sharedURI);
     const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
 
-    const newObject: Concept_TextNode = {
+    const newObject: ThoughtsTextNode = {
       ...data.object,
       meta: {
         isA: data.object.meta.isA.concat([blogConcept.id]),

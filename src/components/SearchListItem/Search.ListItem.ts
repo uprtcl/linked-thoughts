@@ -18,9 +18,9 @@ export default class SearchListItem extends ConnectedElement {
           elements
         </div>
       </div>
-        <div class="footer">
+      <div class="footer">
         <p class="publish-date">Sept 1</p>
-        </div>
+      </div>
     </div>`;
   }
 
@@ -37,7 +37,7 @@ export default class SearchListItem extends ConnectedElement {
           display: flex;
           /* justify-content: space-between; */
           align-items: center;
-          margin-bottom:0.5rem;
+          margin-bottom: 0.5rem;
         }
         .profile-img {
           height: 2rem;
@@ -46,15 +46,15 @@ export default class SearchListItem extends ConnectedElement {
         }
         .author-name {
           color: #da3e52;
-          font-size:0.8rem;
+          font-size: 0.8rem;
         }
         .title {
           font-size: 1.3rem;
           font-weight: bold;
         }
-        .publish-date{
-          font-size:0.8rem;
-          color:#0007;
+        .publish-date {
+          font-size: 0.8rem;
+          color: #0007;
         }
       `,
     ];

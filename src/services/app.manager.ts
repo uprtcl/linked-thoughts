@@ -37,7 +37,7 @@ export class AppManager {
     /** check the app scheleton is there */
     await this.elements.check();
     await this.checkBlogPermissions();
-    // TODO: Check or Create the blog concept perspective.
+    // TODO: Is it necessary to check or Create the blog concept perspective?
   }
 
   /** init blog ACL to publicRead privateWrite (HTTP-remote-specific) */

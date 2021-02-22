@@ -19,6 +19,7 @@ import {
   AppHomePattern,
   DashboardPattern,
   SectionPattern,
+  ThoughtsTextNodePattern,
 } from './app.elements.patterns';
 import { AppManager } from './app.manager';
 import { env } from './env';
@@ -72,6 +73,7 @@ export const initUprtcl = async () => {
     new AppHomePattern(),
     new DashboardPattern(),
     new SectionPattern(),
+    new ThoughtsTextNodePattern(),
   ];
 
   const evees = eveesConstructorHelper(

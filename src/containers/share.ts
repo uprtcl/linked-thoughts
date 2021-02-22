@@ -135,21 +135,25 @@ export default class ShareCard extends ConnectedElement {
 
   async shareTo(toSectionId: string) {
     this.addingPage = true;
-    const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
+    const forkId = await this.appManager.forkPage(
+      this.uref,
+      toSectionId,
+      false
+    );
 
-    const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(sharedURI);
+    const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(forkId);
     const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
 
-    const newObject: ThoughtsTextNode = {
-      ...data.object,
-      meta: {
-        isA: data.object.meta.isA.concat([blogConcept.id]),
-      },
+    /** keep the the entire object and append the blogConcept to the isA array. */
+    const newObject: ThoughtsTextNode = { ...data.object };
+    newObject.meta = {
+      isA: [blogConcept.id],
     };
 
-    await this.evees.updatePerspectiveData(sharedURI, newObject);
+    await this.evees.updatePerspectiveData(forkId, newObject);
+    await this.evees.client.flush();
 
-    this.lastSharedPageId = sharedURI;
+    this.lastSharedPageId = forkId;
     this.disableAddButton = true;
     this.addingPage = false;
   }

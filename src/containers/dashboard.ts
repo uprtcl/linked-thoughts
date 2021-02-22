@@ -155,7 +155,7 @@ export class DashboardElement extends ConnectedElement {
 
           if (!sectionData)
             throw new Error(`data not found for section ${sectionId}`);
-          const title = this.evees.behavior(sectionData.object, 'title');
+          const title = this.evees.behaviorFirst(sectionData.object, 'title');
 
           return {
             id: sectionId,

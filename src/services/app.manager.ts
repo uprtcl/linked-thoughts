@@ -84,12 +84,12 @@ export class AppManager {
     return forkId;
   }
 
-  async getBlogFeed() {
+  async getBlogFeed(): Promise<string[]> {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
-    const blogposts = await this.evees.client.searchEngine.explore({
+    const result = await this.evees.client.searchEngine.explore({
       linksTo: [{ id: blogConcept.id }],
     });
-    return blogposts;
+    return result.perspectiveIds;
   }
 
   async getSections(): Promise<string[]> {

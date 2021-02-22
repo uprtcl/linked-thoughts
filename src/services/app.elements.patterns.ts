@@ -99,6 +99,8 @@ export class SectionBehaviors implements HasChildren<Section> {
 
   links = async (node: Section) => this.children(node);
 
+  text = async (node: Section) => node.text;
+
   replaceChildren = (node: Section) => (childrenHashes: string[]): Section => ({
     ...node,
     pages: childrenHashes,

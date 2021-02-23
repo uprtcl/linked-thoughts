@@ -47,6 +47,9 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   selectedSectionId: string | undefined;
 
+  @internalProperty()
+  blogFeedIds: string[] = [];
+
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
@@ -74,7 +77,9 @@ export class DashboardElement extends ConnectedElement {
       await this.decodeUrl();
 
       this.checkLastVisited();
+
       await this.load();
+      this.blogFeedIds = await this.appManager.getBlogFeed();
     } else {
       Router.go(GettingStarted);
     }
@@ -155,7 +160,7 @@ export class DashboardElement extends ConnectedElement {
 
           if (!sectionData)
             throw new Error(`data not found for section ${sectionId}`);
-          const title = this.evees.behavior(sectionData.object, 'title');
+          const title = this.evees.behaviorFirst(sectionData.object, 'title');
 
           return {
             id: sectionId,
@@ -234,6 +239,12 @@ export class DashboardElement extends ConnectedElement {
           ></app-nav-section>`;
         })}
       </div>
+      <b>feed</b>
+      <uprtcl-list
+        >${this.blogFeedIds.map(
+          (id) => html`<uprtcl-list-item>${id}</uprtcl-list-item>`
+        )}</uprtcl-list
+      >
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 

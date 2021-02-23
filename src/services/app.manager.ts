@@ -5,10 +5,17 @@ import {
   Evees,
   ParentAndChild,
   RecursiveContextMergeStrategy,
+  getConceptPerspective,
+  Secured,
+  Perspective,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard } from '../containers/types';
+
+export enum ConceptId {
+  BLOGPOST = 'blogpost',
+}
 
 export class AppManager {
   elements: AppElements;
@@ -19,10 +26,18 @@ export class AppManager {
     this.appError = new AppError();
   }
 
+  async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
+    switch (conceptId) {
+      case ConceptId.BLOGPOST:
+        return getConceptPerspective(conceptId);
+    }
+  }
+
   async checkStructure() {
     /** check the app scheleton is there */
     await this.elements.check();
     await this.checkBlogPermissions();
+    // TODO: Is it necessary to check or Create the blog concept perspective?
   }
 
   /** init blog ACL to publicRead privateWrite (HTTP-remote-specific) */
@@ -50,15 +65,31 @@ export class AppManager {
   }
 
   /**  */
-  async forkPage(pageId: string, onSectionId): Promise<string> {
+  async forkPage(
+    pageId: string,
+    onSectionId: string,
+    flush: boolean = true
+  ): Promise<string> {
     const forkId = await this.evees.forkPerspective(
       pageId,
       undefined,
       onSectionId
     );
     await this.evees.addExistingChild(forkId, onSectionId);
-    await this.evees.client.flush();
+
+    if (flush) {
+      await this.evees.client.flush();
+    }
+
     return forkId;
+  }
+
+  async getBlogFeed(): Promise<string[]> {
+    const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
+    const result = await this.evees.client.searchEngine.explore({
+      linksTo: [{ id: blogConcept.id }],
+    });
+    return result.perspectiveIds;
   }
 
   async getSections(): Promise<string[]> {

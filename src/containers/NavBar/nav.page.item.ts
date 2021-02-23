@@ -36,7 +36,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   }
 
   async dataUpdated() {
-    this.title = this.evees.behavior(this.data.object, 'title');
+    this.title = this.evees.behaviorFirst(this.data.object, 'title');
   }
 
   selectPage() {

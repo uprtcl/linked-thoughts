@@ -1,9 +1,14 @@
-import { TextNodePattern } from '@uprtcl/documents';
+import { TextNode, TextNodePattern } from '@uprtcl/documents';
 import {
   Pattern,
   HasChildren,
   HasLinks,
   LinkingBehaviorNames,
+  MergeStrategy,
+  mergeResult,
+  mergeArrays,
+  MergingBehaviorNames,
+  HasMerge,
 } from '@uprtcl/evees';
 
 import { Dashboard, ThoughtsTextNode, Section } from '../containers/types';
@@ -78,8 +83,47 @@ export class ThoughtsTextNodePattern extends TextNodePattern {
   }
 }
 
-export class ThoughtsTextNodeBehaviors implements HasLinks<ThoughtsTextNode> {
+export class ThoughtsTextNodeBehaviors
+  implements HasLinks<ThoughtsTextNode>, HasMerge<ThoughtsTextNode> {
   [LinkingBehaviorNames.LINKS_TO] = (node: ThoughtsTextNode) => node.meta.isA;
+
+  [MergingBehaviorNames.MERGE] = (originalNode: ThoughtsTextNode) => async (
+    modifications: ThoughtsTextNode[],
+    merger: MergeStrategy,
+    config: any
+  ): Promise<ThoughtsTextNode> => {
+    const resultText = modifications[1].text;
+    const resultType = mergeResult(
+      originalNode.type,
+      modifications.map((data) => data.type)
+    );
+
+    if (!merger.mergeChildren)
+      throw new Error('mergeChildren function not found in merger');
+
+    const mergedLinks = await merger.mergeChildren(
+      originalNode.links,
+      modifications.map((data) => data.links),
+      config
+    );
+
+    const isAOrg = originalNode.meta ? originalNode.meta.isA : [];
+    const isAMod = modifications.map((mod) =>
+      mod.meta ? mod.meta.isA : isAOrg
+    );
+
+    const mergedIsA = mergeArrays(isAOrg, isAMod);
+    const mergedMeta = {
+      isA: mergedIsA,
+    };
+
+    return {
+      text: resultText,
+      type: resultType,
+      links: mergedLinks,
+      meta: mergedMeta,
+    };
+  };
 }
 
 export class SectionPattern extends Pattern<Section> {

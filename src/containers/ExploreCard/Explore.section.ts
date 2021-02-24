@@ -95,13 +95,15 @@ export default class ExploreCard extends ConnectedElement {
         <span class="explore-heading">EXPLORE</span>
         <div class="explore-navigation">
           <span
+            ?disabled=${this.exploreState == 2}
             @click=${() => this.handleNavigation('increment')}
-            class="navigation-button"
+            class="navigation-button clickable"
             >${ChevronLeft}</span
           >
           <span
+            ?disabled=${this.exploreState == 0}
             @click=${() => this.handleNavigation('decrement')}
-            class="navigation-button"
+            class="navigation-button clickable"
             >${ChevronRight}</span
           >
         </div>
@@ -150,6 +152,13 @@ export default class ExploreCard extends ConnectedElement {
         }
         .navigation-button {
           padding: 0.2rem;
+          border-radius: 50%;
+          padding: 0.075rem 0.25rem;
+        }
+
+        .navigation-button:disabled,
+        .navigation-button[disabled] {
+          opacity: 0.3;
         }
         /* Explore List */
         .explore-list {

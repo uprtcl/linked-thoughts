@@ -1,22 +1,45 @@
-import { html, css, property, internalProperty } from 'lit-element';
+import { Signed, Commit } from '@uprtcl/evees';
+import { html, css, property, internalProperty, svg } from 'lit-element';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 
-export default class SearchListItem extends ConnectedElement {
-  firstUpdated() {}
+import { getRandomAvatar } from '@fractalsoftware/random-avatar-generator';
 
-  async load() {}
+export default class SearchListItem extends ConnectedElement {
+  @property()
+  uref: string;
+
+  @internalProperty()
+  title: string;
+
+  @internalProperty()
+  meta;
+
+  loading: boolean = true;
+  async firstUpdated() {
+    await this.load();
+  }
+
+  async load() {
+    this.loading = true;
+    const data = await this.evees.getPerspectiveData(this.uref);
+    this.title = this.evees.behaviorFirst(data.object, 'title');
+    this.meta = await (await this.evees.client.store.getEntity(this.uref))
+      .object.payload;
+    // debugger;
+    this.loading = false;
+  }
   render() {
-    return html`<div class="cont">
+    if (this.loading) return null;
+    return html`<div class="cont clickable">
       <div class="header">
-        <img class="profile-img" src="src/assets/profile.png" />
-        <span class="author-name">Elon Musk</span>
+        <div class="profile-img">${html`${unsafeHTML(getRandomAvatar())}`}</div>
+        <span class="author-name">${this.meta.creatorId}</span>
       </div>
       <div class="content">
-        <div class="title">
-          The beginning of time started with all the best combinations of
-          elements
-        </div>
+        <div class="title">${this.title}</div>
       </div>
       <div class="footer">
         <p class="publish-date">Sept 1</p>
@@ -33,6 +56,9 @@ export default class SearchListItem extends ConnectedElement {
         .cont {
           padding: 1rem 1.5rem;
         }
+        .cont:hover {
+          background: #00000008;
+        }
         .header {
           display: flex;
           /* justify-content: space-between; */
@@ -41,8 +67,10 @@ export default class SearchListItem extends ConnectedElement {
         }
         .profile-img {
           height: 2rem;
+          width: 2rem;
           border-radius: 50%;
           margin-right: 1rem;
+          overflow: hidden;
         }
         .author-name {
           color: #da3e52;

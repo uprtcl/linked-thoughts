@@ -7,13 +7,41 @@ import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 export default class ExploreCard extends ConnectedElement {
   @property()
-  exploreState: number = 2;
-  firstUpdated() {}
+  exploreState: number = 0;
+
+  @internalProperty()
+  blogFeedIds: string[] = [];
+
+  @property()
+  selectedBlogId: string;
+
+  async firstUpdated() {
+    this.blogFeedIds = await this.appManager.getBlogFeed();
+  }
 
   async load() {}
 
   closeExplore() {
     this.exploreState = 0;
+    this.selectedBlogId = null;
+  }
+
+  handleNavigation(type: 'increment' | 'decrement') {
+    const currentState = this.exploreState;
+
+    if (type === 'increment') {
+      if (currentState < 2) {
+        this.exploreState++;
+      }
+    } else {
+      // Hide the blog page for mini-explore View
+      if (currentState == 2) {
+        this.selectedBlogId = null;
+      }
+      if (currentState > 0) {
+        this.exploreState--;
+      }
+    }
   }
   renderHeader() {
     return html`<div class="header">
@@ -26,54 +54,59 @@ export default class ExploreCard extends ConnectedElement {
       <span class="clickable" @click=${this.closeExplore}>${ClosePurple}</span>
     </div>`;
   }
+
+  renderItems() {
+    if (!Array.isArray(this.blogFeedIds)) return html`Oopsie, no content found`;
+    if (this.selectedBlogId) {
+      return html`${this.renderReadPage()}`;
+    } else
+      return html` ${this.blogFeedIds.map((docId) => {
+        return html` <app-explore-list-item
+          @click=${() => {
+            this.selectedBlogId = docId;
+            this.exploreState = 2;
+          }}
+          uref=${docId}
+        ></app-explore-list-item>`;
+      })}`;
+  }
   renderExploreState() {
     switch (this.exploreState) {
       case 1:
         return html` <div class="explore-list">
           ${this.renderHeader()}
-          <div class="explore-list-cont">
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-          </div>
+          <div class="explore-list-cont">${this.renderItems()}</div>
         </div>`;
       case 2:
         return html`<div class="explore-page">
           ${this.renderHeader()}
-          <div class="explore-page-cont">
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-            <app-explore-list-item></app-explore-list-item>
-          </div>
+          <div class="explore-page-cont">${this.renderItems()}</div>
         </div>`;
     }
+  }
+
+  renderReadPage() {
+    return html`<div class="readCont">
+      <app-read-only-page uref=${this.selectedBlogId} />
+    </div>`;
   }
   render() {
     return html`<div class="explore-navigation-tooltip">
         <span class="explore-heading">EXPLORE</span>
         <div class="explore-navigation">
-          <span @click=${() => this.exploreState++} class="navigation-button"
+          <span
+            @click=${() => this.handleNavigation('increment')}
+            class="navigation-button"
             >${ChevronLeft}</span
           >
-          <span @click=${() => this.exploreState--} class="navigation-button"
+          <span
+            @click=${() => this.handleNavigation('decrement')}
+            class="navigation-button"
             >${ChevronRight}</span
           >
         </div>
       </div>
+
       ${this.renderExploreState()} `;
   }
 
@@ -85,6 +118,10 @@ export default class ExploreCard extends ConnectedElement {
           display: flex;
           align-items: center;
           z-index: 5;
+        }
+        .readCont {
+          flex: 1;
+          width: 100%;
         }
         /* ToolTip */
         .explore-navigation-tooltip {
@@ -207,12 +244,8 @@ export default class ExploreCard extends ConnectedElement {
           overflow-y: scroll;
           height: 80vh;
         }
-        .explore-page-cont > * {
-          
+        .explore-page-cont > app-explore-list-item {
           flex: 0 0 33.333333%;
-        }
-        app-explore-list-item:hover {
-          background: #00000008;
         }
 
         @keyframes slideLeft {
@@ -226,7 +259,7 @@ export default class ExploreCard extends ConnectedElement {
         }
 
         @media only screen and (max-width: 1284px) {
-          .explore-page-cont > * {
+          .explore-page-cont > app-explore-list-item {
             flex: 0 0 25%;
           }
           .explore-page {
@@ -237,7 +270,7 @@ export default class ExploreCard extends ConnectedElement {
           }
         }
         @media only screen and (max-width: 900px) {
-          .explore-page-cont > * {
+          .explore-page-cont > app-explore-list-item {
             flex: 0 0 33.33333%;
           }
           .explore-page {
@@ -248,7 +281,7 @@ export default class ExploreCard extends ConnectedElement {
           }
         }
         @media only screen and (max-width: 680px) {
-          .explore-page-cont > * {
+          .explore-page-cont > app-explore-list-item {
             flex: 0 0 50%;
           }
           .explore-page {

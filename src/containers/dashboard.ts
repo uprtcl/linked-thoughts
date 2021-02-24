@@ -47,9 +47,6 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   selectedSectionId: string | undefined;
 
-  @internalProperty()
-  blogFeedIds: string[] = [];
-
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
@@ -79,7 +76,6 @@ export class DashboardElement extends ConnectedElement {
       this.checkLastVisited();
 
       await this.load();
-      this.blogFeedIds = await this.appManager.getBlogFeed();
     } else {
       Router.go(GettingStarted);
     }
@@ -239,12 +235,7 @@ export class DashboardElement extends ConnectedElement {
           ></app-nav-section>`;
         })}
       </div>
-      <b>feed</b>
-      <uprtcl-list
-        >${this.blogFeedIds.map(
-          (id) => html`<uprtcl-list-item>${id}</uprtcl-list-item>`
-        )}</uprtcl-list
-      >
+
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 
@@ -292,9 +283,9 @@ export class DashboardElement extends ConnectedElement {
           flex-direction: column;
           justify-content: center;
         }
-        app-explore-card{
-          position:absolute;
-          right:0;
+        app-explore-card {
+          position: absolute;
+          right: 0;
         }
         .row {
           display: flex;

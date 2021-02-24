@@ -80,7 +80,7 @@ export default class ReadOnlyPage extends ConnectedElement {
           margin: 0.5rem 0;
         }
         .docEditor {
-          flex: 3;
+          flex: 4;
         }
       `,
     ];

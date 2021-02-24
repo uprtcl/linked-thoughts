@@ -234,9 +234,9 @@ export default class ExploreCard extends ConnectedElement {
         /* Explore Page */
 
         .explore-page {
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.7);
           box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
-          backdrop-filter: blur(50px);
+          backdrop-filter: blur(1rem);
           /* Note: backdrop-filter has minimal browser support */
 
           border-radius: 10px 3px 3px 10px;

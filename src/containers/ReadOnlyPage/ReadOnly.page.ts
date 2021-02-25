@@ -1,31 +1,18 @@
+import { EveesBaseElement } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { getRandomAvatar } from '@fractalsoftware/random-avatar-generator';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 
-export default class ReadOnlyPage extends ConnectedElement {
+export default class ReadOnlyPage extends EveesBaseElement {
   @property()
   uref: string;
-  async firstUpdated() {
-    await this.load();
-  }
-
-  @internalProperty()
-  meta;
-
-  @internalProperty()
-  loading: boolean = true;
 
   async load() {
-    this.loading = true;
+    await super.load();
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
-    this.meta = await (await this.evees.client.store.getEntity(this.uref))
-      .object.payload;
-    // debugger;
-    this.loading = false;
   }
 
   render() {
@@ -33,12 +20,7 @@ export default class ReadOnlyPage extends ConnectedElement {
 
     return html`<div class="root">
       <div class="profileDetailsCont">
-        <div>
-          <div class="profile-img">
-            ${html`${unsafeHTML(getRandomAvatar())}`}
-          </div>
-          <div class="author-name">${this.meta.creatorId.slice(0,20)}</div>
-        </div>
+        <evees-author uref=${this.uref} show-name></evees-author>
       </div>
       <div class="docEditor">
         <documents-editor id="doc-editor" uref=${this.uref} ?read-only=${true}>

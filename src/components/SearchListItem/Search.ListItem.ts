@@ -1,13 +1,8 @@
-import { Signed, Commit } from '@uprtcl/evees';
-import { html, css, property, internalProperty, svg } from 'lit-element';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-
-import { ConnectedElement } from '../../services/connected.element';
+import { Perspective, Secured, EveesBaseElement } from '@uprtcl/evees';
+import { html, css, property, internalProperty } from 'lit-element';
 import { sharedStyles } from '../../styles';
 
-import { getRandomAvatar } from '@fractalsoftware/random-avatar-generator';
-
-export default class SearchListItem extends ConnectedElement {
+export default class SearchListItem extends EveesBaseElement {
   @property()
   uref: string;
 
@@ -15,34 +10,32 @@ export default class SearchListItem extends ConnectedElement {
   title: string;
 
   @internalProperty()
-  meta;
-
   loading: boolean = true;
+
   async firstUpdated() {
     await this.load();
   }
 
   async load() {
     this.loading = true;
+    await super.load();
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
-    this.meta = await (await this.evees.client.store.getEntity(this.uref))
-      .object.payload;
-    // debugger;
     this.loading = false;
   }
+
   render() {
     if (this.loading) return null;
+
     return html`<div class="cont clickable">
       <div class="header">
-        <div class="profile-img">${html`${unsafeHTML(getRandomAvatar())}`}</div>
-        <span class="author-name">${this.meta.creatorId}</span>
+        <evees-author uref=${this.uref} show-name></evees-author>
       </div>
       <div class="content">
         <div class="title">${this.title}</div>
       </div>
       <div class="footer">
-        <p class="publish-date">Sept 1</p>
+        <p class="publish-date">${this.head.object.payload.timestamp}</p>
       </div>
     </div>`;
   }

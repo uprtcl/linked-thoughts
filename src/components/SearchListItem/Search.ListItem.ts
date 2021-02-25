@@ -35,7 +35,7 @@ export default class SearchListItem extends EveesBaseElement {
         <div class="title">${this.title}</div>
       </div>
       <div class="footer">
-        <p class="publish-date">Sept 1</p>
+        <p class="publish-date">${this.head.object.payload.timestamp}</p>
       </div>
     </div>`;
   }

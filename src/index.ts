@@ -9,10 +9,11 @@ import { SectionPage } from './containers/SectionPage/section.page';
 import { VisitorElement } from './containers/visitor';
 import { DocumentPage } from './containers/DocPage/doc.page';
 import { ErrorPage } from './containers/ErrorPage/Error.page';
-
+import ExploreCard from './containers/ExploreCard/Explore.section';
+import SearchListItem from './components/SearchListItem/Search.ListItem';
+import ReadOnlyPage from './containers/ReadOnlyPage/ReadOnly.page';
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
-
 //
 
 (async function () {
@@ -28,4 +29,7 @@ import '@ui5/webcomponents/dist/Carousel';
   customElements.define('app-section-page', SectionPage);
   customElements.define('app-document-page', DocumentPage);
   customElements.define('app-error-page', ErrorPage);
+  customElements.define('app-explore-card', ExploreCard);
+  customElements.define('app-explore-list-item', SearchListItem);
+  customElements.define('app-read-only-page', ReadOnlyPage);
 })();

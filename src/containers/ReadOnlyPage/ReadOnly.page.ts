@@ -31,7 +31,7 @@ export default class ReadOnlyPage extends ConnectedElement {
       }`}
     >
       <div class="profileDetailsCont">
-        <evees-author uref=${this.uref} show-name></evees-author>
+        <evees-author userId=${"google-oauth2|103676780052586452595"} uref=${this.uref} show-name></evees-author>
       </div>
       <div class="docEditor">
         <documents-editor id="doc-editor" uref=${this.uref} ?read-only=${true}>

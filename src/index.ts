@@ -12,6 +12,7 @@ import { ErrorPage } from './containers/ErrorPage/Error.page';
 import ExploreCard from './containers/ExploreCard/Explore.section';
 import SearchListItem from './components/SearchListItem/Search.ListItem';
 import ReadOnlyPage from './containers/ReadOnlyPage/ReadOnly.page';
+import LTIntersectionObserver from './containers/IntersectionObserver/IntersectionObserver';
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
 //
@@ -32,4 +33,5 @@ import '@ui5/webcomponents/dist/Carousel';
   customElements.define('app-explore-card', ExploreCard);
   customElements.define('app-explore-list-item', SearchListItem);
   customElements.define('app-read-only-page', ReadOnlyPage);
+  customElements.define('app-intersection-observer', LTIntersectionObserver);
 })();

@@ -8,7 +8,7 @@ import SearchIcon from '../../assets/icons/search.svg';
 import RefreshIcon from '../../assets/icons/refresh.svg';
 export default class ExploreCard extends ConnectedElement {
   @property()
-  exploreState: number = 1;
+  exploreState: number = 0;
 
   @internalProperty()
   blogFeedIds: string[] = [];
@@ -16,12 +16,16 @@ export default class ExploreCard extends ConnectedElement {
   @property()
   selectedBlogId: string;
 
+  loading: boolean = false;
+
   async firstUpdated() {
     await this.load();
   }
 
   async load() {
+    this.loading = false;
     this.blogFeedIds = await this.appManager.getBlogFeed();
+    this.loading = true;
   }
 
   closeExplore() {
@@ -68,18 +72,30 @@ export default class ExploreCard extends ConnectedElement {
   }
 
   renderItems() {
-    if (!Array.isArray(this.blogFeedIds)) return html`Oopsie, no content found`;
     if (this.selectedBlogId) {
       return html`${this.renderReadPage()}`;
-    } else
-      return html` ${this.blogFeedIds.map((docId) => {
-        return html` <app-explore-list-item
-          @click=${() => {
-            this.selectedBlogId = docId;
-          }}
-          uref=${docId}
-        ></app-explore-list-item>`;
-      })}`;
+    } else if (this.blogFeedIds.length > 0)
+      return html`
+        ${this.blogFeedIds.map((docId) => {
+          return html`
+            <app-explore-list-item
+              @click=${() => {
+                this.selectedBlogId = docId;
+              }}
+              uref=${docId}
+            ></app-explore-list-item>
+          `;
+        })}
+        <!-- <app-intersection-observer
+          @intersect="${() => {}}"
+          .thresholds="${[0.0]}"
+          .root-margin="${'30px'}"
+          ><div>HEllo</div></app-intersection-observer
+        > -->
+      `;
+    else {
+      return html`No content found`;
+    }
   }
 
   renderExploreState() {
@@ -124,7 +140,7 @@ export default class ExploreCard extends ConnectedElement {
         </div>
       </div>
 
-      ${this.renderExploreState()} `;
+      ${this.loading ? this.renderExploreState() : null} `;
   }
 
   static get styles() {

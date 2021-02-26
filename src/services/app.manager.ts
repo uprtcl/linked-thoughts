@@ -9,6 +9,7 @@ import {
   Secured,
   Perspective,
   getHome,
+  SearchOptions,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
@@ -124,6 +125,15 @@ export class AppManager {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
     const result = await this.evees.client.searchEngine.explore({
       linksTo: [{ id: blogConcept.id }],
+    });
+    return result.perspectiveIds;
+  }
+
+  async getPaginatedFeed(config: SearchOptions): Promise<string[]> {
+    const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
+    const result = await this.evees.client.searchEngine.explore({
+      linksTo: [{ id: blogConcept.id }],
+      pagination: config.pagination,
     });
     return result.perspectiveIds;
   }

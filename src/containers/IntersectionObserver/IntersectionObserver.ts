@@ -12,11 +12,7 @@ export default class LTIntersectionObserver extends LitElement {
 
   observer = null;
   render() {
-    return html`
-      <div id="slottedData">
-        <slot></slot>
-      </div>
-    `;
+    return html` <div id="slottedData"></div> `;
   }
 
   firstUpdated() {
@@ -45,5 +41,16 @@ export default class LTIntersectionObserver extends LitElement {
       },
     });
     this.dispatchEvent(event);
+  }
+
+  static get styles() {
+    return [
+      css`
+        #slottedData {
+          height: 1px;
+          /* background: #f0f; */
+        }
+      `,
+    ];
   }
 }

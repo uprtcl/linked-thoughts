@@ -22,6 +22,17 @@ export default class ExploreCard extends ConnectedElement {
     await this.load();
   }
 
+  async getMoreFeed() {
+    console.log('AAAAAAAAA');
+    try {
+      const result = await this.appManager.getPaginatedFeed({
+        pagination: { first: 1, offset: this.blogFeedIds.length },
+      });
+      this.blogFeedIds = [...this.blogFeedIds, ...result];
+    } catch (e) {
+      console.error(e);
+    }
+  }
   async load() {
     this.loading = false;
     this.blogFeedIds = await this.appManager.getBlogFeed();
@@ -86,12 +97,12 @@ export default class ExploreCard extends ConnectedElement {
             ></app-explore-list-item>
           `;
         })}
-        <!-- <app-intersection-observer
-          @intersect="${() => {}}"
+
+        <app-intersection-observer
+          @intersect="${this.getMoreFeed}"
           .thresholds="${[0.0]}"
           .root-margin="${'30px'}"
-          ><div>HEllo</div></app-intersection-observer
-        > -->
+        ></app-intersection-observer>
       `;
     else {
       return html`No content found`;

@@ -8,7 +8,7 @@ import SearchIcon from '../../assets/icons/search.svg';
 import RefreshIcon from '../../assets/icons/refresh.svg';
 export default class ExploreCard extends ConnectedElement {
   @property()
-  exploreState: number = 0;
+  exploreState: number = 1;
 
   @internalProperty()
   blogFeedIds: string[] = [];
@@ -38,9 +38,9 @@ export default class ExploreCard extends ConnectedElement {
       }
     } else {
       // Hide the blog page for mini-explore View
-      if (currentState == 2) {
-        this.selectedBlogId = null;
-      }
+      // if (currentState == 2) {
+      //   this.selectedBlogId = null;
+      // }
       if (currentState > 0) {
         this.exploreState--;
       }
@@ -76,7 +76,6 @@ export default class ExploreCard extends ConnectedElement {
         return html` <app-explore-list-item
           @click=${() => {
             this.selectedBlogId = docId;
-            this.exploreState = 2;
           }}
           uref=${docId}
         ></app-explore-list-item>`;
@@ -100,7 +99,10 @@ export default class ExploreCard extends ConnectedElement {
 
   renderReadPage() {
     return html`<div class="readCont">
-      <app-read-only-page uref=${this.selectedBlogId} />
+      <app-read-only-page
+        containerType=${this.exploreState === 1 ? 'mobile' : 'desktop'}
+        uref=${this.selectedBlogId}
+      />
     </div>`;
   }
   render() {

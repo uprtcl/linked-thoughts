@@ -1,24 +1,35 @@
 import { EveesBaseElement } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 
-export default class ReadOnlyPage extends EveesBaseElement {
+export default class ReadOnlyPage extends ConnectedElement {
   @property()
   uref: string;
 
+  @property()
+  containerType: 'mobile' | 'desktop' = 'desktop';
+
+  loading: boolean = false;
+
+  async firstUpdated() {
+    await this.load();
+  }
+
   async load() {
-    await super.load();
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
   }
 
   render() {
-    if (this.loading) return null;
+    if (this.loading) return html``;
 
-    return html`<div class="root">
+    return html`<div
+      class=${`rootCont ${
+        this.containerType === 'mobile' ? 'rootContBlock' : 'rootContBlock'
+      }`}
+    >
       <div class="profileDetailsCont">
         <evees-author uref=${this.uref} show-name></evees-author>
       </div>
@@ -37,10 +48,16 @@ export default class ReadOnlyPage extends EveesBaseElement {
           width: 100%;
           font-family: 'Inter';
         }
-        .root {
+        .rootCont {
+          height: 100%;
+        }
+
+        .rootContFlex {
           display: flex;
           flex: 1;
-          height: 100%;
+        }
+        .rootContBlock {
+          display: block;
         }
         .profileDetailsCont {
           flex: 1;

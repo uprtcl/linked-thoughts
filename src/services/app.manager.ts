@@ -8,12 +8,14 @@ import {
   getConceptPerspective,
   Secured,
   Perspective,
+  getHome,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
-import { Dashboard } from '../containers/types';
+import { Dashboard, Section } from '../containers/types';
 
 export enum ConceptId {
+  BLOGHOME = 'bloghome',
   BLOGPOST = 'blogpost',
 }
 
@@ -28,6 +30,7 @@ export class AppManager {
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
     switch (conceptId) {
+      case ConceptId.BLOGHOME:
       case ConceptId.BLOGPOST:
         return getConceptPerspective(conceptId);
     }
@@ -37,12 +40,14 @@ export class AppManager {
     /** check the app scheleton is there */
     await this.elements.check();
     await this.checkBlogPermissions();
-    // TODO: Is it necessary to check or Create the blog concept perspective?
   }
 
-  /** init blog ACL to publicRead privateWrite (HTTP-remote-specific) */
+  /** init blog ACL to publicRead privateWrite (HTTP-remote-specific)
+   *  verify blog concept is linked to the blog section
+   */
   async checkBlogPermissions() {
     const blogSection = await this.elements.get('/linkedThoughts/blogSection');
+
     const remote = this.evees.getRemote() as EveesHttp;
     await remote.accessControl.toggleDelegate(blogSection.id, false);
     await remote.accessControl.setPublicPermissions(
@@ -50,6 +55,37 @@ export class AppManager {
       PermissionType.Read,
       true
     );
+
+    // check or associate the blog section with the BLOGHOME concept
+    const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
+
+    // get the current Section data of the blog section
+    const blogSectionData = await this.evees.getPerspectiveData<Section>(
+      blogSection.id
+    );
+
+    if (
+      blogSectionData.object.meta === undefined ||
+      blogSectionData.object.meta.isA === undefined ||
+      !blogSectionData.object.meta.isA.includes(blogHomeConcept.id)
+    ) {
+      // append the bloghome concept
+      const isAOrg = blogSectionData.object.meta
+        ? blogSectionData.object.meta.isA
+        : [];
+      const isANew = isAOrg.concat([blogHomeConcept.id]);
+
+      const blogDataNew: Section = {
+        ...blogSectionData.object,
+        meta: {
+          isA: isANew,
+        },
+      };
+
+      /** update the section data (adding the link) */
+      await this.evees.updatePerspectiveData(blogSection.id, blogDataNew);
+      await this.evees.client.flush();
+    }
   }
 
   async newPage(onSectionId: string): Promise<string> {
@@ -90,6 +126,26 @@ export class AppManager {
       linksTo: [{ id: blogConcept.id }],
     });
     return result.perspectiveIds;
+  }
+
+  // TODO: TEST: find another user's blogs to simulate follows
+  async getBlogIdOf(userId: string): Promise<string | undefined> {
+    const userHome = await getHome(this.evees.getRemote(), userId);
+    const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
+
+    const result = await this.evees.client.searchEngine.explore({
+      under: [{ id: userHome.id }],
+      linksTo: [{ id: blogHomeConcept.id }],
+    });
+
+    if (result.perspectiveIds.length > 1) {
+      throw Error(
+        `Unexpected number ${result.perspectiveIds.length} of blog perspectives under user ${userId}`
+      );
+    }
+    return result.perspectiveIds.length >= 1
+      ? result.perspectiveIds[0]
+      : undefined;
   }
 
   async getSections(): Promise<string[]> {

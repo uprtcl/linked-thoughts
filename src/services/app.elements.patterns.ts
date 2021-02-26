@@ -138,9 +138,12 @@ export class SectionPattern extends Pattern<Section> {
   }
 }
 
-export class SectionBehaviors implements HasChildren<Section> {
-  title = (node: Section) => node.title;
+export class SectionBehaviors
+  implements HasChildren<Section>, HasLinks<Section> {
+  [LinkingBehaviorNames.LINKS_TO] = (node: Section): string[] =>
+    node.meta ? node.meta.isA : [];
 
+  title = (node: Section) => node.title;
   text = (node: Section) => node.text;
 
   [LinkingBehaviorNames.REPLACE_CHILDREN] = (node: Section) => (

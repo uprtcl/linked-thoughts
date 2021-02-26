@@ -8,11 +8,11 @@ import {
   getConceptPerspective,
   Secured,
   Perspective,
+  getHome,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
-import { Dashboard } from '../containers/types';
-import { SearchOptionsJoin } from '@uprtcl/evees/dist/types/evees/interfaces/types';
+import { Dashboard, Section } from '../containers/types';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
@@ -47,6 +47,7 @@ export class AppManager {
    */
   async checkBlogPermissions() {
     const blogSection = await this.elements.get('/linkedThoughts/blogSection');
+
     const remote = this.evees.getRemote() as EveesHttp;
     await remote.accessControl.toggleDelegate(blogSection.id, false);
     await remote.accessControl.setPublicPermissions(
@@ -57,14 +58,33 @@ export class AppManager {
 
     // check or associate the blog section with the BLOGHOME concept
     const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
+
+    // get the current Section data of the blog section
+    const blogSectionData = await this.evees.getPerspectiveData<Section>(
+      blogSection.id
+    );
+
     if (
-      blogSection.object.payload.meta === undefined ||
-      blogSection.object.payload.meta.isA === undefined ||
-      !blogSection.object.payload.meta.isA.includes(blogHomeConcept.id)
+      blogSectionData.object.meta === undefined ||
+      blogSectionData.object.meta.isA === undefined ||
+      !blogSectionData.object.meta.isA.includes(blogHomeConcept.id)
     ) {
-      blogSection.object.payload.meta = {
-        isA: [blogHomeConcept.id],
+      // append the bloghome concept
+      const isAOrg = blogSectionData.object.meta
+        ? blogSectionData.object.meta.isA
+        : [];
+      const isANew = isAOrg.concat([blogHomeConcept.id]);
+
+      const blogDataNew: Section = {
+        ...blogSectionData.object,
+        meta: {
+          isA: isANew,
+        },
       };
+
+      /** update the section data (adding the link) */
+      await this.evees.updatePerspectiveData(blogSection.id, blogDataNew);
+      await this.evees.client.flush();
     }
   }
 
@@ -109,13 +129,23 @@ export class AppManager {
   }
 
   // TODO: TEST: find another user's blogs to simulate follows
-  async getBlogFeedsUnder(underIds: string[]): Promise<string[]> {
+  async getBlogIdOf(userId: string): Promise<string | undefined> {
+    const userHome = await getHome(this.evees.getRemote(), userId);
     const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
+
     const result = await this.evees.client.searchEngine.explore({
-      under: [{ id: underIds[0] }],
+      under: [{ id: userHome.id }],
       linksTo: [{ id: blogHomeConcept.id }],
     });
-    return result.perspectiveIds;
+
+    if (result.perspectiveIds.length > 1) {
+      throw Error(
+        `Unexpected number ${result.perspectiveIds.length} of blog perspectives under user ${userId}`
+      );
+    }
+    return result.perspectiveIds.length >= 1
+      ? result.perspectiveIds[0]
+      : undefined;
   }
 
   async getSections(): Promise<string[]> {

@@ -12,6 +12,9 @@ export interface Section {
   title: string;
   pages: string[];
   text: string;
+  meta: {
+    isA: string[];
+  };
 }
 
 export interface ThoughtsTextNode extends TextNode {

@@ -12,8 +12,10 @@ import {
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard } from '../containers/types';
+import { SearchOptionsJoin } from '@uprtcl/evees/dist/types/evees/interfaces/types';
 
 export enum ConceptId {
+  BLOGHOME = 'bloghome',
   BLOGPOST = 'blogpost',
 }
 
@@ -28,6 +30,7 @@ export class AppManager {
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
     switch (conceptId) {
+      case ConceptId.BLOGHOME:
       case ConceptId.BLOGPOST:
         return getConceptPerspective(conceptId);
     }
@@ -37,10 +40,11 @@ export class AppManager {
     /** check the app scheleton is there */
     await this.elements.check();
     await this.checkBlogPermissions();
-    // TODO: Is it necessary to check or Create the blog concept perspective?
   }
 
-  /** init blog ACL to publicRead privateWrite (HTTP-remote-specific) */
+  /** init blog ACL to publicRead privateWrite (HTTP-remote-specific)
+   *  verify blog concept is linked to the blog section
+   */
   async checkBlogPermissions() {
     const blogSection = await this.elements.get('/linkedThoughts/blogSection');
     const remote = this.evees.getRemote() as EveesHttp;
@@ -50,6 +54,18 @@ export class AppManager {
       PermissionType.Read,
       true
     );
+
+    // check or associate the blog section with the BLOGHOME concept
+    const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
+    if (
+      blogSection.object.payload.meta === undefined ||
+      blogSection.object.payload.meta.isA === undefined ||
+      !blogSection.object.payload.meta.isA.includes(blogHomeConcept.id)
+    ) {
+      blogSection.object.payload.meta = {
+        isA: [blogHomeConcept.id],
+      };
+    }
   }
 
   async newPage(onSectionId: string): Promise<string> {
@@ -88,6 +104,16 @@ export class AppManager {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
     const result = await this.evees.client.searchEngine.explore({
       linksTo: [{ id: blogConcept.id }],
+    });
+    return result.perspectiveIds;
+  }
+
+  // TODO: TEST: find another user's blogs to simulate follows
+  async getBlogFeedsUnder(underIds: string[]): Promise<string[]> {
+    const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
+    const result = await this.evees.client.searchEngine.explore({
+      under: [{ id: underIds[0] }],
+      linksTo: [{ id: blogHomeConcept.id }],
     });
     return result.perspectiveIds;
   }

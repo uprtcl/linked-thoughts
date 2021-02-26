@@ -5,6 +5,7 @@ import ClosePurple from '../../assets/icons/close-purple.svg';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
+import RefreshIcon from '../../assets/icons/refresh.svg';
 export default class ExploreCard extends ConnectedElement {
   @property()
   exploreState: number = 0;
@@ -16,10 +17,12 @@ export default class ExploreCard extends ConnectedElement {
   selectedBlogId: string;
 
   async firstUpdated() {
-    this.blogFeedIds = await this.appManager.getBlogFeed();
+    await this.load();
   }
 
-  async load() {}
+  async load() {
+    this.blogFeedIds = await this.appManager.getBlogFeed();
+  }
 
   closeExplore() {
     this.exploreState = 0;
@@ -51,7 +54,16 @@ export default class ExploreCard extends ConnectedElement {
           placeholder="Search something awesome..."
         />
       </div>
-      <span class="clickable" @click=${this.closeExplore}>${ClosePurple}</span>
+      <span
+        class="clickable refresh"
+        @click=${async () => {
+          await this.load();
+        }}
+        >${RefreshIcon}</span
+      >
+      <span class="clickable" @click=${this.closeExplore}>
+        ${ClosePurple}
+      </span>
     </div>`;
   }
 
@@ -70,6 +82,7 @@ export default class ExploreCard extends ConnectedElement {
         ></app-explore-list-item>`;
       })}`;
   }
+
   renderExploreState() {
     switch (this.exploreState) {
       case 1:
@@ -125,6 +138,11 @@ export default class ExploreCard extends ConnectedElement {
           flex: 1;
           width: 100%;
         }
+        .refresh {
+          width: 25px;
+          height: 25px;
+          padding: 5px;
+        }
         /* ToolTip */
         .explore-navigation-tooltip {
           background: rgba(255, 255, 255, 0.95);
@@ -179,6 +197,7 @@ export default class ExploreCard extends ConnectedElement {
           height: 500px;
           height: 85%;
           max-height: 85vh;
+          min-height: 85vh;
         }
         /* width */
         *::-webkit-scrollbar {

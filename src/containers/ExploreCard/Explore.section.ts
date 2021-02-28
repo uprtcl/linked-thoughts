@@ -18,24 +18,30 @@ export default class ExploreCard extends ConnectedElement {
 
   loading: boolean = false;
 
+  @property({ type: Boolean })
+  isEnded: boolean = false;
+
   async firstUpdated() {
     await this.load();
   }
 
   async getMoreFeed() {
-    console.log('AAAAAAAAA');
+    if (this.isEnded) return;
+
     try {
       const result = await this.appManager.getPaginatedFeed({
-        pagination: { first: 1, offset: this.blogFeedIds.length },
+        pagination: { first: 3, offset: this.blogFeedIds.length },
       });
-      this.blogFeedIds = [...this.blogFeedIds, ...result];
+      this.isEnded = result.ended;
+      this.blogFeedIds = [...this.blogFeedIds, ...result.perspectiveIds];
     } catch (e) {
       console.error(e);
     }
   }
   async load() {
     this.loading = false;
-    this.blogFeedIds = await this.appManager.getBlogFeed();
+    const result = await this.appManager.getBlogFeed();
+    this.blogFeedIds = result.perspectiveIds;
     this.loading = true;
   }
 

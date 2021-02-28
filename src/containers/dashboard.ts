@@ -91,7 +91,7 @@ export class DashboardElement extends ConnectedElement {
 
       // ------------------------------------------
       // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
-      this.blogFeedIds = await this.appManager.getBlogFeed();
+      this.blogFeedIds = (await this.appManager.getBlogFeed()).perspectiveIds;
       // ------------------------------------------
     } else {
       Router.go(GettingStarted);

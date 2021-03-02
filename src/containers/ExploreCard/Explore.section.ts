@@ -40,6 +40,7 @@ export default class ExploreCard extends ConnectedElement {
   }
   async load() {
     this.loading = false;
+    this.isEnded = false;
     const result = await this.appManager.getBlogFeed();
     this.blogFeedIds = result.perspectiveIds;
     this.loading = true;

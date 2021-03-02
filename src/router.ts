@@ -5,6 +5,7 @@ import {
   GenerateDocumentRoute,
   GenerateReadDocumentRoute,
   GenerateSectionRoute,
+  GenerateUserRoute,
   RouteName,
 } from './utils/routes.helpers';
 
@@ -22,6 +23,10 @@ export class LTRouter {
       {
         path: GenerateReadDocumentRoute(),
         component: 'app-visitor',
+      },
+      {
+        path: GenerateUserRoute(),
+        component: 'app-user-page',
       },
       {
         path: Routes.Home,

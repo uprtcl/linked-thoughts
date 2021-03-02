@@ -1,24 +1,17 @@
-import { html, css, internalProperty } from 'lit-element';
-
+import { html, css, internalProperty, property } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
 import { Logger } from '@uprtcl/evees';
-
 import { EveesHttp } from '@uprtcl/evees-http';
-import { LTRouter } from '../router';
+import { sharedStyles } from '../../styles';
+import { ConnectedElement } from '../../services/connected.element';
+import IntercreativityLogo from '../../assets/intercreativity.svg';
+import { ORIGIN } from '../../utils/routes.generator';
 
-import { ConnectedElement } from '../services/connected.element';
-import IntercreativityLogo from '../assets/intercreativity.svg';
-import { ORIGIN } from '../utils/routes.generator';
-export class VisitorElement extends ConnectedElement {
-  logger = new Logger('Dashboard');
-
-  @internalProperty()
-  pageId!: string;
-
+export default class AppBarPublic extends ConnectedElement {
   @internalProperty()
   loading = true;
 
-  @internalProperty()
+  @property()
   isLogged = false;
 
   remote: EveesHttp;
@@ -26,34 +19,30 @@ export class VisitorElement extends ConnectedElement {
   async firstUpdated() {
     this.remote = this.evees.getRemote() as EveesHttp;
     this.isLogged = await this.remote.isLogged();
-    this.decodeUrl();
     this.loading = false;
-  }
-
-  async decodeUrl() {
-    this.pageId = LTRouter.Router.location.params.docId as string;
   }
 
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
 
     return html`
-      <app-appbar-public></app-appbar-public>
-      <app-read-only-page uref=${this.pageId} />
+      <div class="nav">
+        <div class="nav-logo">${IntercreativityLogo}</div>
+        <div class="nav-cta-cont">
+          <a class="nav-cta" href=${ORIGIN} target="_blank"
+            >${this.isLogged ? 'Go to Dashboard' : 'Get Started'}</a
+          >
+        </div>
+      </div>
     `;
   }
 
   static get styles() {
     return [
       styles,
+      sharedStyles,
       css`
         :host {
-          display: flex;
-          flex: 1 1 0;
-          flex-direction: column;
-        }
-        a {
-          text-decoration: none;
         }
 
         .nav {
@@ -73,13 +62,13 @@ export class VisitorElement extends ConnectedElement {
         }
 
         .nav-cta {
-          padding: 1rem 1.7rem;
+          padding: 0.6rem 1.2rem;
 
           background: #efeffd;
           color: #4260f6;
           border-radius: 8px;
           font-weight: bold;
-          font-size: 1.1rem;
+          font-size: 1rem;
           transition: all 0.2s cubic-bezier(0.86, 0, 0.07, 1);
         }
         .nav-cta:hover {

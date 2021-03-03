@@ -44,10 +44,9 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
       <div class="cont">
         <div class="profileCont">
           <div class="author">
-            TODO: Author Component
             <evees-author
-              userId=${this.userId}
-              uref=${this.uref}
+              remote-id=${this.evees.findRemote('http').id}
+              user-id=${this.userId}
               show-name
             ></evees-author>
           </div>
@@ -71,6 +70,7 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
       css`
         :host {
         }
+
         .cont {
           display: flex;
         }
@@ -81,6 +81,9 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
         }
         .author {
           margin-top: 5%;
+
+          width: 50%;
+          overflow: hidden;
         }
         .blogsCont {
           flex: 4;

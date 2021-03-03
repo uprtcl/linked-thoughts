@@ -11,6 +11,9 @@ export default class ReadOnlyPage extends ConnectedElement {
   @property()
   containerType: 'mobile' | 'desktop' = 'desktop';
 
+  @internalProperty()
+  userId: string;
+
   loading: boolean = false;
 
   async firstUpdated() {
@@ -20,6 +23,8 @@ export default class ReadOnlyPage extends ConnectedElement {
   async load() {
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
+    this.userId = await (await this.evees.client.store.getEntity(this.uref))
+      .object.payload.creatorId;
   }
 
   render() {
@@ -27,11 +32,15 @@ export default class ReadOnlyPage extends ConnectedElement {
 
     return html`<div
       class=${`rootCont ${
-        this.containerType === 'mobile' ? 'rootContBlock' : 'rootContBlock'
+        this.containerType === 'mobile' ? 'rootContBlock' : 'rootContFlex'
       }`}
     >
       <div class="profileDetailsCont">
-        <evees-author userId=${"google-oauth2|103676780052586452595"} uref=${this.uref} show-name></evees-author>
+        <evees-author
+          remote-id=${this.evees.findRemote('http').id}
+          user-id=${this.userId}
+          show-name
+        ></evees-author>
       </div>
       <div class="docEditor">
         <documents-editor id="doc-editor" uref=${this.uref} ?read-only=${true}>
@@ -64,6 +73,9 @@ export default class ReadOnlyPage extends ConnectedElement {
           display: flex;
           margin-top: 3vh;
           justify-content: center;
+          width: 50%;
+          min-width: 100px;
+          overflow: hidden;
         }
         .profile-img {
           height: calc(2rem + 3vmin);

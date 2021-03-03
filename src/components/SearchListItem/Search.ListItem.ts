@@ -11,6 +11,9 @@ export default class SearchListItem extends EveesBaseElement {
   title: string;
 
   @internalProperty()
+  userId: string;
+
+  @internalProperty()
   loading: boolean = true;
 
   async firstUpdated() {
@@ -22,6 +25,9 @@ export default class SearchListItem extends EveesBaseElement {
     await super.load();
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
+    this.userId = await (await this.evees.client.store.getEntity(this.uref))
+      .object.payload.creatorId;
+
     this.loading = false;
   }
 
@@ -30,7 +36,11 @@ export default class SearchListItem extends EveesBaseElement {
 
     return html`<div class="cont clickable">
       <div class="header">
-        <evees-author uref=${this.uref} show-name></evees-author>
+        <evees-author
+          remote-id=${this.evees.findRemote('http').id}
+          user-id=${this.userId}
+          show-name
+        ></evees-author>
       </div>
       <div class="content">
         <div class="title">${this.title}</div>

@@ -122,38 +122,38 @@ export class AppManager {
     return forkId;
   }
 
-  async getBlogFeed(): Promise<SearchResult> {
+  async getBlogFeed(
+    offset: number,
+    first: number,
+    text?: string,
+    userId?: string
+  ): Promise<SearchResult> {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
-    const result = await this.evees.client.searchEngine.explore({
-      linksTo: [{ id: blogConcept.id }],
-    });
-    return result;
-  }
+    const userHome = userId
+      ? await getHome(this.evees.getRemote(), userId)
+      : undefined;
 
-  async getPaginatedFeed(config: SearchOptions): Promise<SearchResult> {
-    const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
-    const result = await this.evees.client.searchEngine.explore({
-      linksTo: [{ id: blogConcept.id }],
-      pagination: config.pagination,
-    });
-    return result;
-  }
-
-  // Use it to explore by text under a userHome linked to his blogHomeConcept.
-  async blogFeedSearch(userId: string, textInput: string, levels: boolean): Promise<any> {
-    const userHome = await getHome(this.evees.getRemote(), userId);
-    const blogHomeConcept = await this.getConcept(ConceptId.BLOGPOST);
-
-    const result = await this.evees.client.searchEngine.explore({
-      under: [{ id: userHome.id }],
-      linksTo: [{ id: blogHomeConcept.id }],
-      text: {
-        value: textInput,
-        levels: levels ? -1 : 0
+    const result = await this.evees.client.searchEngine.explore(
+      {
+        under: userHome ? [{ id: userHome.id }] : undefined,
+        linksTo: [{ id: blogConcept.id }],
+        pagination: {
+          offset,
+          first,
+        },
+        text: text
+          ? {
+              value: text,
+              levels: -1,
+            }
+          : undefined,
+      },
+      {
+        entities: true,
+        levels: 0,
       }
-    });
-
-    return result.perspectiveIds;
+    );
+    return result;
   }
 
   // TODO: TEST: find another user's blogs to simulate follows

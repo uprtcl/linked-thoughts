@@ -1,9 +1,11 @@
-import { html, css, property, internalProperty } from 'lit-element';
+import { html, css, property, internalProperty, query } from 'lit-element';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
+import { UprtclTextField } from '@uprtcl/common-ui';
+import lodash from 'lodash';
 
 export default class ExploreCard extends ConnectedElement {
   @internalProperty()
@@ -20,6 +22,14 @@ export default class ExploreCard extends ConnectedElement {
   @property({ type: Boolean })
   isEnded: boolean = false;
 
+  @internalProperty()
+  hovering = false;
+
+  @query('#search-input')
+  searchInput: UprtclTextField;
+
+  searchText: string;
+
   async firstUpdated() {
     await this.load();
   }
@@ -28,11 +38,16 @@ export default class ExploreCard extends ConnectedElement {
     if (this.isEnded) return;
 
     try {
-      const result = await this.appManager.getPaginatedFeed({
-        pagination: { first: 3, offset: this.blogFeedIds.length },
-      });
+      const result = await this.appManager.getBlogFeed(
+        this.blogFeedIds.length,
+        3,
+        this.searchText
+      );
       this.isEnded = result.ended;
-      this.blogFeedIds = [...this.blogFeedIds, ...result.perspectiveIds];
+      this.blogFeedIds = lodash.concat(
+        this.blogFeedIds,
+        ...result.perspectiveIds
+      );
     } catch (e) {
       console.error(e);
     }
@@ -40,12 +55,24 @@ export default class ExploreCard extends ConnectedElement {
   async load() {
     this.loading = true;
     this.isEnded = false;
-    const result = await this.appManager.getBlogFeed();
+    const result = await this.appManager.getBlogFeed(
+      this.blogFeedIds.length,
+      10,
+      this.searchText
+    );
     this.blogFeedIds = result.perspectiveIds;
     this.loading = false;
   }
 
   async refresh() {
+    this.blogFeedIds = [];
+    this.load();
+  }
+
+  async searchByText() {
+    this.searchText = this.searchInput.value.trim()
+      ? this.searchInput.value
+      : undefined;
     this.load();
   }
 
@@ -74,7 +101,10 @@ export default class ExploreCard extends ConnectedElement {
   renderHeader() {
     return html`<div class="header">
       <div class="search-cont">
-        ${SearchIcon}<uprtcl-textfield
+        <div @click=${() => this.searchByText()}>${SearchIcon}</div>
+        <uprtcl-textfield
+          id="search-input"
+          @enter=${() => this.searchByText()}
           label="(soon) Search Intercreativity"
         ></uprtcl-textfield>
       </div>
@@ -113,13 +143,16 @@ export default class ExploreCard extends ConnectedElement {
             })}
 
         <app-intersection-observer
-          @intersect="${this.getMoreFeed}"
-          .thresholds="${[0.0]}"
-          .root-margin="${'30px'}"
-        ></app-intersection-observer>
+          @intersect="${({ detail }) => {
+            if (detail.isIntersecting) this.getMoreFeed();
+          }}"
+        >
+        </app-intersection-observer>
       `;
     else {
-      return html`No content found`;
+      return this.loading
+        ? html`<uprtcl-loading></uprtcl-loading>`
+        : html`No content found`;
     }
   }
 
@@ -152,12 +185,17 @@ export default class ExploreCard extends ConnectedElement {
     return html`<div class="explore-navigation-tooltip">
         <div
           @click=${() => this.handleNavigation('increment')}
-          class="clickable explore-heading"
+          class=${'clickable explore-heading' +
+          (this.hovering ? 'light-grey' : '')}
         >
           EXPLORE
         </div>
-        <div class="explore-navigation">
+        <div
+          class=${'explore-navigation' + (this.hovering ? 'light-grey' : '')}
+        >
           <span
+            @mouseEnter=${() => (this.hovering = true)}
+            @mouseLeave=${() => (this.hovering = false)}
             ?disabled=${this.exploreState == 2}
             @click=${() => this.handleNavigation('increment')}
             class="navigation-button clickable"
@@ -202,6 +240,9 @@ export default class ExploreCard extends ConnectedElement {
           display: flex;
           align-items: center;
           height: fit-content;
+        }
+        .light-grey {
+          background: rgba(240, 240, 240, 0.95);
         }
         .explore-navigation {
           position: absolute;
@@ -288,7 +329,7 @@ export default class ExploreCard extends ConnectedElement {
           flex: 1;
           align-items: center;
           display: flex;
-          margin-right: 1rem;
+          margin: 0 1rem;
           position: relative;
         }
 

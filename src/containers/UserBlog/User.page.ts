@@ -28,20 +28,16 @@ export default class ReadOnlyPage extends ConnectedElement {
 
   userId: string;
   async firstUpdated() {
-    this.blogFeedIds = (await this.appManager.getBlogFeed()).perspectiveIds;
     await this.load();
   }
-  // ------------------------------------------
-  // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
+
   async getUserBlogId(userId) {
     this.userBlogId = await this.appManager.getBlogIdOf(userId);
 
     if (!this.userBlogId) {
       Router.go('/404');
     }
-    // const res = await this.evees.getPerspectiveRemote(this.userBlogId);
   }
-  //
 
   async load() {
     const routeParams = LTRouter.Router.location.params as any;

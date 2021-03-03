@@ -15,7 +15,7 @@ export default class ExploreCard extends ConnectedElement {
   @property()
   selectedBlogId: string;
 
-  loading: boolean = false;
+  loading: boolean = true;
 
   @property({ type: Boolean })
   isEnded: boolean = false;
@@ -38,11 +38,15 @@ export default class ExploreCard extends ConnectedElement {
     }
   }
   async load() {
-    this.loading = false;
+    this.loading = true;
     this.isEnded = false;
     const result = await this.appManager.getBlogFeed();
     this.blogFeedIds = result.perspectiveIds;
-    this.loading = true;
+    this.loading = false;
+  }
+
+  async refresh() {
+    this.load();
   }
 
   closeExplore() {
@@ -71,7 +75,7 @@ export default class ExploreCard extends ConnectedElement {
     return html`<div class="header">
       <div class="search-cont">
         ${SearchIcon}<uprtcl-textfield
-          label="Search Intercreativity"
+          label="(soon) Search Intercreativity"
         ></uprtcl-textfield>
       </div>
       <uprtcl-icon-button
@@ -79,9 +83,7 @@ export default class ExploreCard extends ConnectedElement {
         button
         skinny
         style="margin-right: 6px"
-        @click=${async () => {
-          await this.load();
-        }}
+        @click=${() => this.refresh()}
       ></uprtcl-icon-button>
       <uprtcl-icon-button
         icon="clear"
@@ -97,16 +99,18 @@ export default class ExploreCard extends ConnectedElement {
       return html`${this.renderReadPage()}`;
     } else if (this.blogFeedIds.length > 0)
       return html`
-        ${this.blogFeedIds.map((docId) => {
-          return html`
-            <app-explore-list-item
-              @click=${() => {
-                this.selectedBlogId = docId;
-              }}
-              uref=${docId}
-            ></app-explore-list-item>
-          `;
-        })}
+        ${this.loading
+          ? html`<uprtcl-loading></uprtcl-loading>`
+          : this.blogFeedIds.map((docId) => {
+              return html`
+                <app-explore-list-item
+                  @click=${() => {
+                    this.selectedBlogId = docId;
+                  }}
+                  uref=${docId}
+                ></app-explore-list-item>
+              `;
+            })}
 
         <app-intersection-observer
           @intersect="${this.getMoreFeed}"
@@ -168,7 +172,7 @@ export default class ExploreCard extends ConnectedElement {
         </div>
       </div>
 
-      ${this.loading ? this.renderExploreState() : null} `;
+      ${this.renderExploreState()}`;
   }
 
   static get styles() {

@@ -71,10 +71,9 @@ export default class ExploreCard extends ConnectedElement {
   renderHeader() {
     return html`<div class="header">
       <div class="search-cont">
-        ${SearchIcon}<input
-          autofocus
-          placeholder="Search something awesome..."
-        />
+        ${SearchIcon}<uprtcl-textfield
+          label="Search Intercreativity"
+        ></uprtcl-textfield>
       </div>
       <span
         class="clickable refresh"
@@ -274,20 +273,11 @@ export default class ExploreCard extends ConnectedElement {
         .search-cont {
           flex: 1;
           align-items: center;
-          justify-content: center;
           display: flex;
           margin-right: 1rem;
           position: relative;
         }
-        .search-cont > input {
-          border: none;
-          font-size: 1.2rem;
-          margin-left: 0.5rem;
-          flex: 1;
-          width: '100%';
-          outline: none;
-          background: transparent;
-        }
+
         /* Explore Page */
 
         .explore-page {

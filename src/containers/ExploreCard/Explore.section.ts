@@ -136,6 +136,7 @@ export default class ExploreCard extends ConnectedElement {
       <app-read-only-page
         containerType=${this.exploreState === 1 ? 'mobile' : 'desktop'}
         uref=${this.selectedBlogId}
+        show-back
       />
     </div>`;
   }
@@ -303,7 +304,6 @@ export default class ExploreCard extends ConnectedElement {
 
         .explore-page-cont {
           display: block;
-          padding: 2% 0%;
           overflow-y: auto;
           height: 80vh;
         }

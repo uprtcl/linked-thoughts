@@ -8,6 +8,9 @@ export default class ReadOnlyPage extends ConnectedElement {
   @property()
   uref: string;
 
+  @property({ type: Boolean, attribute: 'show-back' })
+  showBack: boolean = false;
+
   @property()
   containerType: 'mobile' | 'desktop' = 'desktop';
 
@@ -36,11 +39,23 @@ export default class ReadOnlyPage extends ConnectedElement {
       }`}
     >
       <div class="profileDetailsCont">
-        <evees-author
-          remote-id=${this.evees.findRemote('http').id}
-          user-id=${this.userId}
-          show-name
-        ></evees-author>
+        ${this.showBack
+          ? html`<div class="row">
+              <uprtcl-button class="back-button" skinny icon="arrow_back"
+                >Back</uprtcl-button
+              >
+            </div>`
+          : ''}
+        <div class="row">
+          <evees-author
+            class=${this.containerType === 'mobile'
+              ? 'marginTopSmall'
+              : 'marginTopLarge'}
+            remote-id=${this.evees.findRemote('http').id}
+            user-id=${this.userId}
+            show-name
+          ></evees-author>
+        </div>
       </div>
       <div class="docEditor">
         <documents-editor id="doc-editor" uref=${this.uref} ?read-only=${true}>
@@ -60,35 +75,27 @@ export default class ReadOnlyPage extends ConnectedElement {
         .rootCont {
           height: 100%;
         }
-
+        .row {
+          width: 100%;
+        }
         .rootContFlex {
           display: flex;
-          flex: 1;
+          padding: 16px 0px;
         }
         .rootContBlock {
           display: block;
+          padding: 16px 0px;
         }
         .profileDetailsCont {
-          flex: 1;
-          display: flex;
-          margin-top: 3vh;
-          justify-content: center;
-          width: 50%;
           min-width: 100px;
-          overflow: hidden;
+          padding: 0 0 0 4%;
+          flex: 1;
         }
-        .profile-img {
-          height: calc(2rem + 3vmin);
-          width: calc(2rem + 3vmin);
-          border-radius: 50%;
-          margin-right: 1rem;
-          overflow: hidden;
+        .marginTopLarge {
+          margin-top: 9vh;
         }
-        .author-name {
-          font-weight: bold;
-          font-size: 16px;
-          line-height: 19px;
-          margin: 0.5rem 0;
+        .marginTopSmall {
+          margin-top: 8px;
         }
         .docEditor {
           flex: 4;

@@ -4,7 +4,7 @@ import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
-
+import lodash from 'lodash';
 export default class ExploreCard extends ConnectedElement {
   @internalProperty()
   exploreState: number = 0;
@@ -29,10 +29,10 @@ export default class ExploreCard extends ConnectedElement {
 
     try {
       const result = await this.appManager.getPaginatedFeed({
-        pagination: { first: 3, offset: this.blogFeedIds.length },
+        pagination: { first: 5, offset: this.blogFeedIds.length },
       });
       this.isEnded = result.ended;
-      this.blogFeedIds = [...this.blogFeedIds, ...result.perspectiveIds];
+      this.blogFeedIds = lodash.concat(this.blogFeedIds, result.perspectiveIds);
     } catch (e) {
       console.error(e);
     }
@@ -40,8 +40,14 @@ export default class ExploreCard extends ConnectedElement {
   async load() {
     this.loading = true;
     this.isEnded = false;
-    const result = await this.appManager.getBlogFeed();
+    const result = await this.appManager.getPaginatedFeed({
+      pagination: {
+        first: 10,
+        offset: this.blogFeedIds.length,
+      },
+    });
     this.blogFeedIds = result.perspectiveIds;
+    this.isEnded = result.ended;
     this.loading = false;
   }
 
@@ -113,10 +119,11 @@ export default class ExploreCard extends ConnectedElement {
             })}
 
         <app-intersection-observer
-          @intersect="${this.getMoreFeed}"
-          .thresholds="${[0.0]}"
-          .root-margin="${'30px'}"
-        ></app-intersection-observer>
+          @intersect="${({ detail }) => {
+            if (detail.isIntersecting) this.getMoreFeed();
+          }}"
+        >
+        </app-intersection-observer>
       `;
     else {
       return html`No content found`;

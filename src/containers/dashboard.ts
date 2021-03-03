@@ -50,6 +50,9 @@ export class DashboardElement extends ConnectedElement {
   // ------------------------------------------
   // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
   @internalProperty()
+  searchResults: string[] = [];
+
+  @internalProperty()
   blogFeedIds: string[] = [];
 
   @internalProperty()
@@ -57,6 +60,9 @@ export class DashboardElement extends ConnectedElement {
 
   @query('#user-id-input')
   userIdElement: UprtclTextField;
+
+  @query('#levels')
+  levels: any;
   // ------------------------------------------
 
   dashboardPerspective: Secured<Perspective>;
@@ -105,6 +111,12 @@ export class DashboardElement extends ConnectedElement {
   async getUserBlogId() {
     const el = this.userIdElement;
     this.userBlogId = await this.appManager.getBlogIdOf(el.value);
+  }
+
+  async searchBlog() {
+    const userId = localStorage.getItem('AUTH0_USER_ID');
+    const el = this.userIdElement;
+    this.searchResults = await this.appManager.blogFeedSearch(userId, el.value, this.levels.checked);
   }
   // ------------------------------------------
 
@@ -263,14 +275,26 @@ export class DashboardElement extends ConnectedElement {
       <!-- --------------------------------------- -->
       <!-- SAMPLE CODE FOR PRANSHI TO BE REMOVED -->
       <hr />
-      <uprtcl-textfield id="user-id-input" label="userid"></uprtcl-textfield>
-      <uprtcl-button @click=${() => this.getUserBlogId()}>get</uprtcl-button>
+      <uprtcl-textfield id="user-id-input" label="userid or search text"></uprtcl-textfield>
+      <uprtcl-button @click=${() => this.searchBlog()}>search</uprtcl-button>'
+      <div>
+        <input type="checkbox" id="levels" name="levels"/>
+        <label for="levels">Level -1</label>
+      </div>
+      <uprtcl-button @click=${() => this.getUserBlogId()}>get user</uprtcl-button>
       <span>${this.userBlogId ? this.userBlogId : 'undefined'}</span>
 
       <hr />
       <b>feed</b>
       <uprtcl-list
         >${this.blogFeedIds.map(
+          (id) => html`<uprtcl-list-item>${id}</uprtcl-list-item>`
+        )}</uprtcl-list
+      >
+      <hr />
+      <b>Search results</b>
+      <uprtcl-list
+        >${this.searchResults.map(
           (id) => html`<uprtcl-list-item>${id}</uprtcl-list-item>`
         )}</uprtcl-list
       >
@@ -335,6 +359,7 @@ export class DashboardElement extends ConnectedElement {
         }
 
         .app-navbar {
+          overflow-y: auto; /* Hardcoded for testing only!!! */
           scrollbar-width: 0; /* Firefox */
           width: 250px;
           flex-shrink: 0;

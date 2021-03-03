@@ -146,7 +146,12 @@ export default class ExploreCard extends ConnectedElement {
   }
   render() {
     return html`<div class="explore-navigation-tooltip">
-        <span class="explore-heading">EXPLORE</span>
+        <div
+          @click=${() => this.handleNavigation('increment')}
+          class="clickable explore-heading"
+        >
+          EXPLORE
+        </div>
         <div class="explore-navigation">
           <span
             ?disabled=${this.exploreState == 2}
@@ -189,7 +194,6 @@ export default class ExploreCard extends ConnectedElement {
           background: rgba(255, 255, 255, 0.95);
           box-shadow: 4px 0px 50px rgba(0, 0, 0, 0.1);
           backdrop-filter: blur(50px);
-          padding: 1rem 0.2rem 1rem 1.3rem;
           position: relative;
           display: flex;
           align-items: center;
@@ -205,6 +209,8 @@ export default class ExploreCard extends ConnectedElement {
         }
         .explore-heading {
           writing-mode: vertical-rl;
+          transform: rotate(180deg);
+          padding: 2.3rem 1.9rem 2.3rem 0.3rem;
           color: #828282;
           font-weight: 400;
           letter-spacing: 4px;

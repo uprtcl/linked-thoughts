@@ -1,5 +1,6 @@
 import { Perspective, Secured, EveesBaseElement } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
+import { TimestampToDate } from '../../utils/date';
 import { sharedStyles } from '../../styles';
 
 export default class SearchListItem extends EveesBaseElement {
@@ -35,7 +36,9 @@ export default class SearchListItem extends EveesBaseElement {
         <div class="title">${this.title}</div>
       </div>
       <div class="footer">
-        <p class="publish-date">${this.head.object.payload.timestamp}</p>
+        <p class="publish-date">
+          ${TimestampToDate(this.head.object.payload.timestamp)}
+        </p>
       </div>
     </div>`;
   }
@@ -76,6 +79,7 @@ export default class SearchListItem extends EveesBaseElement {
         .publish-date {
           font-size: 0.8rem;
           color: #0007;
+          font-family: 'Poppins';
         }
       `,
     ];

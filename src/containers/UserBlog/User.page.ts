@@ -57,14 +57,16 @@ export default class ReadOnlyPage extends ConnectedElement {
     if (this.loading) return html``;
 
     // return html` <div class="root">Hello</div>`;
-    return html`<div>
+    return html`<div class="root">
       <app-appbar-public></app-appbar-public>
-      ${this.userBlogId
-        ? html` <app-user-page-blog-section
-            userId=${this.userId}
-            uref=${this.userBlogId}
-          />`
-        : null}
+      <div class="content">
+        ${this.userBlogId
+          ? html` <app-user-page-blog-section
+              userId=${this.userId}
+              uref=${this.userBlogId}
+            />`
+          : null}
+      </div>
     </div>`;
   }
 
@@ -78,8 +80,9 @@ export default class ReadOnlyPage extends ConnectedElement {
         .root {
           height: 100vh;
           width: 100vw;
-          display: flex;
-          overflow: hidden;
+        }
+        .content {
+          margin-top: 5vh;
         }
       `,
     ];

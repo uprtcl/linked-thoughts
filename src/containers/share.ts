@@ -55,7 +55,7 @@ export default class ShareCard extends ConnectedElement {
           this.lastSharedPageId
             ? this.lastSharedPageId
             : (LTRouter.Router.location.params.docId as string)
-        )}}`
+        )}`
       );
     } catch (e) {
       console.error(e);

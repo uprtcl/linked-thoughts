@@ -41,7 +41,11 @@ export default class ReadOnlyPage extends ConnectedElement {
       <div class="profileDetailsCont">
         ${this.showBack
           ? html`<div class="row">
-              <uprtcl-button class="back-button" skinny icon="arrow_back"
+              <uprtcl-button
+                class="back-button"
+                skinny
+                icon="arrow_back"
+                @click=${() => this.dispatchEvent(new CustomEvent('back'))}
                 >Back</uprtcl-button
               >
             </div>`

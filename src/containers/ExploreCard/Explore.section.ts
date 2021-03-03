@@ -137,6 +137,7 @@ export default class ExploreCard extends ConnectedElement {
         containerType=${this.exploreState === 1 ? 'mobile' : 'desktop'}
         uref=${this.selectedBlogId}
         show-back
+        @back=${() => (this.selectedBlogId = undefined)}
       />
     </div>`;
   }

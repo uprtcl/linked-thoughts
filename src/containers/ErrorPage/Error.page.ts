@@ -6,7 +6,7 @@ import { Router } from '@vaadin/router';
 import { styles } from '@uprtcl/common-ui';
 import { EveesBaseElement } from '@uprtcl/evees';
 import { sharedStyles } from '../../styles';
-
+import { ORIGIN } from '../../utils/routes.generator';
 export class ErrorPage extends EveesBaseElement {
   render() {
     return html`
@@ -21,7 +21,7 @@ export class ErrorPage extends EveesBaseElement {
           Sorry... The page you’re looking for does not exist
         </div>
 
-        <a href=${window.location.origin} class="button">Go Home</a>
+        <a href=${ORIGIN} class="button">Go Home</a>
       </div>
     `;
   }

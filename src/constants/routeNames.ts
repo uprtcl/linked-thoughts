@@ -4,3 +4,4 @@ export const SectionBaseRoute = '/section';
 export const GettingStarted = '/getting-started';
 export const Home = '/';
 export const PageVisitorRoute = '/read';
+export const UserProfileRoute = '/u';

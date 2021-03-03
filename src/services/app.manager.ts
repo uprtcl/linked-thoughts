@@ -9,6 +9,8 @@ import {
   Secured,
   Perspective,
   getHome,
+  SearchOptions,
+  SearchResult,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
@@ -120,12 +122,21 @@ export class AppManager {
     return forkId;
   }
 
-  async getBlogFeed(): Promise<string[]> {
+  async getBlogFeed(): Promise<SearchResult> {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
     const result = await this.evees.client.searchEngine.explore({
       linksTo: [{ id: blogConcept.id }],
     });
-    return result.perspectiveIds;
+    return result;
+  }
+
+  async getPaginatedFeed(config: SearchOptions): Promise<SearchResult> {
+    const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
+    const result = await this.evees.client.searchEngine.explore({
+      linksTo: [{ id: blogConcept.id }],
+      pagination: config.pagination,
+    });
+    return result;
   }
 
   // TODO: TEST: find another user's blogs to simulate follows

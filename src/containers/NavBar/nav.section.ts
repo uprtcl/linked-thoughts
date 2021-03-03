@@ -16,7 +16,7 @@ import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 
-const sectionHeight = 150;
+const sectionHeight = 30;
 
 export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -149,30 +149,17 @@ export class NavSectionElement extends EveesBaseElement<Section> {
           position: relative;
           /* SAME AS scroller and condition for overlay in the render function!!! */
           max-height: ${css`
-            ${sectionHeight}px
+            ${sectionHeight}vh
           `};
           overflow: hidden;
         }
         .page-list-scroller {
           max-height: ${css`
-            ${sectionHeight}px
+            ${sectionHeight}vh
           `};
           overflow-y: auto;
         }
-        .list-overlay {
-          position: absolute;
-          height: 100%;
-          width: 100%;
-          top: 0px;
-          left: 0px;
-          pointer-events: none;
-          background-image: linear-gradient(
-            0deg,
-            rgba(255, 255, 255, 1),
-            rgba(255, 255, 255, 0),
-            rgba(255, 255, 255, 0)
-          );
-        }
+
         .padding-div {
           height: 55px;
         }

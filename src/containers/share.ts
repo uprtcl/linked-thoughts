@@ -10,6 +10,7 @@ import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
 import { ConceptId } from '../services/app.manager';
+import { GenearateReadURL } from '../utils/routes.generator';
 
 interface SectionData {
   id: string;
@@ -50,11 +51,11 @@ export default class ShareCard extends ConnectedElement {
   async copyShareURL() {
     try {
       await window.navigator.clipboard.writeText(
-        `${window.location.origin}${GenerateReadDocumentRoute(
+        `${GenearateReadURL(
           this.lastSharedPageId
             ? this.lastSharedPageId
             : (LTRouter.Router.location.params.docId as string)
-        )}`
+        )}}`
       );
     } catch (e) {
       console.error(e);
@@ -188,7 +189,7 @@ export default class ShareCard extends ConnectedElement {
             ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`
         : html` <div class="action-copy-cont">
             <div class="url-cont">
-              ${window.location.origin}${GenerateReadDocumentRoute(
+              ${GenearateReadURL(
                 LTRouter.Router.location.params.docId as string
               )}
             </div>
@@ -199,9 +200,7 @@ export default class ShareCard extends ConnectedElement {
       ${this.lastSharedPageId && this.isPagePrivate
         ? html` <div class="action-copy-cont">
             <div class="url-cont">
-              ${window.location.origin}${GenerateReadDocumentRoute(
-                this.lastSharedPageId
-              )}
+              ${GenearateReadURL(this.lastSharedPageId)}
             </div>
             <div @click=${this.copyShareURL} class="copy-url-button clickable">
               ${ClipboardIcon}

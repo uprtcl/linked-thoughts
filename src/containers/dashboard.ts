@@ -47,18 +47,6 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   selectedSectionId: string | undefined;
 
-  // ------------------------------------------
-  // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
-  @internalProperty()
-  blogFeedIds: string[] = [];
-
-  @internalProperty()
-  userBlogId: string;
-
-  @query('#user-id-input')
-  userIdElement: UprtclTextField;
-  // ------------------------------------------
-
   dashboardPerspective: Secured<Perspective>;
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
@@ -88,25 +76,12 @@ export class DashboardElement extends ConnectedElement {
       this.checkLastVisited();
 
       await this.load();
-
-      // ------------------------------------------
-      // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
-      this.blogFeedIds = await this.appManager.getBlogFeed();
-      // ------------------------------------------
     } else {
       Router.go(GettingStarted);
     }
 
     this.loading = false;
   }
-
-  // ------------------------------------------
-  // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
-  async getUserBlogId() {
-    const el = this.userIdElement;
-    this.userBlogId = await this.appManager.getBlogIdOf(el.value);
-  }
-  // ------------------------------------------
 
   async login() {
     await this.remote.login();
@@ -260,21 +235,6 @@ export class DashboardElement extends ConnectedElement {
           ></app-nav-section>`;
         })}
       </div>
-      <!-- --------------------------------------- -->
-      <!-- SAMPLE CODE FOR PRANSHI TO BE REMOVED -->
-      <hr />
-      <uprtcl-textfield id="user-id-input" label="userid"></uprtcl-textfield>
-      <uprtcl-button @click=${() => this.getUserBlogId()}>get</uprtcl-button>
-      <span>${this.userBlogId ? this.userBlogId : 'undefined'}</span>
-
-      <hr />
-      <b>feed</b>
-      <uprtcl-list
-        >${this.blogFeedIds.map(
-          (id) => html`<uprtcl-list-item>${id}</uprtcl-list-item>`
-        )}</uprtcl-list
-      >
-      <!-- --------------------------------------- -->
       ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
   }
 
@@ -304,7 +264,10 @@ export class DashboardElement extends ConnectedElement {
             }
           </div>
         </div>
+        
+        
       </div>
+        <app-explore-card ></app-explore-card>
     `;
   }
 
@@ -318,6 +281,10 @@ export class DashboardElement extends ConnectedElement {
           flex: 1 1 0;
           flex-direction: column;
           justify-content: center;
+        }
+        app-explore-card {
+          position: absolute;
+          right: 0;
         }
         .row {
           display: flex;

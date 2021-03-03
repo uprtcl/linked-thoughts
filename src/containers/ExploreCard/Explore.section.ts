@@ -70,6 +70,7 @@ export default class ExploreCard extends ConnectedElement {
   }
 
   async searchByText() {
+    this.blogFeedIds = [];
     this.searchText = this.searchInput.value.trim()
       ? this.searchInput.value
       : undefined;

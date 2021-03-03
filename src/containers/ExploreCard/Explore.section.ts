@@ -1,11 +1,10 @@
 import { html, css, property, internalProperty } from 'lit-element';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
-import ClosePurple from '../../assets/icons/close-purple.svg';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
-import RefreshIcon from '../../assets/icons/refresh.svg';
+
 export default class ExploreCard extends ConnectedElement {
   @internalProperty()
   exploreState: number = 0;
@@ -75,16 +74,21 @@ export default class ExploreCard extends ConnectedElement {
           label="Search Intercreativity"
         ></uprtcl-textfield>
       </div>
-      <span
-        class="clickable refresh"
+      <uprtcl-icon-button
+        icon="refresh"
+        button
+        skinny
+        style="margin-right: 6px"
         @click=${async () => {
           await this.load();
         }}
-        >${RefreshIcon}</span
-      >
-      <span class="clickable" @click=${this.closeExplore}>
-        ${ClosePurple}
-      </span>
+      ></uprtcl-icon-button>
+      <uprtcl-icon-button
+        icon="clear"
+        button
+        skinny
+        @click=${() => this.closeExplore()}
+      ></uprtcl-icon-button>
     </div>`;
   }
 

@@ -7,7 +7,7 @@ import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import RefreshIcon from '../../assets/icons/refresh.svg';
 export default class ExploreCard extends ConnectedElement {
-  @property()
+  @internalProperty()
   exploreState: number = 0;
 
   @internalProperty()
@@ -302,14 +302,15 @@ export default class ExploreCard extends ConnectedElement {
         }
 
         .explore-page-cont {
-          display: flex;
-          flex-wrap: wrap;
+          display: block;
           padding: 2% 0%;
-          overflow-y: scroll;
+          overflow-y: auto;
           height: 80vh;
         }
         .explore-page-cont > app-explore-list-item {
-          flex: 0 0 33.333333%;
+          display: block;
+          width: 25%;
+          float: left;
         }
 
         @keyframes slideLeft {
@@ -324,35 +325,26 @@ export default class ExploreCard extends ConnectedElement {
 
         @media only screen and (max-width: 1284px) {
           .explore-page-cont > app-explore-list-item {
-            flex: 0 0 25%;
+            width: 33.3333%;
           }
           .explore-page {
             width: 80vw;
-          }
-          .explore-navigation-tooltip {
-            transform: scale(0.6);
           }
         }
         @media only screen and (max-width: 900px) {
           .explore-page-cont > app-explore-list-item {
-            flex: 0 0 33.33333%;
+            width: 50%;
           }
           .explore-page {
             width: 80vw;
-          }
-          .explore-navigation-tooltip {
-            transform: scale(0.6);
           }
         }
         @media only screen and (max-width: 680px) {
           .explore-page-cont > app-explore-list-item {
-            flex: 0 0 50%;
+            width: 100%;
           }
           .explore-page {
             width: 80vw;
-          }
-          .explore-navigation-tooltip {
-            transform: scale(0.6);
           }
         }
       `,

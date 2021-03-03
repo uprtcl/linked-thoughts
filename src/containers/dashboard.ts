@@ -264,10 +264,8 @@ export class DashboardElement extends ConnectedElement {
             }
           </div>
         </div>
-        
-        
       </div>
-        <app-explore-card ></app-explore-card>
+      <app-explore-card ></app-explore-card>
     `;
   }
 

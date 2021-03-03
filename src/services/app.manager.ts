@@ -128,6 +128,23 @@ export class AppManager {
     return result.perspectiveIds;
   }
 
+  // Use it to explore by text under a userHome linked to his blogHomeConcept.
+  async blogFeedSearch(userId: string, textInput: string, levels: boolean): Promise<any> {
+    const userHome = await getHome(this.evees.getRemote(), userId);
+    const blogHomeConcept = await this.getConcept(ConceptId.BLOGPOST);
+
+    const result = await this.evees.client.searchEngine.explore({
+      under: [{ id: userHome.id }],
+      linksTo: [{ id: blogHomeConcept.id }],
+      text: {
+        value: textInput,
+        levels: levels ? -1 : 0
+      }
+    });
+
+    return result.perspectiveIds;
+  }
+
   // TODO: TEST: find another user's blogs to simulate follows
   async getBlogIdOf(userId: string): Promise<string | undefined> {
     const userHome = await getHome(this.evees.getRemote(), userId);

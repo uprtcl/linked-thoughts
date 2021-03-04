@@ -6,6 +6,7 @@ import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import { UprtclTextField } from '@uprtcl/common-ui';
 import lodash from 'lodash';
+import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 
 export default class ExploreCard extends ConnectedElement {
   @internalProperty()
@@ -28,6 +29,9 @@ export default class ExploreCard extends ConnectedElement {
   @query('#search-input')
   searchInput: UprtclTextField;
 
+  @query('#intersection-observer')
+  intersectionObserverEl!: LTIntersectionObserver;
+
   searchText: string;
 
   async firstUpdated() {
@@ -36,6 +40,8 @@ export default class ExploreCard extends ConnectedElement {
 
   async getMoreFeed() {
     if (this.isEnded) return;
+
+    console.log('getMoreFeed()- curren ids:', this.blogFeedIds);
 
     try {
       const result = await this.appManager.getBlogFeed(
@@ -52,20 +58,23 @@ export default class ExploreCard extends ConnectedElement {
       console.error(e);
     }
   }
+
   async load() {
     this.loading = true;
     this.isEnded = false;
-    const result = await this.appManager.getBlogFeed(
-      this.blogFeedIds.length,
-      10,
-      this.searchText
-    );
-    this.blogFeedIds = result.perspectiveIds;
+
+    this.blogFeedIds = [];
+    if (
+      !this.intersectionObserverEl ||
+      (!this.intersectionObserverEl.isShown && !this.isEnded)
+    ) {
+      await this.getMoreFeed();
+    }
+
     this.loading = false;
   }
 
   async refresh() {
-    this.blogFeedIds = [];
     this.load();
   }
 
@@ -108,6 +117,13 @@ export default class ExploreCard extends ConnectedElement {
     }
   }
 
+  intersectDetected({ detail }) {
+    console.log('intersectDetected', detail);
+    if (detail.isIntersecting) {
+      this.getMoreFeed();
+    }
+  }
+
   renderHeader() {
     return html`<div class="header">
       <div class="search-cont">
@@ -137,33 +153,28 @@ export default class ExploreCard extends ConnectedElement {
   renderItems() {
     if (this.selectedBlogId) {
       return html`${this.renderReadPage()}`;
-    } else if (this.blogFeedIds.length > 0)
-      return html`
-        ${this.loading
-          ? html`<uprtcl-loading></uprtcl-loading>`
-          : this.blogFeedIds.map((docId) => {
-              return html`
-                <app-explore-list-item
-                  @click=${() => {
-                    this.selectedBlogId = docId;
-                  }}
-                  uref=${docId}
-                ></app-explore-list-item>
-              `;
-            })}
-
-        <app-intersection-observer
-          @intersect="${({ detail }) => {
-            if (detail.isIntersecting) this.getMoreFeed();
-          }}"
-        >
-        </app-intersection-observer>
-      `;
-    else {
-      return this.loading
-        ? html`<uprtcl-loading></uprtcl-loading>`
-        : html`No content found`;
     }
+
+    return html`
+      ${this.loading
+        ? html`<uprtcl-loading></uprtcl-loading>`
+        : this.blogFeedIds.map((docId) => {
+            return html`
+              <app-explore-list-item
+                @click=${() => {
+                  this.selectedBlogId = docId;
+                }}
+                uref=${docId}
+              ></app-explore-list-item>
+            `;
+          })}
+      <app-intersection-observer
+        id="intersection-observer"
+        @intersect="${this.intersectDetected}"
+        .thresholds=${[0.0, 1.0]}
+      >
+      </app-intersection-observer>
+    `;
   }
 
   renderExploreState() {

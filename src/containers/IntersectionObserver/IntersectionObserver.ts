@@ -10,7 +10,9 @@ export default class LTIntersectionObserver extends LitElement {
   @property({ type: String })
   rootMargin;
 
-  observer = null;
+  observer: IntersectionObserver = null;
+  isShown: boolean = false;
+
   render() {
     return html` <div id="slottedData"></div> `;
   }
@@ -27,6 +29,7 @@ export default class LTIntersectionObserver extends LitElement {
 
     this.observer.observe(this.shadowRoot.querySelector('#slottedData'));
   }
+
   handleIntersectionCallback(entries) {
     for (let entry of entries) {
       this._setIntersect(entry);
@@ -40,6 +43,17 @@ export default class LTIntersectionObserver extends LitElement {
         intersectionRatio: Number(entry.intersectionRatio).toFixed(2) || '0.00',
       },
     });
+
+    if (entry.intersectionRatio > 0) {
+      console.log('intersect shown');
+      this.isShown = true;
+    }
+
+    if (!entry.isIntersecting && entry.intersectionRatio == 0) {
+      console.log('intersect hidden');
+      this.isShown = false;
+    }
+
     this.dispatchEvent(event);
   }
 
@@ -48,7 +62,8 @@ export default class LTIntersectionObserver extends LitElement {
       css`
         #slottedData {
           height: 1px;
-          /* background: #f0f; */
+          margin-bottom: 10vh;
+          background: #f0f;
         }
       `,
     ];

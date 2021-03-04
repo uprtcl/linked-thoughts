@@ -58,6 +58,7 @@ export default class SearchListItem extends EveesBaseElement {
       sharedStyles,
       css`
         :host {
+          height: 150px;
         }
         .cont {
           padding: 1rem 1.5rem;

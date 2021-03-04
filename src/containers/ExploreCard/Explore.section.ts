@@ -99,6 +99,15 @@ export default class ExploreCard extends ConnectedElement {
       }
     }
   }
+
+  handleExploreClick() {
+    if (this.exploreState == 2) {
+      this.handleNavigation('decrement');
+    } else {
+      this.handleNavigation('increment');
+    }
+  }
+
   renderHeader() {
     return html`<div class="header">
       <div class="search-cont">
@@ -185,7 +194,7 @@ export default class ExploreCard extends ConnectedElement {
   render() {
     return html`<div class="explore-navigation-tooltip">
         <div
-          @click=${() => this.handleNavigation('increment')}
+          @click=${() => this.handleExploreClick()}
           class=${'clickable explore-heading' +
           (this.hovering ? 'light-grey' : '')}
         >

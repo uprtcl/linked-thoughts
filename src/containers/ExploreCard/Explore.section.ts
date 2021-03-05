@@ -5,23 +5,25 @@ import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import { UprtclTextField } from '@uprtcl/common-ui';
-import lodash from 'lodash';
-import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
-
+import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
+import { Logger } from '@uprtcl/evees';
 
 export default class ExploreCard extends ConnectedElement {
+  logger = new Logger('ExploreSection');
+
   @internalProperty()
   exploreState: number = 0;
 
   @internalProperty()
   blogFeedIds: string[] = [];
 
-  @property()
+  @internalProperty()
   selectedBlogId: string;
 
+  @internalProperty()
   loading: boolean = true;
 
-  @property({ type: Boolean })
+  @internalProperty()
   isEnded: boolean = false;
 
   @internalProperty()
@@ -30,53 +32,89 @@ export default class ExploreCard extends ConnectedElement {
   @query('#search-input')
   searchInput: UprtclTextField;
 
-  @query('#intersection-observer')
-  intersectionObserverEl!: LTIntersectionObserver;
+  @query('#is-visible')
+  isVisibleEl!: UprtclIsVisible;
 
   searchText: string;
+  firstExpanded: boolean = false;
 
   async firstUpdated() {
-    await this.load();
+    this.load();
   }
 
-  async getMoreFeed() {
-    if (this.isEnded) return;
+  async refresh() {
+    this.isVisibleEl.enable = false;
+    this.blogFeedIds = [];
 
-    console.log('getMoreFeed()- curren ids:', this.blogFeedIds);
-
-    try {
-      const result = await this.appManager.getBlogFeed(
-        this.blogFeedIds.length,
-        3,
-        this.searchText
-      );
-      this.isEnded = result.ended;
-      this.blogFeedIds = lodash.concat(
-        this.blogFeedIds,
-        ...result.perspectiveIds
-      );
-    } catch (e) {
-      console.error(e);
-    }
+    this.load();
   }
 
   async load() {
     this.loading = true;
     this.isEnded = false;
 
-    this.blogFeedIds = [];
-    if (
-      !this.intersectionObserverEl ||
-      (!this.intersectionObserverEl.isShown && !this.isEnded)
-    ) {
-      await this.getMoreFeed();
-    }
+    this.logger.log('load()');
 
+    /** get first results */
+    await this.getMoreFeed(10);
     this.loading = false;
   }
 
-  async refresh() {
-    this.load();
+  async updated(cp) {
+    if (cp.has('exploreState')) {
+      if (this.exploreState > 0 && cp.get('exploreState') === 0) {
+        /** the first time the items list reapears we need to manually enable the isVisible component */
+        this.isVisibleEl.enable = true;
+      }
+      if (this.exploreState > 1 && cp.get('exploreState') === 1) {
+        /** if the explore state is fully expand refrest the isVisible check */
+        this.isVisibleEl.enable = false;
+        await this.isVisibleEl.updateComplete;
+        this.isVisibleEl.enable = true;
+      }
+    }
+  }
+
+  visibleChanged(value: boolean) {
+    this.logger.log('visibleChanged()', value);
+    if (value) {
+      this.getMoreFeed();
+    }
+  }
+
+  async getMoreFeed(first: number = 3) {
+    if (this.isEnded) return;
+
+    this.logger.log('getMoreFeed()- curren ids:', this.blogFeedIds);
+
+    if (this.isVisibleEl) {
+      this.isVisibleEl.enable = false;
+      await this.isVisibleEl.updateComplete;
+    }
+
+    const result = await this.appManager.getBlogFeed(
+      this.blogFeedIds.length,
+      first,
+      this.searchText
+    );
+
+    this.isEnded = result.ended;
+    this.blogFeedIds = this.blogFeedIds.concat(result.perspectiveIds);
+
+    this.logger.log('getMoreFeed()- new ids:', this.blogFeedIds);
+
+    await this.updateComplete;
+
+    if (this.isVisibleEl) {
+      this.isVisibleEl.enable = true;
+
+      await this.isVisibleEl.updateComplete;
+
+      if (this.isVisibleEl.isShown && !this.isEnded) {
+        this.logger.log('is still visible!');
+        await this.getMoreFeed();
+      }
+    }
   }
 
   async searchByText() {
@@ -100,10 +138,6 @@ export default class ExploreCard extends ConnectedElement {
         this.exploreState++;
       }
     } else {
-      // Hide the blog page for mini-explore View
-      // if (currentState == 2) {
-      //   this.selectedBlogId = null;
-      // }
       if (currentState > 0) {
         this.exploreState--;
       }
@@ -115,13 +149,6 @@ export default class ExploreCard extends ConnectedElement {
       this.handleNavigation('decrement');
     } else {
       this.handleNavigation('increment');
-    }
-  }
-
-  intersectDetected({ detail }) {
-    console.log('intersectDetected', detail);
-    if (detail.isIntersecting) {
-      this.getMoreFeed();
     }
   }
 
@@ -169,10 +196,10 @@ export default class ExploreCard extends ConnectedElement {
               ></app-explore-list-item>
             `;
           })}
+
       <app-intersection-observer
-        id="intersection-observer"
-        @intersect="${this.intersectDetected}"
-        .thresholds=${[0.0, 1.0]}
+        id="is-visible"
+        @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
       >
       </app-intersection-observer>
     `;
@@ -373,10 +400,15 @@ export default class ExploreCard extends ConnectedElement {
           overflow-y: auto;
           height: 80vh;
         }
+
         .explore-page-cont > * {
           display: block;
           width: 25%;
           float: left;
+        }
+
+        app-explore-list-item {
+          height: 160px;
         }
 
         @keyframes slideLeft {

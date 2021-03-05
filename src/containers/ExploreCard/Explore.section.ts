@@ -8,6 +8,7 @@ import { UprtclTextField } from '@uprtcl/common-ui';
 import lodash from 'lodash';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 
+
 export default class ExploreCard extends ConnectedElement {
   @internalProperty()
   exploreState: number = 0;
@@ -307,7 +308,6 @@ export default class ExploreCard extends ConnectedElement {
         }
         .explore-list-cont {
           overflow-y: scroll;
-          height: 500px;
           height: 85%;
           max-height: 85vh;
           min-height: 85vh;
@@ -370,11 +370,10 @@ export default class ExploreCard extends ConnectedElement {
         }
 
         .explore-page-cont {
-          display: block;
           overflow-y: auto;
           height: 80vh;
         }
-        .explore-page-cont > app-explore-list-item {
+        .explore-page-cont > * {
           display: block;
           width: 25%;
           float: left;

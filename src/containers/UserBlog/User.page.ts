@@ -6,6 +6,7 @@ import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { LTRouter } from '../../router';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
+import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 
 export default class ReadOnlyPage extends ConnectedElement {
   // ------------------------------------------
@@ -27,6 +28,12 @@ export default class ReadOnlyPage extends ConnectedElement {
   loading: boolean = false;
 
   userId: string;
+
+
+  @query('#intersection-observer')
+  intersectionObserverEl!: LTIntersectionObserver;
+
+  
   async firstUpdated() {
     await this.load();
   }
@@ -39,6 +46,7 @@ export default class ReadOnlyPage extends ConnectedElement {
     }
   }
 
+  
   async load() {
     const routeParams = LTRouter.Router.location.params as any;
     if (routeParams.userId) {

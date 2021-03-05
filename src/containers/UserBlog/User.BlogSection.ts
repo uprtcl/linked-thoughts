@@ -10,13 +10,11 @@ import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
 } from '../../utils/routes.helpers';
-
 import { APP_MANAGER } from '../../services/init';
 import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
-
-const sectionHeight = 30;
+import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -25,8 +23,14 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   @property({ type: String })
   userId: string;
 
+  @internalProperty()
+  blogIds: string[] = [];
+
   // TODO request app mananger on an ConnectedEveeElement base class...
   appManager: AppManager;
+
+  @query('#intersection-observer')
+  intersectionObserverEl!: LTIntersectionObserver;
 
   connectedCallback() {
     super.connectedCallback();
@@ -35,8 +39,26 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
 
   async firstUpdated() {
     await super.firstUpdated();
+    this.getMoreFeed();
   }
 
+  intersectDetected({ detail }) {
+    console.log('intersectDetected', detail);
+    if (detail.isIntersecting) {
+      this.getMoreFeed();
+    }
+  }
+
+  getMoreFeed() {
+    this.blogIds = [
+      ...this.blogIds,
+      ...lodash.slice(
+        this.data.object.pages,
+        this.blogIds.length,
+        this.blogIds.length + 3
+      ),
+    ];
+  }
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
@@ -52,13 +74,19 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
           </div>
         </div>
         <div class="blogsCont">
-          ${this.data.object.pages.map((pageId, pageIndex) => {
+          ${this.blogIds.map((pageId, pageIndex) => {
             return html`
               <app-user-page-blog-section-item
                 uref=${pageId}
               ></app-user-page-blog-section-item>
             `;
           })}
+          <app-intersection-observer
+            id="intersection-observer"
+            @intersect="${this.intersectDetected}"
+            .thresholds=${[0.0, 1.0]}
+          >
+          </app-intersection-observer>
         </div>
       </div>
     </div>`;

@@ -15,6 +15,7 @@ import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
+import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
 
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   @property({ type: String })
@@ -26,11 +27,14 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   @internalProperty()
   blogIds: string[] = [];
 
+  @internalProperty()
+  isEnded: boolean = false;
+
   // TODO request app mananger on an ConnectedEveeElement base class...
   appManager: AppManager;
 
-  @query('#intersection-observer')
-  intersectionObserverEl!: LTIntersectionObserver;
+  @query('#is-visible')
+  isVisibleEl!: UprtclIsVisible;
 
   connectedCallback() {
     super.connectedCallback();
@@ -49,16 +53,38 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
     }
   }
 
-  getMoreFeed() {
+  async getMoreFeed() {
+    if (this.isEnded) return;
+    if (this.isVisibleEl) {
+      this.isVisibleEl.enable = false;
+      await this.isVisibleEl.updateComplete;
+    }
+
     this.blogIds = [
       ...this.blogIds,
       ...lodash.slice(
         this.data.object.pages,
         this.blogIds.length,
-        this.blogIds.length + 3
+        this.blogIds.length + 1
       ),
     ];
+    if (this.isVisibleEl) {
+      this.isVisibleEl.enable = true;
+
+      await this.isVisibleEl.updateComplete;
+
+      if (this.isVisibleEl.isShown && !this.isEnded) {
+        this.logger.log('is still visible!');
+        await this.getMoreFeed();
+      }
+    }
   }
+  visibleChanged(value: boolean) {
+    if (value) {
+      this.getMoreFeed();
+    }
+  }
+
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
@@ -82,9 +108,8 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
             `;
           })}
           <app-intersection-observer
-            id="intersection-observer"
-            @intersect="${this.intersectDetected}"
-            .thresholds=${[0.0, 1.0]}
+            id="is-visible"
+            @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
           >
           </app-intersection-observer>
         </div>

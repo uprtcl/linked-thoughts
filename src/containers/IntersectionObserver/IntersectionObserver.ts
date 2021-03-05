@@ -63,7 +63,7 @@ export default class LTIntersectionObserver extends LitElement {
         #slottedData {
           height: 1px;
           margin-bottom: 10vh;
-          background: #f0f;
+          /* background: #f0f; */
         }
       `,
     ];

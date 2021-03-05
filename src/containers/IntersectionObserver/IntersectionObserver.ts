@@ -45,7 +45,7 @@ export default class UprtclIsVisible extends LitElement {
   }
 
   handleIntersect(entry) {
-    this.logger.log('handleIntersect', entry);
+    // this.logger.log('handleIntersect', entry);
 
     const wasVisible = this.isShown;
 

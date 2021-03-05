@@ -1,6 +1,6 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import lodash from 'lodash';
-import { EveesBaseElement } from '@uprtcl/evees';
+import { EveesBaseElement, Logger } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
 
@@ -18,6 +18,8 @@ import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
 
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
+  logger = new Logger('UserPublicBlogSection');
+
   @property({ type: String })
   uref: string;
 
@@ -43,7 +45,7 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
 
   async firstUpdated() {
     await super.firstUpdated();
-    this.getMoreFeed();
+    this.getMoreFeed(3);
   }
 
   intersectDetected({ detail }) {
@@ -53,22 +55,35 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
     }
   }
 
-  async getMoreFeed() {
+  async getMoreFeed(first: number = 1) {
     if (this.isEnded) return;
+
+    this.logger.log('getMoreFeed()');
+
     if (this.isVisibleEl) {
+      this.logger.log('disable()');
       this.isVisibleEl.enable = false;
       await this.isVisibleEl.updateComplete;
     }
 
-    this.blogIds = [
-      ...this.blogIds,
-      ...lodash.slice(
-        this.data.object.pages,
-        this.blogIds.length,
-        this.blogIds.length + 1
-      ),
-    ];
+    const newNumberOfEls =
+      this.data.object.pages.length > this.blogIds.length + first
+        ? this.blogIds.length + first
+        : this.data.object.pages.length;
+
+    if (newNumberOfEls === this.data.object.pages.length) {
+      this.isEnded = true;
+    }
+
+    const newIds = this.data.object.pages.slice(0, newNumberOfEls);
+
+    /** a single assignment that triggers re-render */
+    this.blogIds = newIds;
+
+    await this.updateComplete;
+
     if (this.isVisibleEl) {
+      this.logger.log('enable()');
       this.isVisibleEl.enable = true;
 
       await this.isVisibleEl.updateComplete;
@@ -123,7 +138,6 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
       css`
         :host {
         }
-
         .cont {
           display: flex;
         }
@@ -140,6 +154,11 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
         }
         .blogsCont {
           flex: 4;
+        }
+        app-user-page-blog-section-item {
+          min-height: 150px;
+          width: 100%;
+          display: block;
         }
 
         @media only screen and (max-width: 720px) {

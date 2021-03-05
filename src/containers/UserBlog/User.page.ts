@@ -9,8 +9,6 @@ import { sharedStyles } from '../../styles';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 
 export default class ReadOnlyPage extends ConnectedElement {
-  // ------------------------------------------
-  // SAMPLE CODE FOR PRANSHU --- TO BE REMOVED
   @internalProperty()
   blogFeedIds: string[] = [];
 
@@ -29,11 +27,9 @@ export default class ReadOnlyPage extends ConnectedElement {
 
   userId: string;
 
-
   @query('#intersection-observer')
   intersectionObserverEl!: LTIntersectionObserver;
 
-  
   async firstUpdated() {
     await this.load();
   }
@@ -46,7 +42,6 @@ export default class ReadOnlyPage extends ConnectedElement {
     }
   }
 
-  
   async load() {
     const routeParams = LTRouter.Router.location.params as any;
     if (routeParams.userId) {
@@ -60,7 +55,6 @@ export default class ReadOnlyPage extends ConnectedElement {
   render() {
     if (this.loading) return html``;
 
-    // return html` <div class="root">Hello</div>`;
     return html`<div class="root">
       <app-appbar-public></app-appbar-public>
       <div class="content">

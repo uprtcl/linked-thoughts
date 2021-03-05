@@ -1,20 +1,11 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
-import lodash from 'lodash';
 import { EveesBaseElement, Logger } from '@uprtcl/evees';
 import { styles } from '@uprtcl/common-ui';
-import { Router } from '@vaadin/router';
-
-import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
-import {
-  GenerateDocumentRoute,
-  GenerateSectionRoute,
-} from '../../utils/routes.helpers';
 import { APP_MANAGER } from '../../services/init';
 import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
-import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
 
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {

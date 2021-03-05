@@ -1,9 +1,5 @@
-import { UprtclTextField } from '@uprtcl/common-ui';
-import { Commit, EveesBaseElement, Signed } from '@uprtcl/evees';
-import { html, css, property, internalProperty, query } from 'lit-element';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { head } from 'lodash';
-import { LTRouter } from '../../router';
+import { Commit, Signed } from '@uprtcl/evees';
+import { html, css, property } from 'lit-element';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import { GenearateReadURL } from '../../utils/routes.generator';
@@ -55,7 +51,7 @@ export default class ReadOnlyPage extends ConnectedElement {
           </documents-editor>
         </div>
         <div class="action-cont">
-          <a href=${GenearateReadURL(this.uref)} target="_blank"
+          <a href=${GenearateReadURL(this.uref)}
             ><div class="read-more">Read More</div></a
           >
           <hr />

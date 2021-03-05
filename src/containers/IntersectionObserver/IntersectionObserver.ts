@@ -77,6 +77,7 @@ export default class UprtclIsVisible extends LitElement {
         #element {
           height: 1px;
           /* background: #f0f; */
+          margin-bottom: 5vh;
         }
       `,
     ];

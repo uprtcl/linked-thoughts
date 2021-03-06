@@ -1,7 +1,7 @@
-import { html, css, internalProperty } from 'lit-element';
+import { html, css, internalProperty, query } from 'lit-element';
 import { Router } from '@vaadin/router';
 import { EveesHttp } from '@uprtcl/evees-http';
-import { styles } from '@uprtcl/common-ui';
+import { styles, UprtclTextField } from '@uprtcl/common-ui';
 import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
 import LockIcon from '../assets/icons/lock.svg';
@@ -18,6 +18,7 @@ import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
   RouteName,
+  NavigateTo404,
 } from '../utils/routes.helpers';
 
 interface SectionData {
@@ -74,6 +75,7 @@ export class DashboardElement extends ConnectedElement {
       await this.decodeUrl();
 
       this.checkLastVisited();
+
       await this.load();
     } else {
       Router.go(GettingStarted);
@@ -109,7 +111,7 @@ export class DashboardElement extends ConnectedElement {
         );
       } catch (e) {
         this.appManager.appError.clearLastVisited();
-        Router.go('/404');
+        NavigateTo404();
       }
     } else if (this.routeName === RouteName.dashboard) {
       // go to the first private page if nothing is selected.
@@ -155,7 +157,7 @@ export class DashboardElement extends ConnectedElement {
 
           if (!sectionData)
             throw new Error(`data not found for section ${sectionId}`);
-          const title = this.evees.behavior(sectionData.object, 'title');
+          const title = this.evees.behaviorFirst(sectionData.object, 'title');
 
           return {
             id: sectionId,
@@ -264,6 +266,7 @@ export class DashboardElement extends ConnectedElement {
           </div>
         </div>
       </div>
+      <app-explore-card ></app-explore-card>
     `;
   }
 
@@ -277,6 +280,10 @@ export class DashboardElement extends ConnectedElement {
           flex: 1 1 0;
           flex-direction: column;
           justify-content: center;
+        }
+        app-explore-card {
+          position: absolute;
+          right: 0;
         }
         .row {
           display: flex;

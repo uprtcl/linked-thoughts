@@ -1,7 +1,9 @@
+import { Router } from '@vaadin/router';
 import {
   DocumentBaseRoute,
   PageVisitorRoute,
   SectionBaseRoute,
+  UserProfileRoute,
 } from '../constants/routeNames';
 
 export enum RouteName {
@@ -18,3 +20,13 @@ export const GenerateSectionRoute = (sectionId: string = ':sectionId') =>
 
 export const GenerateReadDocumentRoute = (docId: string = ':docId') =>
   `${PageVisitorRoute}/${docId}`;
+
+export const GenerateUserRoute = (userId: string = ':userId') =>
+  `${UserProfileRoute}/${userId}`;
+
+export const GenerateUserDocRoute = (
+  userId: string = ':userId',
+  docId: string = ':docId'
+) => `${UserProfileRoute}/${userId}/${docId}`;
+
+export const NavigateTo404 = () => Router.go('/404');

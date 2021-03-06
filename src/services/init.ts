@@ -19,9 +19,11 @@ import {
   AppHomePattern,
   DashboardPattern,
   SectionPattern,
+  ThoughtsTextNodePattern,
 } from './app.elements.patterns';
 import { AppManager } from './app.manager';
 import { env } from './env';
+import { ORIGIN } from '../utils/routes.generator';
 
 export const APP_MANAGER = 'app-manager-service';
 export const AUTH0_CONNECTION = 'AUTH0_CONNECTION';
@@ -40,7 +42,7 @@ export const initUprtcl = async () => {
   const auth0Config: Auth0ClientOptions = {
     domain: 'linked-thoughts-dev.eu.auth0.com',
     client_id: 'I7cwQfbSOm9zzU29Lt0Z3TjQsdB6GVEf',
-    redirect_uri: `${window.location.origin}/homeBLYAT`,
+    redirect_uri: `${ORIGIN}/homeBLYAT`,
     cacheLocation: 'localstorage',
   };
 
@@ -62,7 +64,7 @@ export const initUprtcl = async () => {
   );
 
   const httpStore = new HttpStore(httpConnection, httpCidConfig);
-  const httpEvees = new EveesHttp(httpConnection, httpStore);
+  const httpEvees = new EveesHttp(httpConnection, httpStore.casID);
 
   const remotes = [httpEvees];
   const modules = new Map<string, EveesContentModule>();
@@ -72,9 +74,15 @@ export const initUprtcl = async () => {
     new AppHomePattern(),
     new DashboardPattern(),
     new SectionPattern(),
+    new ThoughtsTextNodePattern(),
   ];
 
-  const evees = eveesConstructorHelper(remotes, modules, appPatterns);
+  const evees = eveesConstructorHelper(
+    remotes,
+    [httpStore],
+    modules,
+    appPatterns
+  );
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

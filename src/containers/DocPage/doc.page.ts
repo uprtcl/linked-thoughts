@@ -31,7 +31,7 @@ export class DocumentPage extends ConnectedElement {
   @query('#doc-editor')
   documentEditor: DocumentEditor;
 
-  @property()
+  @internalProperty()
   showSnackBar = false;
 
   eveesPull: Evees;

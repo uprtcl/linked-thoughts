@@ -1,8 +1,20 @@
-import { Pattern, HasChildren } from '@uprtcl/evees';
+import { TextNode, TextNodePattern } from '@uprtcl/documents';
+import {
+  Pattern,
+  HasChildren,
+  HasLinks,
+  LinkingBehaviorNames,
+  MergeStrategy,
+  mergeResult,
+  mergeArrays,
+  MergingBehaviorNames,
+  HasMerge,
+} from '@uprtcl/evees';
 
-import { Dashboard, Section } from '../containers/types';
+import { Dashboard, ThoughtsTextNode, Section } from '../containers/types';
 
 export const DashboardType = 'LinkedThoughts:Dashboard';
+export const ThoughtsTextNodeType = 'LinkedThoughts:ThoughtsTextNode';
 export const SectionType = 'LinkedThoughts:Section';
 export const HomeType = 'LinkedThoughts:UserHome';
 
@@ -19,14 +31,16 @@ export class AppHomePattern extends Pattern<any> {
 }
 
 export class AppHomeBehaviors implements HasChildren<any> {
-  links = async (node: any) => this.children(node);
-
-  replaceChildren = (node: any) => (childrenHashes: string[]): any => ({
+  [LinkingBehaviorNames.REPLACE_CHILDREN] = (node: any) => (
+    childrenHashes: string[]
+  ): any => ({
     ...node,
     linkedThoughts: childrenHashes[0],
   });
 
-  children = (node: any): string[] => [node.linkedThoughts];
+  [LinkingBehaviorNames.CHILDREN] = (node: any): string[] => [
+    node.linkedThoughts,
+  ];
 }
 
 export class DashboardPattern extends Pattern<Dashboard> {
@@ -42,16 +56,74 @@ export class DashboardPattern extends Pattern<Dashboard> {
 }
 
 export class DashboardBehaviors implements HasChildren<Dashboard> {
-  links = async (node: Dashboard) => this.children(node);
-
-  replaceChildren = (node: Dashboard) => (
+  [LinkingBehaviorNames.REPLACE_CHILDREN] = (node: Dashboard) => (
     childrenHashes: string[]
   ): Dashboard => ({
     ...node,
     sections: childrenHashes,
   });
 
-  children = (node: Dashboard): string[] => node.sections;
+  [LinkingBehaviorNames.CHILDREN] = (node: Dashboard): string[] =>
+    node.sections;
+}
+
+export class ThoughtsTextNodePattern extends TextNodePattern {
+  recognize(object: any): boolean {
+    return (
+      super.recognize(object) &&
+      object.meta !== undefined &&
+      object.meta.isA !== undefined
+    );
+  }
+
+  type = ThoughtsTextNodeType;
+
+  constructor() {
+    super([new ThoughtsTextNodeBehaviors()]);
+  }
+}
+
+export class ThoughtsTextNodeBehaviors
+  implements HasLinks<ThoughtsTextNode>, HasMerge<ThoughtsTextNode> {
+  [LinkingBehaviorNames.LINKS_TO] = (node: ThoughtsTextNode) => node.meta.isA;
+
+  [MergingBehaviorNames.MERGE] = (originalNode: ThoughtsTextNode) => async (
+    modifications: ThoughtsTextNode[],
+    merger: MergeStrategy,
+    config: any
+  ): Promise<ThoughtsTextNode> => {
+    const resultText = modifications[1].text;
+    const resultType = mergeResult(
+      originalNode.type,
+      modifications.map((data) => data.type)
+    );
+
+    if (!merger.mergeChildren)
+      throw new Error('mergeChildren function not found in merger');
+
+    const mergedLinks = await merger.mergeChildren(
+      originalNode.links,
+      modifications.map((data) => data.links),
+      config
+    );
+
+    const isAOrg = originalNode.meta ? originalNode.meta.isA : [];
+    const isAMod = modifications.map((mod) =>
+      mod.meta ? mod.meta.isA : isAOrg
+    );
+
+    const mergedIsA = mergeArrays(isAOrg, isAMod);
+    const mergedMeta = {
+      isA: mergedIsA,
+    };
+
+    return {
+      text: resultText,
+      type: resultType,
+      links: mergedLinks,
+      meta: mergedMeta,
+    };
+  };
 }
 
 export class SectionPattern extends Pattern<Section> {
@@ -66,15 +138,20 @@ export class SectionPattern extends Pattern<Section> {
   }
 }
 
-export class SectionBehaviors implements HasChildren<Section> {
-  title = async (node: Section) => node.title;
+export class SectionBehaviors
+  implements HasChildren<Section>, HasLinks<Section> {
+  [LinkingBehaviorNames.LINKS_TO] = (node: Section): string[] =>
+    node.meta ? node.meta.isA : [];
 
-  links = async (node: Section) => this.children(node);
+  title = (node: Section) => node.title;
+  text = (node: Section) => node.text;
 
-  replaceChildren = (node: Section) => (childrenHashes: string[]): Section => ({
+  [LinkingBehaviorNames.REPLACE_CHILDREN] = (node: Section) => (
+    childrenHashes: string[]
+  ): Section => ({
     ...node,
     pages: childrenHashes,
   });
 
-  children = (node: Section): string[] => node.pages;
+  [LinkingBehaviorNames.CHILDREN] = (node: Section): string[] => node.pages;
 }

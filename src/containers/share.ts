@@ -5,15 +5,18 @@ import { Entity } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
-import { Section } from './types';
+import { ThoughtsTextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
+import { ConceptId } from '../services/app.manager';
+import { GenearateReadURL } from '../utils/routes.generator';
 
 interface SectionData {
   id: string;
   data: Entity<Section>;
 }
+
 export default class ShareCard extends ConnectedElement {
   @property({ type: String })
   uref: string;
@@ -48,7 +51,7 @@ export default class ShareCard extends ConnectedElement {
   async copyShareURL() {
     try {
       await window.navigator.clipboard.writeText(
-        `${window.location.origin}${GenerateReadDocumentRoute(
+        `${GenearateReadURL(
           this.lastSharedPageId
             ? this.lastSharedPageId
             : (LTRouter.Router.location.params.docId as string)
@@ -133,8 +136,25 @@ export default class ShareCard extends ConnectedElement {
 
   async shareTo(toSectionId: string) {
     this.addingPage = true;
-    const sharedURI = await this.appManager.forkPage(this.uref, toSectionId);
-    this.lastSharedPageId = sharedURI;
+    const forkId = await this.appManager.forkPage(
+      this.uref,
+      toSectionId,
+      false
+    );
+
+    const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(forkId);
+    const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
+
+    /** keep the the entire object and append the blogConcept to the isA array. */
+    const newObject: ThoughtsTextNode = { ...data.object };
+    newObject.meta = {
+      isA: [blogConcept.id],
+    };
+
+    await this.evees.updatePerspectiveData(forkId, newObject);
+    await this.evees.client.flush();
+
+    this.lastSharedPageId = forkId;
     this.disableAddButton = true;
     this.addingPage = false;
   }
@@ -169,7 +189,7 @@ export default class ShareCard extends ConnectedElement {
             ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`
         : html` <div class="action-copy-cont">
             <div class="url-cont">
-              ${window.location.origin}${GenerateReadDocumentRoute(
+              ${GenearateReadURL(
                 LTRouter.Router.location.params.docId as string
               )}
             </div>
@@ -180,9 +200,7 @@ export default class ShareCard extends ConnectedElement {
       ${this.lastSharedPageId && this.isPagePrivate
         ? html` <div class="action-copy-cont">
             <div class="url-cont">
-              ${window.location.origin}${GenerateReadDocumentRoute(
-                this.lastSharedPageId
-              )}
+              ${GenearateReadURL(this.lastSharedPageId)}
             </div>
             <div @click=${this.copyShareURL} class="copy-url-button clickable">
               ${ClipboardIcon}

@@ -2,13 +2,16 @@ import { Commit, Signed } from '@uprtcl/evees';
 import { html, css, property } from 'lit-element';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
-import { GenearateReadURL } from '../../utils/routes.generator';
+import { GenearateUserDocReadURL } from '../../utils/routes.generator';
 
 import { TimestampToDate } from '../../utils/date';
 const MAX_HEIGHT = 400;
 export default class ReadOnlyPage extends ConnectedElement {
   @property({ type: String })
   uref: string;
+
+  @property({ type: String })
+  userId: string;
 
   @property()
   head = null;
@@ -51,7 +54,8 @@ export default class ReadOnlyPage extends ConnectedElement {
           </documents-editor>
         </div>
         <div class="action-cont">
-          <a href=${GenearateReadURL(this.uref)}
+          <a href=${GenearateUserDocReadURL(this.userId, this.uref)}
+          target="_blank"
             ><div class="read-more">Read More</div></a
           >
           <hr />

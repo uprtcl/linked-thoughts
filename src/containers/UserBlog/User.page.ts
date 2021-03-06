@@ -7,6 +7,7 @@ import { LTRouter } from '../../router';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
+import { NavigateTo404 } from '../../utils/routes.helpers';
 
 export default class ReadOnlyPage extends ConnectedElement {
   @internalProperty()
@@ -38,7 +39,7 @@ export default class ReadOnlyPage extends ConnectedElement {
     this.userBlogId = await this.appManager.getBlogIdOf(userId);
 
     if (!this.userBlogId) {
-      Router.go('/404');
+      NavigateTo404();
     }
   }
 
@@ -48,6 +49,7 @@ export default class ReadOnlyPage extends ConnectedElement {
       this.userId = routeParams.userId;
       this.getUserBlogId(routeParams.userId);
     }
+
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
   }
@@ -78,6 +80,7 @@ export default class ReadOnlyPage extends ConnectedElement {
         .root {
           height: 100vh;
           width: 100vw;
+          overflow-x: hidden;
         }
         .content {
           margin-top: 5vh;

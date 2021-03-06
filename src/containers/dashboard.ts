@@ -18,6 +18,7 @@ import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
   RouteName,
+  NavigateTo404,
 } from '../utils/routes.helpers';
 
 interface SectionData {
@@ -110,7 +111,7 @@ export class DashboardElement extends ConnectedElement {
         );
       } catch (e) {
         this.appManager.appError.clearLastVisited();
-        Router.go('/404');
+        NavigateTo404();
       }
     } else if (this.routeName === RouteName.dashboard) {
       // go to the first private page if nothing is selected.

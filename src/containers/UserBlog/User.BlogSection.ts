@@ -110,6 +110,7 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
             return html`
               <app-user-page-blog-section-item
                 uref=${pageId}
+                userId=${this.userId}
               ></app-user-page-blog-section-item>
             `;
           })}

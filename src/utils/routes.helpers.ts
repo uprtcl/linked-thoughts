@@ -1,3 +1,4 @@
+import { Router } from '@vaadin/router';
 import {
   DocumentBaseRoute,
   PageVisitorRoute,
@@ -22,3 +23,10 @@ export const GenerateReadDocumentRoute = (docId: string = ':docId') =>
 
 export const GenerateUserRoute = (userId: string = ':userId') =>
   `${UserProfileRoute}/${userId}`;
+
+export const GenerateUserDocRoute = (
+  userId: string = ':userId',
+  docId: string = ':docId'
+) => `${UserProfileRoute}/${userId}/${docId}`;
+
+export const NavigateTo404 = () => Router.go('/404');

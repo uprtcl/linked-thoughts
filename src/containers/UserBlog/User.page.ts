@@ -59,14 +59,13 @@ export default class ReadOnlyPage extends ConnectedElement {
 
     return html`<div class="root">
       <app-appbar-public></app-appbar-public>
-      <div class="content">
-        ${this.userBlogId
-          ? html` <app-user-page-blog-section
-              userId=${this.userId}
-              uref=${this.userBlogId}
-            />`
-          : null}
-      </div>
+
+      ${this.userBlogId
+        ? html` <app-user-page-blog-section
+            userId=${this.userId}
+            uref=${this.userBlogId}
+          />`
+        : null}
     </div>`;
   }
 
@@ -82,8 +81,14 @@ export default class ReadOnlyPage extends ConnectedElement {
           width: 100vw;
           overflow-x: hidden;
         }
-        .content {
-          margin-top: 5vh;
+        .root::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .root {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
         }
       `,
     ];

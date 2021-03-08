@@ -66,17 +66,24 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));
   }
-  async deletePerspective(pageId: string) {
+  async deletePage(pageIx: number) {
     const confirmResponse = window.confirm(
       'Are you sure you want to delete this item?'
     );
 
     if (confirmResponse === true) {
-      lodash.remove(this.data.object.pages, (id) => id === pageId);
-      await this.evees.updatePerspectiveData(this.uref, this.data.object);
+      let wasSelected: boolean = false;
+
+      if (this.selectedId === this.data.object.pages[pageIx]) {
+        wasSelected = true;
+      }
+
+      await this.evees.deleteChild(this.uref, pageIx);
       await this.evees.client.flush();
 
-      Router.go(GenerateSectionRoute(this.uref));
+      if (wasSelected) {
+        Router.go(GenerateSectionRoute(this.uref));
+      }
     }
   }
 
@@ -123,8 +130,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
                 uref=${pageId}
                 ui-parent=${this.uref}
                 idx=${pageIndex}
-                .deleteCurrentPerspective=${() =>
-                  this.deletePerspective(pageId)}
+                @delete-element=${() => this.deletePage(pageIndex)}
               ></app-nav-page-item>`;
             })}
             <div class="padding-div"></div>

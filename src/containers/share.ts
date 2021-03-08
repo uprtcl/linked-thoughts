@@ -111,24 +111,15 @@ export default class ShareCard extends ConnectedElement {
 
     const forkedIn = await this.appManager.getForkedIn(this.uref);
 
-    const inBlogIx = forkedIn.findIndex((e) => e.parentId === BlogSection.id);
-    if (inBlogIx !== -1) {
-      const parentAndChild = forkedIn[inBlogIx];
-      console.log({ forkId: parentAndChild.childId });
-      const PreviouslyForkedIn = lodash.find(
-        forkedIn,
-        (obj) => obj.parentId == BlogSection.id
-      );
-      if (PreviouslyForkedIn) {
-        this.lastSharedPageId = PreviouslyForkedIn.childId;
-      }
-      this.disableAddButton = true;
+    const forksInBlog = forkedIn.filter((e) => e.parentId === BlogSection.id);
 
-      const workspace = await this.appManager.compareForks(
-        PreviouslyForkedIn.childId,
-        this.uref
-      );
-      this.hasPush = await this.appManager.workspaceHasChanges(workspace);
+    if (forksInBlog.length > 0) {
+      // TODO: compare each fork and offer to push changes there
+      // const workspace = await this.appManager.compareForks(
+      //   PreviouslyForkedIn.childId,
+      //   this.uref
+      // );
+      this.hasPush = false; // await this.appManager.workspaceHasChanges(workspace);
     }
 
     this.loading = false;

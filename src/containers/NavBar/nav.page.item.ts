@@ -37,7 +37,6 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
 
   async dataUpdated() {
     this.title = this.evees.behaviorFirst(this.data.object, 'title');
-    
   }
 
   selectPage() {
@@ -49,7 +48,9 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   async optionOnPage(e) {
     switch (e.detail.key) {
       case 'remove':
-        this.deleteCurrentPerspective();
+        this.dispatchEvent(
+          new CustomEvent('delete-element', { detail: this.uref })
+        );
         break;
     }
   }
@@ -58,7 +59,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
     const menuConfig: MenuConfig = {
       remove: {
         disabled: false,
-        text: 'remove',
+        text: 'delete',
         icon: 'delete',
       },
     };

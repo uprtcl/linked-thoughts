@@ -95,8 +95,9 @@ export default class ReadOnlyPage
           class="closeButton clickable"
           @click=${() => {
             this.selectedBlogId = null;
-            Router.go(GenerateUserRoute(this.userId));
+            window.history.replaceState({}, '', GenerateUserRoute(this.userId));
           }}
+          Router.go(GenerateUserRoute(this.userId));
         >
           ${CloseIcon}
         </div>
@@ -111,6 +112,7 @@ export default class ReadOnlyPage
       <app-appbar-public></app-appbar-public>
       ${this.userBlogId
         ? html` <app-user-page-blog-section
+         .onSelection=${(uref) => (this.selectedBlogId = uref)}
             userId=${this.userId}
             uref=${this.userBlogId}
           />`

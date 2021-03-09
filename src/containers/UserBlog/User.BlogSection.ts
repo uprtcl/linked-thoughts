@@ -13,6 +13,9 @@ import { GenerateUserRoute } from '../../utils/routes.helpers';
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   logger = new Logger('UserPublicBlogSection');
 
+  @property()
+  onSelection: Function;
+
   @property({ type: String })
   uref: string;
 
@@ -24,9 +27,6 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
 
   @internalProperty()
   isEnded: boolean = false;
-
-  @internalProperty()
-  selectedBlogId: string = null;
 
   // TODO request app mananger on an ConnectedEveeElement base class...
   appManager: AppManager;
@@ -42,10 +42,6 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   async firstUpdated() {
     await super.firstUpdated();
 
-    const URLDocId = LTRouter.Router.location.params.docId as string;
-    if (URLDocId) {
-      this.selectedBlogId = URLDocId;
-    }
     this.getMoreFeed(3);
   }
 
@@ -116,23 +112,21 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
           </div>
         </div>
         <div class="blogsCont">
-          <div class=${`${this.selectedBlogId ? 'hideVisibility' : ''}`}>
-            <div class="topSeperator"></div>
-            ${this.blogIds.map((pageId, pageIndex) => {
-              return html`
-                <app-user-page-blog-section-item
-                  .onSelection=${(uref) => (this.selectedBlogId = uref)}
-                  uref=${pageId}
-                  userId=${this.userId}
-                ></app-user-page-blog-section-item>
-              `;
-            })}
-            <app-intersection-observer
-              id="is-visible"
-              @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
-            >
-            </app-intersection-observer>
-          </div>
+          <div class="topSeperator"></div>
+          ${this.blogIds.map((pageId, pageIndex) => {
+            return html`
+              <app-user-page-blog-section-item
+                .onSelection=${this.onSelection}
+                uref=${pageId}
+                userId=${this.userId}
+              ></app-user-page-blog-section-item>
+            `;
+          })}
+          <app-intersection-observer
+            id="is-visible"
+            @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
+          >
+          </app-intersection-observer>
         </div>
       </div>
     </div>`;
@@ -173,7 +167,6 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
           width: 100%;
           display: block;
         }
-    
 
         @media only screen and (max-width: 720px) {
           .cont {

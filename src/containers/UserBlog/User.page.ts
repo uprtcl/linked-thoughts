@@ -112,7 +112,7 @@ export default class ReadOnlyPage
       <app-appbar-public></app-appbar-public>
       ${this.userBlogId
         ? html` <app-user-page-blog-section
-         .onSelection=${(uref) => (this.selectedBlogId = uref)}
+            .onSelection=${(uref) => (this.selectedBlogId = uref)}
             userId=${this.userId}
             uref=${this.userBlogId}
           />`

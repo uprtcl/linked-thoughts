@@ -59,12 +59,17 @@ export default class ReadOnlyPage extends ConnectedElement {
         <div
           class="action-cont clickable"
           @click=${() => {
+            window.history.pushState(
+              {},
+              '',
+              GenearateUserDocReadURL(this.userId, this.uref)
+            );
             this.onSelection(this.uref);
           }}
+          }}
         >
-          <a href=${GenearateUserDocReadURL(this.userId, this.uref)}>
-            <div class="read-more">Read More</div>
-          </a>
+          <div class="read-more">Read More</div>
+
           <hr />
         </div>
       </div>

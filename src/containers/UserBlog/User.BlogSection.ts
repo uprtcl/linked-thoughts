@@ -173,16 +173,7 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
           width: 100%;
           display: block;
         }
-        @keyframes zoomIn {
-          from {
-            transform: scale(0.1);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
+    
 
         @media only screen and (max-width: 720px) {
           .cont {

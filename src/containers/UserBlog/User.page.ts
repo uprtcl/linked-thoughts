@@ -8,6 +8,7 @@ import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 import { NavigateTo404 } from '../../utils/routes.helpers';
+import { GenerateUserRoute } from '../../utils/routes.helpers';
 
 export default class ReadOnlyPage extends ConnectedElement {
   @internalProperty()
@@ -23,6 +24,9 @@ export default class ReadOnlyPage extends ConnectedElement {
 
   @property()
   containerType: 'mobile' | 'desktop' = 'desktop';
+
+  @internalProperty()
+  selectedBlogId: string = null;
 
   loading: boolean = false;
 
@@ -50,6 +54,11 @@ export default class ReadOnlyPage extends ConnectedElement {
       this.getUserBlogId(routeParams.userId);
     }
 
+    const URLDocId = LTRouter.Router.location.params.docId as string;
+    if (URLDocId) {
+      this.selectedBlogId = URLDocId;
+    }
+
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
   }
@@ -58,8 +67,21 @@ export default class ReadOnlyPage extends ConnectedElement {
     if (this.loading) return html``;
 
     return html`<div class="root">
-      <app-appbar-public></app-appbar-public>
+      <div class=${`docReadCont ${!this.selectedBlogId ? 'hide' : ''}`}>
+        <div
+          class="closeButton clickable"
+          @click=${() => {
+            this.selectedBlogId = null;
+            Router.go(GenerateUserRoute(this.userId));
+          }}
+        >
+          <-
+        </div>
+        <documents-editor uref=${this.selectedBlogId} ?read-only=${true}>
+        </documents-editor>
+      </div>
 
+        <app-appbar-public></app-appbar-public>
       ${this.userBlogId
         ? html` <app-user-page-blog-section
             userId=${this.userId}
@@ -89,6 +111,52 @@ export default class ReadOnlyPage extends ConnectedElement {
         .root {
           -ms-overflow-style: none; /* IE and Edge */
           scrollbar-width: none; /* Firefox */
+        }
+
+        .docReadCont {
+          background: rgba(255, 255, 255, 0.8);
+          box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
+          backdrop-filter: blur(1rem);
+          animation: zoomIn 0.2s ease-in-out;
+          /* Note: backdrop-filter has minimal browser support */
+          align-self: center;
+          border-radius: 10px 3px 3px 10px;
+          position: sticky;
+          /* width: 100%; */
+          top: 0;
+          overflow-y: scroll;
+          z-index: 5;
+          height: 85vh;
+          /* top: 5vh; */
+          width: 100%;
+          padding: 2rem 0;
+          overscroll-behavior: contain;
+          border-bottom: 2px solid #f0f;
+        }
+        .docReadCont::-webkit-scrollbar-thumb {
+          background-color: #0003;
+          border-radius: 1rem;
+        }
+        .docReadCont::-webkit-scrollbar {
+          width: 8px;
+          display: block;
+          scrollbar-width: 8px; /* Firefox */
+        }
+        .closeButton {
+          position: absolute;
+          left: 0.5rem;
+          top: 0.5rem;
+          font-size: 1.5rem;
+          color: #4260f6;
+          background: #efeffd;
+          padding: 0.25rem 0.5rem;
+          border-radius: 2rem;
+        }
+        .hide {
+          display: none;
+        }
+        .hideVisibility {
+          opacity: 0.5;
         }
       `,
     ];

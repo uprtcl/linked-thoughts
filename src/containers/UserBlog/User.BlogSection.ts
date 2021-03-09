@@ -7,9 +7,14 @@ import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
-
+import { LTRouter } from '../../router';
+import { Router } from '@vaadin/router';
+import { GenerateUserRoute } from '../../utils/routes.helpers';
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   logger = new Logger('UserPublicBlogSection');
+
+  @property()
+  onSelection: Function;
 
   @property({ type: String })
   uref: string;
@@ -36,6 +41,7 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
 
   async firstUpdated() {
     await super.firstUpdated();
+
     this.getMoreFeed(3);
   }
 
@@ -106,9 +112,11 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
           </div>
         </div>
         <div class="blogsCont">
+          <div class="topSeperator"></div>
           ${this.blogIds.map((pageId, pageIndex) => {
             return html`
               <app-user-page-blog-section-item
+                .onSelection=${this.onSelection}
                 uref=${pageId}
                 userId=${this.userId}
               ></app-user-page-blog-section-item>
@@ -141,12 +149,19 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
         .author {
           margin-top: 5%;
 
-          width: 50%;
+          width: 80%;
+
           overflow: hidden;
         }
+
         .blogsCont {
           flex: 4;
+          position: relative;
         }
+        .topSeperator {
+          height: 5vh;
+        }
+
         app-user-page-blog-section-item {
           min-height: 150px;
           width: 100%;

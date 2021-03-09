@@ -29,7 +29,7 @@ export class LTRouter {
         path: GenerateUserRoute(),
         component: 'app-user-page',
       },
-      { path: GenerateUserDocRoute(), component: 'app-visitor' },
+      { path: GenerateUserDocRoute(), component: 'app-user-page' },
       {
         path: Routes.Home,
         component: 'app-dashboard', // Slot

@@ -24,19 +24,19 @@ export default class ReadOnlyPage
   @internalProperty()
   userBlogId: string = null;
 
-  @query('#user-id-input')
-  userIdElement: UprtclTextField;
-  @property()
-  uref: string;
-
   @property()
   containerType: 'mobile' | 'desktop' = 'desktop';
 
   @internalProperty()
   selectedBlogId: string = null;
 
-  loading: boolean = false;
+  @internalProperty()
+  loading: boolean = true;
 
+  @query('#user-id-input')
+  userIdElement: UprtclTextField;
+
+  @internalProperty()
   userId: string;
 
   onBeforeLeave(
@@ -60,6 +60,7 @@ export default class ReadOnlyPage
 
   async firstUpdated() {
     await this.load();
+    this.loading = false;
   }
 
   async getUserBlogId(userId) {
@@ -81,13 +82,10 @@ export default class ReadOnlyPage
     if (URLDocId) {
       this.selectedBlogId = URLDocId;
     }
-
-    const data = await this.evees.getPerspectiveData(this.uref);
-    this.title = this.evees.behaviorFirst(data.object, 'title');
   }
 
   render() {
-    if (this.loading) return html``;
+    if (this.loading) return html`loading`;
 
     return html`<div class="root">
       <div class=${`docReadCont ${!this.selectedBlogId ? 'hide' : ''}`}>
@@ -101,15 +99,18 @@ export default class ReadOnlyPage
         >
           ${CloseIcon}
         </div>
-        <documents-editor
-          class="docRead"
-          uref=${this.selectedBlogId}
-          ?read-only=${true}
-        >
-        </documents-editor>
+        ${this.selectedBlogId
+          ? html`<documents-editor
+              class="docRead"
+              uref=${this.selectedBlogId}
+              ?read-only=${true}
+            >
+            </documents-editor>`
+          : ''}
       </div>
 
       <app-appbar-public></app-appbar-public>
+
       ${this.userBlogId
         ? html` <app-user-page-blog-section
             .onSelection=${(uref) => (this.selectedBlogId = uref)}

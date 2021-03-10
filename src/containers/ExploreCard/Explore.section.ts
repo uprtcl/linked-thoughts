@@ -7,7 +7,7 @@ import SearchIcon from '../../assets/icons/search.svg';
 import { UprtclTextField } from '@uprtcl/common-ui';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
 import { Logger } from '@uprtcl/evees';
-
+import lodash from 'lodash';
 export default class ExploreCard extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
@@ -117,13 +117,15 @@ export default class ExploreCard extends ConnectedElement {
     }
   }
 
-  async searchByText() {
+  searchByText() {
+    this.selectedBlogId = null;
     this.blogFeedIds = [];
     this.searchText = this.searchInput.value.trim()
       ? this.searchInput.value
       : undefined;
     this.load();
   }
+  debouncedSearchByText = lodash.debounce(this.searchByText, 1000);
 
   closeExplore() {
     this.exploreState = 0;
@@ -155,11 +157,13 @@ export default class ExploreCard extends ConnectedElement {
   renderHeader() {
     return html`<div class="header">
       <div class="search-cont">
-        <div @click=${() => this.searchByText()}>${SearchIcon}</div>
+        <div @click=${this.searchByText}>${SearchIcon}</div>
         <uprtcl-textfield
           id="search-input"
-          @enter=${() => this.searchByText()}
-          label="(soon) Search Intercreativity"
+          @input=${() => {
+            this.debouncedSearchByText();
+          }}
+          label="Search Intercreativity"
         ></uprtcl-textfield>
       </div>
       <uprtcl-icon-button

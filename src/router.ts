@@ -28,8 +28,8 @@ export class LTRouter {
       {
         path: GenerateUserRoute(),
         component: 'app-user-page',
+        children: [{ path: '/:docId', component: 'div' }],
       },
-      { path: GenerateUserDocRoute(), component: 'app-user-page' },
       {
         path: Routes.Home,
         component: 'app-dashboard', // Slot

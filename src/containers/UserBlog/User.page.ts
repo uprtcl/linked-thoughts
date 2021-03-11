@@ -1,5 +1,3 @@
-import { UprtclTextField } from '@uprtcl/common-ui';
-import { EveesBaseElement } from '@uprtcl/evees';
 import {
   BeforeLeaveObserver,
   PreventCommands,
@@ -7,17 +5,22 @@ import {
   RouterLocation,
 } from '@vaadin/router';
 import { html, css, property, internalProperty, query } from 'lit-element';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+
+import { UprtclTextField } from '@uprtcl/common-ui';
+
 import { LTRouter } from '../../router';
+import { GenearateUserDocReadURL } from '../../utils/routes.generator';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
 import { NavigateTo404 } from '../../utils/routes.helpers';
 import { GenerateUserRoute } from '../../utils/routes.helpers';
-import CloseIcon from '../../assets/icons/close-purple.svg';
-export default class ReadOnlyPage
-  extends ConnectedElement
-  implements BeforeLeaveObserver {
+
+import { PAGE_SELECTED_EVENT_NAME } from './User.BlogSection.Item';
+import { Logger } from '@uprtcl/evees';
+export default class ReadOnlyPage extends ConnectedElement {
+  logger = new Logger('ReadOnlyPage');
+
   @internalProperty()
   blogFeedIds: string[] = [];
 
@@ -28,7 +31,7 @@ export default class ReadOnlyPage
   containerType: 'mobile' | 'desktop' = 'desktop';
 
   @internalProperty()
-  selectedBlogId: string = null;
+  selectedBlogId: string | undefined = undefined;
 
   @internalProperty()
   loading: boolean = true;
@@ -39,28 +42,25 @@ export default class ReadOnlyPage
   @internalProperty()
   userId: string;
 
-  onBeforeLeave(
-    location: RouterLocation,
-    commands: PreventCommands,
-    router: Router
-  ) {
-    const URLDocId = location.params.docId as string;
-    if (URLDocId) {
-      this.selectedBlogId = URLDocId;
-    } else {
-      this.selectedBlogId = null;
-    }
-
-    return commands.prevent();
-
-    // ...
-  }
   @query('#intersection-observer')
   intersectionObserverEl!: LTIntersectionObserver;
 
   async firstUpdated() {
+    this.logger.log('firstUpdated()');
     await this.load();
     this.loading = false;
+  }
+
+  connectedCallback() {
+    this.logger.log('connectedCallback()');
+    super.connectedCallback();
+
+    window.addEventListener('popstate', () => this.decodeUrl());
+
+    this.addEventListener(PAGE_SELECTED_EVENT_NAME, ((event: CustomEvent) => {
+      event.stopPropagation();
+      this.showSelectedBlogPost(event.detail.uref);
+    }) as EventListener);
   }
 
   async getUserBlogId(userId) {
@@ -72,52 +72,80 @@ export default class ReadOnlyPage
   }
 
   async load() {
+    this.logger.log('load()');
+    await this.decodeUrl();
+  }
+
+  async decodeUrl() {
+    this.logger.log('decodeUrl()');
+
     const routeParams = LTRouter.Router.location.params as any;
     if (routeParams.userId) {
       this.userId = routeParams.userId;
-      this.getUserBlogId(routeParams.userId);
     }
 
     const URLDocId = LTRouter.Router.location.params.docId as string;
     if (URLDocId) {
       this.selectedBlogId = URLDocId;
     }
+
+    await this.getUserBlogId(routeParams.userId);
+  }
+
+  updated(cp) {
+    this.logger.log('updated()');
+    if (cp.has('selectedBlogId')) {
+      this.logger.log({
+        selectedBlogId: this.selectedBlogId,
+        oldSelectedBlogId: cp.get('selectedBlogId'),
+      });
+    }
+  }
+
+  showSelectedBlogPost(uref: string) {
+    this.logger.log('showSelectedBlogPost()', uref);
+    Router.go(GenearateUserDocReadURL(this.userId, uref));
+  }
+
+  closeSelectedBlogPost() {
+    this.logger.log('closeSelectedBlogPost()');
+    this.selectedBlogId = undefined;
+    Router.go(GenerateUserRoute(this.userId));
   }
 
   render() {
+    this.logger.log('render()');
+
     if (this.loading) return html`loading`;
 
-    return html`<div class="root">
-      <div class=${`docReadCont ${!this.selectedBlogId ? 'hide' : ''}`}>
-        <div
-          class="closeButton clickable"
-          @click=${() => {
-            this.selectedBlogId = null;
-            window.history.replaceState({}, '', GenerateUserRoute(this.userId));
-          }}
-          Router.go(GenerateUserRoute(this.userId));
-        >
-          ${CloseIcon}
-        </div>
-        ${this.selectedBlogId
-          ? html`<documents-editor
-              class="docRead"
-              uref=${this.selectedBlogId}
-              ?read-only=${true}
-            >
-            </documents-editor>`
-          : ''}
-      </div>
+    return html`
+
+      ${
+        this.selectedBlogId
+          ? html`<uprtcl-dialog
+              show-close
+              size="large"
+              @close=${() => this.closeSelectedBlogPost()}
+              ><documents-editor
+                class="docRead"
+                uref=${this.selectedBlogId}
+                ?read-only=${true}
+              >
+              </documents-editor
+            ></uprtcl-dialog>`
+          : ''
+      }
 
       <app-appbar-public></app-appbar-public>
 
-      ${this.userBlogId
-        ? html` <app-user-page-blog-section
-            .onSelection=${(uref) => (this.selectedBlogId = uref)}
-            userId=${this.userId}
-            uref=${this.userBlogId}
-          />`
-        : null}
+      ${
+        this.userBlogId
+          ? html` <app-user-page-blog-section
+              userId=${this.userId}
+              uref=${this.userBlogId}
+            />`
+          : null
+      }
     </div>`;
   }
 

@@ -2,14 +2,12 @@ import { Commit, Signed } from '@uprtcl/evees';
 import { html, css, property } from 'lit-element';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
-import { GenearateUserDocReadURL } from '../../utils/routes.generator';
 
 import { TimestampToDate } from '../../utils/date';
 const MAX_HEIGHT = 400;
-export default class ReadOnlyPage extends ConnectedElement {
-  @property()
-  onSelection: Function;
 
+export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
+export default class ReadOnlyPage extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
@@ -21,9 +19,11 @@ export default class ReadOnlyPage extends ConnectedElement {
 
   @property({ type: Boolean })
   loading: boolean = true;
+
   firstUpdated() {
     this.load();
   }
+
   async load() {
     this.loading = true;
     const { details } = await this.evees.client.getPerspective(this.uref);
@@ -38,6 +38,17 @@ export default class ReadOnlyPage extends ConnectedElement {
     this.head = head;
     this.loading = false;
   }
+
+  selectItem() {
+    this.dispatchEvent(
+      new CustomEvent(PAGE_SELECTED_EVENT_NAME, {
+        bubbles: true,
+        composed: true,
+        detail: { uref: this.uref },
+      })
+    );
+  }
+
   render() {
     if (this.loading) {
       return html`<evees-loading></evees-loading>`;
@@ -56,18 +67,7 @@ export default class ReadOnlyPage extends ConnectedElement {
           >
           </documents-editor>
         </div>
-        <div
-          class="action-cont clickable"
-          @click=${() => {
-            window.history.pushState(
-              {},
-              '',
-              GenearateUserDocReadURL(this.userId, this.uref)
-            );
-            this.onSelection(this.uref);
-          }}
-          }}
-        >
+        <div class="action-cont clickable" @click=${() => this.selectItem()}>
           <div class="read-more">Read More</div>
 
           <hr />

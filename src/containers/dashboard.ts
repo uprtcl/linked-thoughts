@@ -100,7 +100,9 @@ export class DashboardElement extends ConnectedElement {
     // /getting-started
 
     this.routeName = LTRouter.Router.location.route.name as RouteName;
+
     const routeParams = LTRouter.Router.location.params as any;
+
     if (this.routeName === RouteName.section) {
       this.selectedSectionId = routeParams.sectionId;
     } else if (this.routeName === RouteName.page) {

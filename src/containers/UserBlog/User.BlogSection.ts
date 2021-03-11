@@ -13,9 +13,6 @@ import { GenerateUserRoute } from '../../utils/routes.helpers';
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   logger = new Logger('UserPublicBlogSection');
 
-  @property()
-  onSelection: Function;
-
   @property({ type: String })
   uref: string;
 
@@ -116,7 +113,6 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
           ${this.blogIds.map((pageId, pageIndex) => {
             return html`
               <app-user-page-blog-section-item
-                .onSelection=${this.onSelection}
                 uref=${pageId}
                 userId=${this.userId}
               ></app-user-page-blog-section-item>

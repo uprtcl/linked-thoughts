@@ -171,31 +171,6 @@ export default class ReadOnlyPage extends ConnectedElement {
           scrollbar-width: none; /* Firefox */
         }
 
-        .docReadCont {
-          background: rgba(255, 255, 255, 0.8);
-          box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
-          backdrop-filter: blur(6rem);
-          animation: zoomIn 0.2s ease-in-out;
-          align-self: center;
-          border-radius: 10px 3px 3px 10px;
-          position: fixed;
-          overflow-y: scroll;
-          z-index: 5;
-          width: 100%;
-          height: 100%;
-          overscroll-behavior: contain;
-          display: flex;
-          flex-direction: column;
-        }
-        .docReadCont::-webkit-scrollbar-thumb {
-          background-color: #0003;
-          border-radius: 1rem;
-        }
-        .docReadCont::-webkit-scrollbar {
-          width: 8px;
-          display: block;
-          scrollbar-width: 8px; /* Firefox */
-        }
         .docRead {
           flex: 1;
           padding-top: 1rem;

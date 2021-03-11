@@ -286,13 +286,13 @@ export default class ExploreCard extends ConnectedElement {
         }
         /* ToolTip */
         .explore-navigation-tooltip {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgb(255, 255, 255);
           box-shadow: 4px 0px 50px rgba(0, 0, 0, 0.1);
-          backdrop-filter: blur(50px);
           position: relative;
           display: flex;
           align-items: center;
           height: fit-content;
+          padding-right: 1rem;
         }
         .light-grey {
           background: rgba(240, 240, 240, 0.95);
@@ -325,9 +325,9 @@ export default class ExploreCard extends ConnectedElement {
         }
         /* Explore List */
         .explore-list {
-          background: rgba(255, 255, 255, 0.6);
+          background: rgb(255, 255, 255);
           box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
-          backdrop-filter: blur(50px);
+
           /* Note: backdrop-filter has minimal browser support */
           font-family: 'Inter', sans-serif;
 
@@ -367,12 +367,10 @@ export default class ExploreCard extends ConnectedElement {
           align-items: center;
           justify-content: center;
           border-bottom: 1px solid #e0e0e0;
-
           position: static;
           position: sticky;
           top: 0;
           background: transparent;
-          backdrop-filter: blur(1rem);
           padding: 1rem 3%;
           z-index: 10;
         }
@@ -388,9 +386,9 @@ export default class ExploreCard extends ConnectedElement {
         /* Explore Page */
 
         .explore-page {
-          background: rgba(255, 255, 255, 0.7);
+          background: rgb(255, 255, 255);
           box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
-          backdrop-filter: blur(1rem);
+
           /* Note: backdrop-filter has minimal browser support */
 
           border-radius: 10px 3px 3px 10px;
@@ -407,7 +405,6 @@ export default class ExploreCard extends ConnectedElement {
 
         .explore-page-cont > * {
           display: block;
-          width: 25%;
           float: left;
         }
 
@@ -447,6 +444,21 @@ export default class ExploreCard extends ConnectedElement {
           }
           .explore-page {
             width: 80vw;
+          }
+        }
+        @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+          .explore-page {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(1rem);
+          }
+          .explore-navigation-tooltip {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(50px);
+          }
+          .explore-list {
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(50px);
           }
         }
       `,

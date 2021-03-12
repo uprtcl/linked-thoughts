@@ -198,7 +198,7 @@ export class AppManager {
     };
 
     // Create a temporary workspaces to compute the merge
-    const evees = this.evees.clone();
+    const evees = await this.evees.clone();
     const merger = new RecursiveContextMergeStrategy(evees);
     await merger.mergePerspectivesExternal(to, from, config);
 

@@ -12,6 +12,8 @@ import {
   EveesContentModule,
   eveesConstructorHelper,
   MultiContainer,
+  RemoteEveesLocal,
+  Evees,
 } from '@uprtcl/evees';
 
 import { appElementsInit } from './app.elements.init';
@@ -26,6 +28,8 @@ import { env } from './env';
 import { ORIGIN } from '../utils/routes.generator';
 
 export const APP_MANAGER = 'app-manager-service';
+export const DRAFTS_EVEES = 'app-drafts-store';
+
 export const AUTH0_CONNECTION = 'AUTH0_CONNECTION';
 export const ETH_ACCOUNT_CONNECTION = 'ETH_HTTP_CONNECTION';
 
@@ -87,6 +91,11 @@ export const initUprtcl = async () => {
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);
   services.set(APP_MANAGER, appManager);
+
+  /** each set of changes made to one document are stored under a single evees client with
+   * local persistence */
+  const drafts = new Map<string, Evees>();
+  services.set(DRAFTS_EVEES, drafts);
 
   customElements.define('app-container', MultiContainer(evees, services));
 };

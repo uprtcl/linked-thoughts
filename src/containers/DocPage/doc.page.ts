@@ -1,11 +1,6 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import {
-  Secured,
-  Perspective,
-  Evees,
-  RecursiveContextMergeStrategy,
-} from '@uprtcl/evees';
+import { Secured, Perspective, Evees, ClientLocal } from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';
@@ -13,7 +8,7 @@ import { sharedStyles } from '../../styles';
 
 import RestrictedIcon from '../../assets/icons/left.svg';
 import CloseIcon from '../../assets/icons/x.svg';
-import MoreHorizontalIcon from '../../assets/icons/more-horizontal.svg';
+import { DRAFTS_EVEES } from '../../services/init';
 
 export class DocumentPage extends ConnectedElement {
   @property({ type: String, attribute: 'page-id' })
@@ -37,11 +32,13 @@ export class DocumentPage extends ConnectedElement {
   eveesPull: Evees;
   privateSectionPerspective: Secured<Perspective>;
   originId: string;
+  localEvees: Evees;
 
   async firstUpdated() {
     this.privateSectionPerspective = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
+
     this.load();
   }
 
@@ -54,16 +51,44 @@ export class DocumentPage extends ConnectedElement {
     }
   }
 
+  async checkEveesLocal() {
+    const draftsEvees: Map<string, Evees> = this.request(DRAFTS_EVEES);
+
+    /** initialize a dedicated Client and Evees service to store this document changes */
+    if (!draftsEvees.has(this.pageId)) {
+      const draftClient = new ClientLocal(
+        `client-local-${this.pageId}`,
+        this.evees.client.store
+      );
+
+      const draftEvees = await this.evees.clone(
+        `Draf of ${this.pageId}`,
+        draftClient
+      );
+
+      draftsEvees.set(this.pageId, draftEvees);
+    }
+
+    this.localEvees = draftsEvees.get(this.pageId);
+  }
+
   async load() {
     window.onbeforeunload = function () {
       // return 'Are you sure?';
     };
+
+    await this.checkEveesLocal();
+
     this.hasPull = false;
 
-    const { details } = await this.evees.client.getPerspective(this.pageId);
+    const { details } = await this.localEvees.client.getPerspective(
+      this.pageId
+    );
     this.readOnly = details.guardianId !== this.privateSectionPerspective.id;
 
-    const perspective = await this.evees.client.store.getEntity(this.pageId);
+    const perspective = await this.localEvees.client.store.getEntity(
+      this.pageId
+    );
 
     if (
       perspective.object.payload.meta &&
@@ -165,6 +190,7 @@ export class DocumentPage extends ConnectedElement {
         <documents-editor
           id="doc-editor"
           uref=${this.pageId}
+          .localEvees=${this.localEvees}
           ?read-only=${this.readOnly}
         >
         </documents-editor>

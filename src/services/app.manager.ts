@@ -85,7 +85,10 @@ export class AppManager {
       };
 
       /** update the section data (adding the link) */
-      await this.evees.updatePerspectiveData(blogSection.id, blogDataNew);
+      await this.evees.updatePerspectiveData({
+        perspectiveId: blogSection.id,
+        object: blogDataNew,
+      });
       await this.evees.client.flush();
     }
   }

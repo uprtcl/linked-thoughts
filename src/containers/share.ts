@@ -142,7 +142,10 @@ export default class ShareCard extends ConnectedElement {
       isA: [blogConcept.id],
     };
 
-    await this.evees.updatePerspectiveData(forkId, newObject);
+    await this.evees.updatePerspectiveData({
+      perspectiveId: forkId,
+      object: newObject,
+    });
     await this.evees.client.flush();
 
     this.lastSharedPageId = forkId;

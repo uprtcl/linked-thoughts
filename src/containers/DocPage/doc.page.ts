@@ -1,6 +1,12 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import { Secured, Perspective, Evees, ClientLocal } from '@uprtcl/evees';
+import {
+  Secured,
+  Perspective,
+  Evees,
+  ClientLocal,
+  CASLocal,
+} from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';
@@ -57,9 +63,9 @@ export class DocumentPage extends ConnectedElement {
     /** initialize a dedicated Client and Evees service to store this document changes */
     if (!draftsEvees.has(this.pageId)) {
       const draftClient = new ClientLocal(
-        this.evees.client.store,
+        new CASLocal(this.pageId, this.evees.client.store),
         this.evees.client,
-        `client-local-${this.pageId}`
+        this.pageId
       );
 
       const draftEvees = await this.evees.clone(

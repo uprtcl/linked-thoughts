@@ -63,9 +63,10 @@ export class DocumentPage extends ConnectedElement {
     /** initialize a dedicated Client and Evees service to store this document changes */
     if (!draftsEvees.has(this.pageId)) {
       const draftClient = new ClientLocal(
-        new CASLocal(this.pageId, this.evees.client.store),
+        new CASLocal(this.pageId, this.evees.client.store, false),
         this.evees.client,
-        this.pageId
+        this.pageId,
+        false
       );
 
       const draftEvees = await this.evees.clone(

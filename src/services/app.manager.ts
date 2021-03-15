@@ -11,10 +11,13 @@ import {
   getHome,
   SearchOptions,
   SearchResult,
+  ClientLocal,
+  CASLocal,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard, Section } from '../containers/types';
+import { DRAFTS_EVEES } from './init';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
@@ -24,6 +27,7 @@ export enum ConceptId {
 export class AppManager {
   elements: AppElements;
   appError: AppError;
+  draftsEvees: Map<string, Evees> = new Map();
 
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
@@ -212,5 +216,26 @@ export class AppManager {
     // see if the temporary workspaces has updated any perspective
     const diff = await evees.client.diff();
     return diff.updates ? diff.updates.length > 0 : false;
+  }
+
+  async getDocumentEvees(docId): Promise<Evees> {
+    /** initialize a dedicated Client and Evees service to store this document changes */
+    if (!this.draftsEvees.has(docId)) {
+      const draftClient = new ClientLocal(
+        new CASLocal(docId, this.evees.client.store, false),
+        this.evees.client,
+        docId,
+        false
+      );
+
+      const draftEvees = await this.evees.clone(
+        `Draf of ${docId}`,
+        draftClient
+      );
+
+      this.draftsEvees.set(docId, draftEvees);
+    }
+
+    return this.draftsEvees.get(docId);
   }
 }

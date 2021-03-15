@@ -92,10 +92,5 @@ export const initUprtcl = async () => {
   const appManager = new AppManager(evees, appElementsInit);
   services.set(APP_MANAGER, appManager);
 
-  /** each set of changes made to one document are stored under a single evees client with
-   * local persistence */
-  const drafts = new Map<string, Evees>();
-  services.set(DRAFTS_EVEES, drafts);
-
   customElements.define('app-container', MultiContainer(evees, services));
 };

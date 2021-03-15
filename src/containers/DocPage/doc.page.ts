@@ -58,32 +58,11 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async checkEveesLocal() {
-    const draftsEvees: Map<string, Evees> = this.request(DRAFTS_EVEES);
-
-    /** initialize a dedicated Client and Evees service to store this document changes */
-    if (!draftsEvees.has(this.pageId)) {
-      const draftClient = new ClientLocal(
-        new CASLocal(this.pageId, this.evees.client.store, false),
-        this.evees.client,
-        this.pageId,
-        false
-      );
-
-      const draftEvees = await this.evees.clone(
-        `Draf of ${this.pageId}`,
-        draftClient
-      );
-
-      draftsEvees.set(this.pageId, draftEvees);
-    }
-
-    this.localEvees = draftsEvees.get(this.pageId);
+    this.localEvees = await this.appManager.getDocumentEvees(this.pageId);
   }
 
   async load() {
-    window.onbeforeunload = function () {
-      // return 'Are you sure?';
-    };
+    this.loading = true;
 
     await this.checkEveesLocal();
 
@@ -134,7 +113,9 @@ export class DocumentPage extends ConnectedElement {
         <uprtcl-button slot="icon" skinny secondary>Share</uprtcl-button>
         <share-card
           uref=${this.pageId}
-          from=${this.privateSectionPerspective.id}
+          from=${this.privateSectionPerspective
+            ? this.privateSectionPerspective.id
+            : undefined}
         ></share-card>
       </uprtcl-popper>
     </div>`;
@@ -190,19 +171,18 @@ export class DocumentPage extends ConnectedElement {
     </div>`;
   }
   render() {
-    if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
-
     return html`
       <div class="page-container">
         ${this.renderTopNav()}
-        <documents-editor
-          id="doc-editor"
-          uref=${this.pageId}
-          .localEvees=${this.localEvees}
-          ?read-only=${this.readOnly}
-        >
-        </documents-editor>
-
+        ${this.loading
+          ? html`<uprtcl-loading></uprtcl-loading>`
+          : html`<documents-editor
+              id="doc-editor"
+              uref=${this.pageId}
+              .localEvees=${this.localEvees}
+              ?read-only=${this.readOnly}
+            >
+            </documents-editor> `}
         ${this.hasPull && this.showSnackBar
           ? this.renderSnackBar('pullchanges')
           : null}

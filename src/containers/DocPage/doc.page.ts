@@ -1,12 +1,6 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import {
-  Secured,
-  Perspective,
-  Evees,
-  ClientLocal,
-  CASLocal,
-} from '@uprtcl/evees';
+import { Secured, Perspective, Evees } from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';
@@ -14,7 +8,6 @@ import { sharedStyles } from '../../styles';
 
 import RestrictedIcon from '../../assets/icons/left.svg';
 import CloseIcon from '../../assets/icons/x.svg';
-import { DRAFTS_EVEES } from '../../services/init';
 
 export class DocumentPage extends ConnectedElement {
   @property({ type: String, attribute: 'page-id' })
@@ -38,7 +31,6 @@ export class DocumentPage extends ConnectedElement {
   eveesPull: Evees;
   privateSectionPerspective: Secured<Perspective>;
   originId: string;
-  localEvees: Evees;
 
   async firstUpdated() {
     this.privateSectionPerspective = await this.appManager.elements.get(
@@ -57,25 +49,21 @@ export class DocumentPage extends ConnectedElement {
     }
   }
 
-  async checkEveesLocal() {
-    this.localEvees = await this.appManager.getDocumentEvees(this.pageId);
-  }
-
   async load() {
     this.loading = true;
 
-    await this.checkEveesLocal();
-
     this.hasPull = false;
 
-    const { details } = await this.localEvees.client.getPerspective(
-      this.pageId
-    );
+    const {
+      details,
+    } = await this.appManager
+      .getDraftEvees()
+      .client.getPerspective(this.pageId);
     this.readOnly = details.guardianId !== this.privateSectionPerspective.id;
 
-    const perspective = await this.localEvees.client.store.getEntity(
-      this.pageId
-    );
+    const perspective = await this.appManager
+      .getDraftEvees()
+      .client.store.getEntity(this.pageId);
 
     if (
       perspective.object.payload.meta &&
@@ -179,7 +167,7 @@ export class DocumentPage extends ConnectedElement {
           : html`<documents-editor
               id="doc-editor"
               uref=${this.pageId}
-              .localEvees=${this.localEvees}
+              .localEvees=${this.appManager.getDraftEvees()}
               ?read-only=${this.readOnly}
             >
             </documents-editor> `}

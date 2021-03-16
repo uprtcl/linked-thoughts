@@ -28,7 +28,6 @@ import { env } from './env';
 import { ORIGIN } from '../utils/routes.generator';
 
 export const APP_MANAGER = 'app-manager-service';
-export const DRAFTS_EVEES = 'app-drafts-store';
 
 export const AUTH0_CONNECTION = 'AUTH0_CONNECTION';
 export const ETH_ACCOUNT_CONNECTION = 'ETH_HTTP_CONNECTION';

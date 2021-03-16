@@ -66,7 +66,7 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      await this.appManager.checkStructure();
+      await this.appManager.init();
 
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'

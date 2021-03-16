@@ -28,15 +28,20 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
 
   deleteCurrentPerspective: Function = () => null;
 
+  connectedCallback() {
+    super.connectedCallback();
+  }
+
   async firstUpdated() {
     await super.firstUpdated();
+
     if (this.guardianId !== this.uiParentId) {
       this.isShortcut = true;
     }
   }
 
   async dataUpdated() {
-    this.title = this.evees.behaviorFirst(this.data.object, 'title');
+    this.title = this.localEvees.behaviorFirst(this.data.object, 'title');
   }
 
   selectPage() {

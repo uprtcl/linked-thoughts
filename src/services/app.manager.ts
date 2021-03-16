@@ -9,15 +9,13 @@ import {
   Secured,
   Perspective,
   getHome,
-  SearchOptions,
   SearchResult,
-  ClientLocal,
+  ClientCachedLocal,
   CASLocal,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard, Section } from '../containers/types';
-import { DRAFTS_EVEES } from './init';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
@@ -27,7 +25,7 @@ export enum ConceptId {
 export class AppManager {
   elements: AppElements;
   appError: AppError;
-  draftsEvees: Map<string, Evees> = new Map();
+  draftEvees!: Evees;
 
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
@@ -42,10 +40,30 @@ export class AppManager {
     }
   }
 
+  async init() {
+    await this.checkStructure();
+    await this.initDraftsLocal();
+  }
+
   async checkStructure() {
     /** check the app scheleton is there */
     await this.elements.check();
     await this.checkBlogPermissions();
+  }
+
+  async initDraftsLocal() {
+    const draftClient = new ClientCachedLocal(
+      new CASLocal('local', this.evees.client.store, false),
+      this.evees.client,
+      false,
+      'local'
+    );
+
+    this.draftEvees = await this.evees.clone(`Draft Evees`, draftClient);
+  }
+
+  getDraftEvees(): Evees {
+    return this.draftEvees;
   }
 
   /** init blog ACL to publicRead privateWrite (HTTP-remote-specific)
@@ -216,26 +234,5 @@ export class AppManager {
     // see if the temporary workspaces has updated any perspective
     const diff = await evees.client.diff();
     return diff.updates ? diff.updates.length > 0 : false;
-  }
-
-  async getDocumentEvees(docId): Promise<Evees> {
-    /** initialize a dedicated Client and Evees service to store this document changes */
-    if (!this.draftsEvees.has(docId)) {
-      const draftClient = new ClientLocal(
-        new CASLocal(docId, this.evees.client.store, false),
-        this.evees.client,
-        docId,
-        false
-      );
-
-      const draftEvees = await this.evees.clone(
-        `Draf of ${docId}`,
-        draftClient
-      );
-
-      this.draftsEvees.set(docId, draftEvees);
-    }
-
-    return this.draftsEvees.get(docId);
   }
 }

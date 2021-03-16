@@ -243,7 +243,12 @@ export class DashboardElement extends ConnectedElement {
 
   renderSectionContent() {
     return html` ${this.selectedSectionId !== undefined
-      ? html` <app-section-page uref=${this.selectedSectionId} /> `
+      ? html`
+          <app-section-page
+            uref=${this.selectedSectionId}
+            .localEvees=${this.appManager.getDraftEvees()}
+          />
+        `
       : null}`;
   }
 

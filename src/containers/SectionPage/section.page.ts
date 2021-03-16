@@ -16,8 +16,6 @@ import {
 import { TextNode } from '@uprtcl/documents';
 
 import { ErrorBase } from '../../utils/error.base';
-import FileAddIcon from '../../assets/icons/file-add.svg';
-import DropDownIcon from '../../assets/icons/drop-down.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { sharedStyles } from '../../styles';
 import SearchIcon from '../../assets/icons/search.svg';
@@ -91,9 +89,9 @@ export class SectionPage extends EveesBaseElement<Section> {
 
     this.pageList = await Promise.all(
       this.data.object.pages.map(async (pageId) => {
-        const { details } = await this.evees.client.getPerspective(pageId);
+        const { details } = await this.localEvees.client.getPerspective(pageId);
 
-        const perspective = await this.evees.client.store.getEntity<
+        const perspective = await this.localEvees.client.store.getEntity<
           Signed<Perspective>
         >(pageId);
 
@@ -101,11 +99,11 @@ export class SectionPage extends EveesBaseElement<Section> {
         let data = undefined;
 
         if (details.headId) {
-          head = await this.evees.client.store.getEntity<Signed<Commit>>(
+          head = await this.localEvees.client.store.getEntity<Signed<Commit>>(
             details.headId
           );
 
-          data = await this.evees.client.store.getEntity<TextNode>(
+          data = await this.localEvees.client.store.getEntity<TextNode>(
             head.object.payload.dataId
           );
         }

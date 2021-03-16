@@ -127,6 +127,31 @@ export class AppManager {
     return childId;
   }
 
+  /** takes all changes under a given page, squash them as new commits and remove them from the drafts client */
+  async commitPage(pageId: string) {
+    /** get all changes on the local client and persist them on the evees client */
+    const cache = (this.draftEvees.client as ClientCachedLocal)
+      .cache as CacheLocal;
+    const perspectiveIds = await cache.getOnEcosystem(pageId);
+
+    await Promise.all(
+      perspectiveIds.map(async (perspectiveId) => {
+        const newPerspective = await cache.isNewPerspective(perspectiveId);
+        if (newPerspective) {
+          this.evees.createEvee({ perspectiveId, object: data.object });
+        } else {
+          const update = await cache.getLastUpdate(perspectiveId);
+          this.evees.updatePerspectiveData({
+            perspectiveId,
+            object: data.object,
+          });
+        }
+      })
+    );
+
+    await this.evees.client.flush();
+  }
+
   /**  */
   async forkPage(
     pageId: string,

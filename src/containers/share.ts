@@ -1,7 +1,7 @@
 import { html, css, property, internalProperty } from 'lit-element';
 import lodash from 'lodash';
 
-import { Entity } from '@uprtcl/evees';
+import { Entity, Perspective, Secured } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
@@ -42,7 +42,12 @@ export default class ShareCard extends ConnectedElement {
   @internalProperty()
   hasPush = false;
 
+  @internalProperty()
+  hasFork: boolean = false;
+
   sections: SectionData[];
+  privateSection!: Secured<Perspective>;
+  blogSection!: Secured<Perspective>;
 
   firstUpdated() {
     this.load();
@@ -76,6 +81,7 @@ export default class ShareCard extends ConnectedElement {
     this.lastSharedPageId = null;
     this.disableAddButton = false;
     this.hasPush = false;
+    this.hasFork = false;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -92,37 +98,46 @@ export default class ShareCard extends ConnectedElement {
         )
     );
 
-    const { details } = await this.evees.client.getPerspective(this.uref);
+    const {
+      details,
+    } = await this.appManager.getDraftEvees().client.getPerspective(this.uref);
 
-    const privateSectionPerspective = await this.appManager.elements.get(
+    this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
-    const BlogSection = await this.appManager.elements.get(
+    this.blogSection = await this.appManager.elements.get(
       '/linkedThoughts/blogSection'
     );
-    if (
-      details.guardianId &&
-      details.guardianId != privateSectionPerspective.id
-    ) {
+
+    if (details.guardianId && details.guardianId != this.privateSection.id) {
       this.isPagePrivate = false;
     } else {
       this.isPagePrivate = true;
     }
 
     const forkedIn = await this.appManager.getForkedIn(this.uref);
-
-    const forksInBlog = forkedIn.filter((e) => e.parentId === BlogSection.id);
+    const forksInBlog = forkedIn.filter(
+      (e) => e.parentId === this.blogSection.id
+    );
 
     if (forksInBlog.length > 0) {
-      // TODO: compare each fork and offer to push changes there
-      // const workspace = await this.appManager.compareForks(
-      //   PreviouslyForkedIn.childId,
-      //   this.uref
-      // );
-      this.hasPush = false; // await this.appManager.workspaceHasChanges(workspace);
+      this.hasFork = true;
+      const workspace = await this.appManager.compareForks(
+        forksInBlog[0].childId,
+        this.uref
+      );
+      this.hasPush = await this.appManager.workspaceHasChanges(workspace);
     }
 
     this.loading = false;
+  }
+
+  toggleBlogVersion() {
+    if (this.hasFork) {
+      // delete fork
+    } else {
+      this.shareTo(this.blogSection.id);
+    }
   }
 
   async shareTo(toSectionId: string) {
@@ -153,44 +168,46 @@ export default class ShareCard extends ConnectedElement {
     this.addingPage = false;
   }
 
+  renderPrivatePage() {
+    return html`<div class="row">
+        <div class="col">
+          <div class="row">
+            <div class="heading">
+              ${this.isPagePrivate ? html`Share to blog` : html`Share to Web`}
+            </div>
+          </div>
+          <div class="row">
+            <div class="description">
+              ${this.isPagePrivate
+                ? html`Sharing to blog creates a fork of this page in your blog`
+                : html`Anyone with this link can view this page.`}
+            </div>
+          </div>
+        </div>
+        <div>
+          <uprtcl-toggle @click=${() => this.toggleBlogVersion()}>
+          </uprtcl-toggle>
+        </div>
+      </div>
+
+      ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`;
+  }
+
+  renderBlogPage() {
+    return html` <div class="action-copy-cont">
+      <div class="url-cont">
+        ${GenearateReadURL(LTRouter.Router.location.params.docId as string)}
+      </div>
+      <div @click=${this.copyShareURL} class="copy-url-button clickable">
+        ${ClipboardIcon}
+      </div>
+    </div>`;
+  }
+
   render() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
     return html`<div class="share-card-cont">
-      <div class="content">
-        <div class="row">
-          <div class="heading">
-            ${this.isPagePrivate ? html`Add to blog` : html`Share to Web`}
-          </div>
-        </div>
-        <div class="row">
-          <div class="description">
-            ${this.isPagePrivate
-              ? html`Share this page by forking it in your Blog section`
-              : html`Anyone with this link can view this page.`}
-          </div>
-        </div>
-      </div>
-      ${this.isPagePrivate
-        ? html`<uprtcl-button-loading
-              class="add-to-blog-button"
-              @click=${() =>
-                !this.disableAddButton ? this.shareTo(this.sections[0].id) : {}}
-              ?disabled=${this.disableAddButton}
-              ?loading=${this.addingPage}
-            >
-              ${this.disableAddButton ? html`Added` : html`Add`}
-            </uprtcl-button-loading>
-            ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`
-        : html` <div class="action-copy-cont">
-            <div class="url-cont">
-              ${GenearateReadURL(
-                LTRouter.Router.location.params.docId as string
-              )}
-            </div>
-            <div @click=${this.copyShareURL} class="copy-url-button clickable">
-              ${ClipboardIcon}
-            </div>
-          </div>`}
+      ${this.isPagePrivate ? this.renderPrivatePage() : this.renderBlogPage()}
       ${this.lastSharedPageId && this.isPagePrivate
         ? html` <div class="action-copy-cont">
             <div class="url-cont">

@@ -167,7 +167,7 @@ export class AppManager {
 
     const allUpdates = pageMutation.newPerspectives
       .map((np) => np.update)
-      .concat();
+      .concat(pageMutation.updates);
 
     await Promise.all(
       allUpdates.map(async (update) => {

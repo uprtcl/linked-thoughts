@@ -12,6 +12,9 @@ import {
   SearchResult,
   ClientCachedLocal,
   CASLocal,
+  CacheLocal,
+  Update,
+  Signed,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
@@ -132,24 +135,66 @@ export class AppManager {
     /** get all changes on the local client and persist them on the evees client */
     const cache = (this.draftEvees.client as ClientCachedLocal)
       .cache as CacheLocal;
-    const perspectiveIds = await cache.getOnEcosystem(pageId);
+
+    const perspectiveIds = await cache.getUnder(pageId);
 
     await Promise.all(
       perspectiveIds.map(async (perspectiveId) => {
-        const newPerspective = await cache.isNewPerspective(perspectiveId);
+        /** creates a new commit with the same data as the latest dat in the draft (don't keep the
+         * commit history of the draft) */
+        let update: Update | undefined = undefined;
+        let isNew: Boolean = false;
+
+        const newPerspective = await cache.getNewPerspective(perspectiveId);
         if (newPerspective) {
-          this.evees.createEvee({ perspectiveId, object: data.object });
-        } else {
-          const update = await cache.getLastUpdate(perspectiveId);
-          this.evees.updatePerspectiveData({
-            perspectiveId,
-            object: data.object,
-          });
+          update = newPerspective.update;
+          isNew = true;
+        }
+
+        const lastUpdate = await cache.getLastUpdate(perspectiveId);
+
+        if (lastUpdate) {
+          update = lastUpdate; // last update is what counts
+        }
+
+        if (update) {
+          const data = update.details.headId
+            ? await this.draftEvees.getCommitData(update.details.headId)
+            : undefined;
+
+          const perspective = await this.draftEvees.client.store.getEntity<
+            Signed<Perspective>
+          >(perspectiveId);
+
+          /** target it to the remote store  */
+          perspective.casID = this.evees.getRemote().casID;
+
+          if (isNew) {
+            await this.evees.client.store.storeEntity(perspective);
+            this.evees.createEvee({
+              perspectiveId,
+              object: data.object,
+              guardianId: update.details.guardianId,
+            });
+          } else {
+            /** just update the perspective data (no guardian update or anything) */
+            await this.evees.updatePerspectiveData({
+              perspectiveId,
+              object: data.object,
+            });
+          }
         }
       })
     );
 
     await this.evees.client.flush();
+
+    /** clean perspectives from the cache */
+    await Promise.all(
+      perspectiveIds.map(async (perspectiveId) =>
+        cache.clearPerspective(perspectiveId)
+      )
+    );
   }
 
   /**  */
@@ -158,6 +203,10 @@ export class AppManager {
     onSectionId: string,
     flush: boolean = true
   ): Promise<string> {
+    /** moves the page draft changes to the evees client */
+    await this.commitPage(pageId);
+
+    /** and creates a fork */
     const forkId = await this.evees.forkPerspective(
       pageId,
       undefined,

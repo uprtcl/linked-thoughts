@@ -171,10 +171,10 @@ export class AppManager {
 
           if (isNew) {
             await this.evees.client.store.storeEntity(perspective);
-            this.evees.createEvee({
+            await this.evees.createEvee({
               perspectiveId,
               object: data.object,
-              guardianId: update.details.guardianId,
+              guardianId: newPerspective.update.details.guardianId,
             });
           } else {
             /** just update the perspective data (no guardian update or anything) */

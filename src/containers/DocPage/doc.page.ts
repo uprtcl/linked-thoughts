@@ -82,7 +82,9 @@ export class DocumentPage extends ConnectedElement {
       this.pageId,
       this.originId
     );
-    this.hasPull = await this.appManager.workspaceHasChanges(this.eveesPull);
+    const diff = await this.eveesPull.client.diff();
+    this.hasPull = diff.updates.length > 0;
+
     // To show the snackbar
     if (this.hasPull) {
       this.showSnackBar = true;

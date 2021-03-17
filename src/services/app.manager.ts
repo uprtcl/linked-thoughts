@@ -13,8 +13,8 @@ import {
   ClientCachedLocal,
   CASLocal,
   CacheLocal,
-  Update,
   Signed,
+  EveesMutation,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
@@ -130,69 +130,90 @@ export class AppManager {
     return childId;
   }
 
-  /** takes all changes under a given page, squash them as new commits and remove them from the drafts client */
-  async commitPage(pageId: string) {
-    /** get all changes on the local client and persist them on the evees client */
+  /** returns an EveesMutation with the new perspectives and **last** update under a given page
+   * created un the draftsEvees */
+  async getDiffUnder(pageId: string): Promise<EveesMutation> {
     const cache = (this.draftEvees.client as ClientCachedLocal)
       .cache as CacheLocal;
 
     const perspectiveIds = await cache.getUnder(pageId);
+    const mutation: EveesMutation = {
+      newPerspectives: [],
+      updates: [],
+      entities: [],
+      deletedPerspectives: [],
+    };
 
     await Promise.all(
       perspectiveIds.map(async (perspectiveId) => {
-        /** creates a new commit with the same data as the latest dat in the draft (don't keep the
-         * commit history of the draft) */
-        let update: Update | undefined = undefined;
-        let isNew: Boolean = false;
-
         const newPerspective = await cache.getNewPerspective(perspectiveId);
         if (newPerspective) {
-          update = newPerspective.update;
-          isNew = true;
+          mutation.newPerspectives.push(newPerspective);
         }
 
-        const lastUpdate = await cache.getLastUpdate(perspectiveId);
-
-        if (lastUpdate) {
-          update = lastUpdate; // last update is what counts
-        }
-
+        const update = await cache.getLastUpdate(perspectiveId);
         if (update) {
-          const data = update.details.headId
-            ? await this.draftEvees.getCommitData(update.details.headId)
-            : undefined;
+          mutation.updates.push(update);
+        }
+      })
+    );
 
-          const perspective = await this.draftEvees.client.store.getEntity<
-            Signed<Perspective>
-          >(perspectiveId);
+    return mutation;
+  }
 
-          /** target it to the remote store  */
-          perspective.casID = this.evees.getRemote().casID;
+  /** takes all changes under a given page, squash them as new commits and remove them from the drafts client */
+  async commitPage(pageId: string) {
+    const pageMutation = await this.getDiffUnder(pageId);
 
-          if (isNew) {
-            await this.evees.client.store.storeEntity(perspective);
-            await this.evees.createEvee({
-              perspectiveId,
-              object: data.object,
-              guardianId: newPerspective.update.details.guardianId,
-            });
-          } else {
-            /** just update the perspective data (no guardian update or anything) */
-            await this.evees.updatePerspectiveData({
-              perspectiveId,
-              object: data.object,
-            });
-          }
+    const allUpdates = pageMutation.newPerspectives
+      .map((np) => np.update)
+      .concat();
+
+    await Promise.all(
+      allUpdates.map(async (update) => {
+        const perspectiveId = update.perspectiveId;
+        const newPerspective = pageMutation.newPerspectives.find(
+          (np) => np.perspective.id === perspectiveId
+        );
+
+        const data = update.details.headId
+          ? await this.draftEvees.getCommitData(update.details.headId)
+          : undefined;
+
+        const perspective = await this.draftEvees.client.store.getEntity<
+          Signed<Perspective>
+        >(perspectiveId);
+
+        /** target it to the remote store  */
+        perspective.casID = this.evees.getRemote().casID;
+
+        if (newPerspective !== undefined) {
+          await this.evees.client.store.storeEntity(perspective);
+          await this.evees.createEvee({
+            perspectiveId,
+            object: data.object,
+            guardianId: newPerspective.update.details.guardianId,
+          });
+        } else {
+          /** just update the perspective data (no guardian update or anything) */
+          await this.evees.updatePerspectiveData({
+            perspectiveId,
+            object: data.object,
+          });
         }
       })
     );
 
     await this.evees.client.flush();
 
+    // Clean cache
+    const cache = (this.draftEvees.client as ClientCachedLocal)
+      .cache as CacheLocal;
+
     /** clean perspectives from the cache */
     await Promise.all(
-      perspectiveIds.map(async (perspectiveId) =>
-        cache.clearPerspective(perspectiveId)
+      allUpdates.map(async (update) =>
+        cache.clearPerspective(update.perspectiveId)
       )
     );
   }
@@ -297,16 +318,10 @@ export class AppManager {
     };
 
     // Create a temporary workspaces to compute the merge
-    const evees = await this.evees.clone();
+    const evees = await this.draftEvees.clone();
     const merger = new RecursiveContextMergeStrategy(evees);
     await merger.mergePerspectivesExternal(to, from, config);
 
     return evees;
-  }
-
-  async workspaceHasChanges(evees: Evees) {
-    // see if the temporary workspaces has updated any perspective
-    const diff = await evees.client.diff();
-    return diff.updates ? diff.updates.length > 0 : false;
   }
 }

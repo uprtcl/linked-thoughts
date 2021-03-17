@@ -1,7 +1,13 @@
 import { html, css, property, internalProperty } from 'lit-element';
 import lodash from 'lodash';
 
-import { Entity, Perspective, Secured } from '@uprtcl/evees';
+import {
+  Entity,
+  Evees,
+  EveesMutation,
+  Perspective,
+  Secured,
+} from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
@@ -45,9 +51,15 @@ export default class ShareCard extends ConnectedElement {
   @internalProperty()
   hasFork: boolean = false;
 
+  @internalProperty()
+  pushDiff!: EveesMutation;
+
   sections: SectionData[];
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
+
+  // Evees service storing changes from private to blog
+  eveesPush!: Evees;
 
   firstUpdated() {
     this.load();
@@ -122,11 +134,11 @@ export default class ShareCard extends ConnectedElement {
 
     if (forksInBlog.length > 0) {
       this.hasFork = true;
-      const workspace = await this.appManager.compareForks(
+      this.eveesPush = await this.appManager.compareForks(
         forksInBlog[0].childId,
         this.uref
       );
-      this.hasPush = await this.appManager.workspaceHasChanges(workspace);
+      this.pushDiff = await this.eveesPush.client.diff();
     }
 
     this.loading = false;
@@ -134,7 +146,7 @@ export default class ShareCard extends ConnectedElement {
 
   toggleBlogVersion() {
     if (this.hasFork) {
-      // delete fork
+      // delete
     } else {
       this.shareTo(this.blogSection.id);
     }
@@ -185,11 +197,23 @@ export default class ShareCard extends ConnectedElement {
           </div>
         </div>
         <div>
-          <uprtcl-toggle @click=${() => this.toggleBlogVersion()}>
+          <uprtcl-toggle
+            @click=${() => this.toggleBlogVersion()}
+            ?active=${this.hasFork}
+          >
           </uprtcl-toggle>
         </div>
       </div>
-
+      ${this.pushDiff && this.pushDiff.updates.length > 0
+        ? html`<hr />
+            <div>
+              <div class="row">${this.pushDiff.updates.length} changes.</div>
+            </div>
+            <div class="row">
+              <uprtcl-button>Push</uprtcl-button
+              ><uprtcl-button disabled>view</uprtcl-button>
+            </div>`
+        : html``}
       ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`;
   }
 

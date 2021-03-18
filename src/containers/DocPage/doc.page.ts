@@ -195,6 +195,7 @@ export class DocumentPage extends ConnectedElement {
           : html`<documents-editor
               id="doc-editor"
               uref=${this.pageId}
+              emit-updates
               .localEvees=${this.appManager.getDraftEvees()}
               ?read-only=${this.readOnly}
             >

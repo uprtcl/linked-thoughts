@@ -34,18 +34,12 @@ export class DocumentPage extends ConnectedElement {
   @query('#doc-editor')
   documentEditor: DocumentEditor;
 
-  @query('#share-element')
-  shareElement: ShareCard;
-
   @internalProperty()
   showSnackBar = false;
 
   eveesPull: Evees;
   privateSectionPerspective: Secured<Perspective>;
   originId: string;
-
-  blockUpdates: boolean = false;
-  pendingUpdates: boolean = false;
 
   async firstUpdated() {
     this.privateSectionPerspective = await this.appManager.elements.get(
@@ -79,30 +73,7 @@ export class DocumentPage extends ConnectedElement {
     ) => {
       event.stopPropagation();
       this.appManager.draftsManager.updatePerspective(event.detail, 2000);
-      this.debounceUpdateShareStatus();
     }) as EventListener);
-  }
-
-  debounceUpdateShareStatus() {
-    this.pendingUpdates = true;
-
-    if (!this.blockUpdates) {
-      this.blockUpdates = true;
-      this.pendingUpdates = false;
-
-      this.updateShareStatus();
-
-      setTimeout(() => {
-        this.blockUpdates = false;
-        if (this.pendingUpdates) {
-          this.updateShareStatus();
-        }
-      });
-    }
-  }
-
-  updateShareStatus() {
-    this.shareElement.loadChanges();
   }
 
   async load() {

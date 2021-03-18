@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events';
+
 import {
   AsyncQueue,
   CacheLocal,
@@ -11,12 +13,17 @@ import {
   UpdatePerspectiveData,
 } from '@uprtcl/evees';
 
+export enum DraftsManagerEvents {
+  ecosystemUpdated = 'ecosystem-updated',
+}
+
 /** A service that keeps changes on a locally cached evees client and 
 can persist them to the base client. Almost a Client :/ */
 export class DraftsManager {
   protected draftEvees: Evees;
   protected cache!: CacheLocal;
   protected updateQueue: AsyncQueue;
+  readonly events: EventEmitter;
 
   /** a store of pending udpates to debounce repeated ones*/
   protected pendingUpdates: Map<
@@ -26,6 +33,8 @@ export class DraftsManager {
 
   constructor(protected baseEvees: Evees) {
     this.updateQueue = new AsyncQueue();
+    this.events = new EventEmitter();
+    this.events.setMaxListeners(1000);
   }
 
   async init() {
@@ -155,9 +164,15 @@ export class DraftsManager {
   }
 
   /** if interval !== 0, debounce update by waiting for an interval before executing
-   * them and overwriting it with now ones if received before it was executed.  */
+   * it or overwriting it with a new one if received before it was executed.  */
   updatePerspective(update: UpdatePerspectiveData, interval: number = 0) {
-    const action = () => this.draftEvees.updatePerspectiveData(update);
+    const action = async () => {
+      await this.draftEvees.updatePerspectiveData(update);
+      const onEcosystems = await this.cache.getOnEcosystems(
+        update.perspectiveId
+      );
+      this.events.emit(DraftsManagerEvents.ecosystemUpdated, onEcosystems);
+    };
 
     if (interval === 0) {
       action();
@@ -166,6 +181,7 @@ export class DraftsManager {
 
     /** if there is a timeout to execute an update to this perspective, delete it and create a new one */
     const pending = this.pendingUpdates.get(update.perspectiveId);
+
     if (pending && !pending.called && pending.timeout) {
       clearTimeout(pending.timeout);
     }
@@ -175,8 +191,8 @@ export class DraftsManager {
       interval
     );
 
-    /** create a timeout to execute (queue) this update,
-     * store the fn to be able to call it anticipatedly if needed */
+    /** create a new timeout to execute (queue) this update,
+     * store the action to be able to call it anticipatedly if needed */
     this.pendingUpdates.set(update.perspectiveId, {
       timeout: newTimeout,
       action,

@@ -5,6 +5,7 @@ import {
   Entity,
   Evees,
   EveesMutation,
+  Logger,
   Perspective,
   Secured,
 } from '@uprtcl/evees';
@@ -13,10 +14,10 @@ import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
 import { ThoughtsTextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
-import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
 import { ConceptId } from '../services/app.manager';
 import { GenearateReadURL } from '../utils/routes.generator';
+import { DraftsManagerEvents } from '../services/drafts.manager';
 
 interface SectionData {
   id: string;
@@ -24,6 +25,8 @@ interface SectionData {
 }
 
 export default class ShareCard extends ConnectedElement {
+  logger = new Logger('ShareCard');
+
   @property({ type: String })
   uref: string;
 
@@ -37,22 +40,19 @@ export default class ShareCard extends ConnectedElement {
   loading: boolean = true;
 
   @internalProperty()
-  disableAddButton: boolean = false;
-
-  @internalProperty()
   lastSharedPageId: string = null;
 
   @internalProperty()
   addingPage = false;
 
   @internalProperty()
-  hasPush = false;
-
-  @internalProperty()
   forkId: string | undefined = undefined;
 
   @internalProperty()
   pushDiff!: EveesMutation;
+
+  @internalProperty()
+  pushing = false;
 
   sections: SectionData[];
   privateSection!: Secured<Perspective>;
@@ -61,8 +61,42 @@ export default class ShareCard extends ConnectedElement {
   // Evees service storing changes from private to blog
   eveesPush!: Evees;
 
+  blockUpdates: boolean = false;
+  pendingUpdates: boolean = false;
+
   firstUpdated() {
+    this.appManager.draftsManager.events.on(
+      DraftsManagerEvents.ecosystemUpdated,
+      (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
+    );
     this.load();
+  }
+
+  ecosystemUpdated(perspectiveIds: string[]) {
+    if (perspectiveIds.includes(this.uref)) {
+      this.logger.log('ecosystemUpdated()');
+      this.debounceUpdateChanges();
+    }
+  }
+
+  debounceUpdateChanges() {
+    this.pendingUpdates = true;
+
+    if (!this.blockUpdates) {
+      this.blockUpdates = true;
+      this.pendingUpdates = false;
+
+      this.loadChanges();
+
+      setTimeout(() => {
+        this.blockUpdates = false;
+        if (this.pendingUpdates) {
+          this.loadChanges();
+        }
+      }, 2500);
+    } else {
+      this.logger.log('blockUpdates is true');
+    }
   }
 
   async copyShareURL() {
@@ -91,8 +125,6 @@ export default class ShareCard extends ConnectedElement {
   async load() {
     // alert(this.isPagePrivate);
     this.lastSharedPageId = null;
-    this.disableAddButton = false;
-    this.hasPush = false;
     this.forkId = undefined;
 
     const sectionIds = await this.appManager.getSections();
@@ -145,8 +177,22 @@ export default class ShareCard extends ConnectedElement {
   }
 
   async loadChanges() {
-    this.eveesPush = await this.appManager.compareForks(this.forkId, this.uref);
-    this.pushDiff = await this.eveesPush.client.diff();
+    this.logger.log('loadChanges()', { forkId: this.forkId });
+    if (this.forkId) {
+      this.eveesPush = await this.appManager.compareForks(
+        this.forkId,
+        this.uref
+      );
+      this.pushDiff = await this.eveesPush.client.diff();
+      this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
+    } else {
+      this.pushDiff = {
+        deletedPerspectives: [],
+        entities: [],
+        newPerspectives: [],
+        updates: [],
+      };
+    }
   }
 
   get nChanges() {
@@ -170,6 +216,8 @@ export default class ShareCard extends ConnectedElement {
   navToBlogVersion() {}
 
   async shareTo(toSectionId: string) {
+    if (this.addingPage) return;
+
     this.addingPage = true;
     const forkId = await this.appManager.forkPage(
       this.uref,
@@ -193,13 +241,18 @@ export default class ShareCard extends ConnectedElement {
     await this.evees.client.flush();
 
     this.lastSharedPageId = forkId;
-    this.disableAddButton = true;
+
+    this.loadForks();
     this.addingPage = false;
   }
 
   async pushChanges() {
+    if (this.pushing) return;
+
+    this.pushing = true;
     await this.eveesPush.client.flush();
-    this.loadChanges();
+    this.pushing = false;
+    this.loadForks();
   }
 
   renderPrivatePage() {
@@ -235,8 +288,10 @@ export default class ShareCard extends ConnectedElement {
               </div>
             </div>
             <div class="row buttons">
-              <uprtcl-button @click=${() => this.pushChanges()}
-                >Push to Blog</uprtcl-button
+              <uprtcl-button-loading
+                ?loading=${this.pushing}
+                @click=${() => this.pushChanges()}
+                >Push to Blog</uprtcl-button-loading
               >
               <div class="item-separator"></div>
               <uprtcl-button disabled>View Changes</uprtcl-button>
@@ -245,8 +300,7 @@ export default class ShareCard extends ConnectedElement {
                 >See Version</uprtcl-button
               >
             </div>`
-        : html``}
-      ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`;
+        : html``} `;
   }
 
   renderBlogPage() {
@@ -284,8 +338,10 @@ export default class ShareCard extends ConnectedElement {
   render() {
     return html`<uprtcl-popper>
       <uprtcl-button slot="icon" skinny secondary
-        >${`Push${
-          this.nChanges > 0 ? ` (${this.nChanges})` : ''
+        >${`${
+          this.forkId === undefined
+            ? 'Share'
+            : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
         }`}</uprtcl-button
       >
       ${this.renderContent()}

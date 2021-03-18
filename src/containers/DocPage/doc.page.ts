@@ -71,7 +71,7 @@ export class DocumentPage extends ConnectedElement {
       event: UpdatePerspectiveDataEvent
     ) => {
       event.stopPropagation();
-      this.appManager.draftsManager.updatePerspective(event.detail);
+      this.appManager.draftsManager.updatePerspective(event.detail, 2000);
     }) as EventListener);
   }
 

@@ -19,7 +19,10 @@ export class DraftsManager {
   protected updateQueue: AsyncQueue;
 
   /** a store of pending udpates to debounce repeated ones*/
-  protected pendingUpdates: Map<string, NodeJS.Timeout> = new Map();
+  protected pendingUpdates: Map<
+    string,
+    { action: Function; timeout: NodeJS.Timeout; called: boolean }
+  > = new Map();
 
   constructor(protected baseEvees: Evees) {
     this.updateQueue = new AsyncQueue();
@@ -41,6 +44,23 @@ export class DraftsManager {
 
   get evees(): Evees {
     return this.draftEvees;
+  }
+
+  async flushPendingUpdates() {
+    /** execute pending updates */
+    Array.from(this.pendingUpdates.values()).map((e) => {
+      if (!e.called) {
+        clearTimeout(e.timeout);
+        e.action();
+      }
+    });
+
+    /** await the last queued action is executed */
+    if (this.updateQueue._items.length > 0) {
+      await this.updateQueue._items[
+        this.updateQueue._items.length - 1
+      ].action();
+    }
   }
 
   /** returns an EveesMutation with the new perspectives and **last** update under a given page
@@ -75,6 +95,8 @@ export class DraftsManager {
 
   /** takes all changes under a given page, squash them as new commits and remove them from the drafts client */
   async commitEcosystem(ecosystemId: string) {
+    await this.flushPendingUpdates();
+
     const pageMutation = await this.getDiffUnder(ecosystemId);
 
     const allUpdates = pageMutation.newPerspectives
@@ -126,22 +148,40 @@ export class DraftsManager {
     );
   }
 
-  updatePerspective(update: UpdatePerspectiveData) {
-    /** if there is a timeout to execute this update, delete it and create a new one*/
-    const timeout = this.pendingUpdates.get(update.perspectiveId);
-    if (timeout) {
-      clearTimeout(timeout);
+  executePending(perspectiveId: string) {
+    const pending = this.pendingUpdates.get(perspectiveId);
+    pending.called = true;
+    pending.action();
+  }
+
+  /** if interval !== 0, debounce update by waiting for an interval before executing
+   * them and overwriting it with now ones if received before it was executed.  */
+  updatePerspective(update: UpdatePerspectiveData, interval: number = 0) {
+    const action = () => this.draftEvees.updatePerspectiveData(update);
+
+    if (interval === 0) {
+      action();
+      return;
     }
 
-    /** create a timeout to execute (queue) this update */
-    this.pendingUpdates.set(
-      update.perspectiveId,
-      setTimeout(() => {
-        this.updateQueue.enqueue(() =>
-          this.draftEvees.updatePerspectiveData(update)
-        );
-      }, 2000)
+    /** if there is a timeout to execute an update to this perspective, delete it and create a new one */
+    const pending = this.pendingUpdates.get(update.perspectiveId);
+    if (pending && !pending.called && pending.timeout) {
+      clearTimeout(pending.timeout);
+    }
+
+    const newTimeout = setTimeout(
+      () => this.executePending(update.perspectiveId),
+      interval
     );
+
+    /** create a timeout to execute (queue) this update,
+     * store the fn to be able to call it anticipatedly if needed */
+    this.pendingUpdates.set(update.perspectiveId, {
+      timeout: newTimeout,
+      action,
+      called: false,
+    });
   }
 
   async createPerspective(newEvee: CreateEvee) {

@@ -1,6 +1,14 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import { Secured, Perspective, Evees } from '@uprtcl/evees';
+import {
+  Secured,
+  Perspective,
+  Evees,
+  CREATE_PERSPECTIVE_TAG,
+  CreatePerspectiveEvent,
+  UpdatePerspectiveDataEvent,
+  UPDATE_PERSPECTIVE_DATA_TAG,
+} from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';
@@ -47,6 +55,24 @@ export class DocumentPage extends ConnectedElement {
     ) {
       this.load();
     }
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.addEventListener(CREATE_PERSPECTIVE_TAG, ((
+      event: CreatePerspectiveEvent
+    ) => {
+      event.stopPropagation();
+      this.appManager.draftsManager.createPerspective(event.detail);
+    }) as EventListener);
+
+    this.addEventListener(UPDATE_PERSPECTIVE_DATA_TAG, ((
+      event: UpdatePerspectiveDataEvent
+    ) => {
+      event.stopPropagation();
+      this.appManager.draftsManager.updatePerspective(event.detail);
+    }) as EventListener);
   }
 
   async load() {

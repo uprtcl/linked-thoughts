@@ -7,7 +7,8 @@ export const sharedStyles = css`
     --white: #ffffff;
     --black: #000000;
     --black-transparent: rgba(3, 3, 3, 0.25);
-    --gray: #333333;
+    --gray-dark: #333333;
+    --gray-light: #828282;
     --border-radius-complete: 100vh;
     --background-color: #fffffb;
   }
@@ -22,6 +23,11 @@ export const sharedStyles = css`
   .column {
     display: flex;
     flex-direction: column;
+  }
+
+  .center-items {
+    justify-content: center;
+    align-items: center;
   }
 
   .cursor-pointer {

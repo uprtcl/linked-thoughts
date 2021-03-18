@@ -49,7 +49,7 @@ export default class ShareCard extends ConnectedElement {
   hasPush = false;
 
   @internalProperty()
-  hasFork: boolean = false;
+  forkId: string | undefined = undefined;
 
   @internalProperty()
   pushDiff!: EveesMutation;
@@ -93,7 +93,7 @@ export default class ShareCard extends ConnectedElement {
     this.lastSharedPageId = null;
     this.disableAddButton = false;
     this.hasPush = false;
-    this.hasFork = false;
+    this.forkId = undefined;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -127,30 +127,47 @@ export default class ShareCard extends ConnectedElement {
       this.isPagePrivate = true;
     }
 
+    await this.loadForks();
+
+    this.loading = false;
+  }
+
+  async loadForks() {
     const forkedIn = await this.appManager.getForkedIn(this.uref);
     const forksInBlog = forkedIn.filter(
       (e) => e.parentId === this.blogSection.id
     );
 
     if (forksInBlog.length > 0) {
-      this.hasFork = true;
-      this.eveesPush = await this.appManager.compareForks(
-        forksInBlog[0].childId,
-        this.uref
-      );
-      this.pushDiff = await this.eveesPush.client.diff();
+      this.forkId = forksInBlog[0].childId;
+      await this.loadChanges();
     }
+  }
 
-    this.loading = false;
+  async loadChanges() {
+    this.eveesPush = await this.appManager.compareForks(this.forkId, this.uref);
+    this.pushDiff = await this.eveesPush.client.diff();
+  }
+
+  get nChanges() {
+    if (!this.pushDiff) return 0;
+
+    return (
+      this.pushDiff.deletedPerspectives.length +
+      this.pushDiff.newPerspectives.length +
+      this.pushDiff.updates.length
+    );
   }
 
   toggleBlogVersion() {
-    if (this.hasFork) {
+    if (this.forkId) {
       // delete
     } else {
       this.shareTo(this.blogSection.id);
     }
   }
+
+  navToBlogVersion() {}
 
   async shareTo(toSectionId: string) {
     this.addingPage = true;
@@ -180,9 +197,14 @@ export default class ShareCard extends ConnectedElement {
     this.addingPage = false;
   }
 
+  async pushChanges() {
+    await this.eveesPush.client.flush();
+    this.loadChanges();
+  }
+
   renderPrivatePage() {
     return html`<div class="row">
-        <div class="col">
+        <div class="column description-column">
           <div class="row">
             <div class="heading">
               ${this.isPagePrivate ? html`Share to blog` : html`Share to Web`}
@@ -191,44 +213,58 @@ export default class ShareCard extends ConnectedElement {
           <div class="row">
             <div class="description">
               ${this.isPagePrivate
-                ? html`Sharing to blog creates a fork of this page in your blog`
+                ? html`Sharing to blog creates a public "fork" of this page in
+                  your blog`
                 : html`Anyone with this link can view this page.`}
             </div>
           </div>
         </div>
-        <div>
+        <div class="column center-items">
           <uprtcl-toggle
             @click=${() => this.toggleBlogVersion()}
-            ?active=${this.hasFork}
+            ?active=${this.forkId !== undefined}
           >
           </uprtcl-toggle>
         </div>
       </div>
       ${this.pushDiff && this.pushDiff.updates.length > 0
-        ? html`<hr />
+        ? html`<div class="separator"></div>
             <div>
-              <div class="row">${this.pushDiff.updates.length} changes.</div>
+              <div class="row description">
+                (${this.nChanges}) ${' '} Changes made since last push
+              </div>
             </div>
-            <div class="row">
-              <uprtcl-button>Push</uprtcl-button
-              ><uprtcl-button disabled>view</uprtcl-button>
+            <div class="row buttons">
+              <uprtcl-button @click=${() => this.pushChanges()}
+                >Push to Blog</uprtcl-button
+              >
+              <div class="item-separator"></div>
+              <uprtcl-button disabled>View Changes</uprtcl-button>
+              <div class="item-separator"></div>
+              <uprtcl-button skinny @click=${() => this.navToBlogVersion()}
+                >See Version</uprtcl-button
+              >
             </div>`
         : html``}
       ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`;
   }
 
   renderBlogPage() {
-    return html` <div class="action-copy-cont">
-      <div class="url-cont">
-        ${GenearateReadURL(LTRouter.Router.location.params.docId as string)}
+    return html`<div class="row description">
+        This is the public version of this document. Use this link to share it
+        with others.
       </div>
-      <div @click=${this.copyShareURL} class="copy-url-button clickable">
-        ${ClipboardIcon}
-      </div>
-    </div>`;
+      <div class="action-copy-cont">
+        <div class="url-cont">
+          ${GenearateReadURL(LTRouter.Router.location.params.docId as string)}
+        </div>
+        <div @click=${this.copyShareURL} class="copy-url-button clickable">
+          ${ClipboardIcon}
+        </div>
+      </div>`;
   }
 
-  render() {
+  renderContent() {
     if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
     return html`<div class="share-card-cont">
       ${this.isPagePrivate ? this.renderPrivatePage() : this.renderBlogPage()}
@@ -245,18 +281,33 @@ export default class ShareCard extends ConnectedElement {
     </div>`;
   }
 
+  render() {
+    return html`<uprtcl-popper>
+      <uprtcl-button slot="icon" skinny secondary
+        >${`Push${
+          this.nChanges > 0 ? ` (${this.nChanges})` : ''
+        }`}</uprtcl-button
+      >
+      ${this.renderContent()}
+    </uprtcl-popper>`;
+  }
+
   static get styles() {
     return [
       sharedStyles,
       css`
         :host {
-          font-family: 'Poppins', sans-serif;
+          display: block;
         }
         .share-card-cont {
           width: 350px;
+          padding: 1rem 1rem 1.5rem 1rem;
         }
         .content {
           padding: 0.5rem 1rem 0rem;
+        }
+        .description-column {
+          padding-right: 30px;
         }
         .heading {
           font-size: 1.2rem;
@@ -266,6 +317,26 @@ export default class ShareCard extends ConnectedElement {
         .description {
           font-size: 1rem;
           font-weight: 400;
+          color: var(--gray-light, black);
+        }
+        .separator {
+          width: 100%;
+          border-top-style: solid;
+          border-width: 0.6px;
+          border-color: #bdbdbd;
+          margin: 12px 0px;
+        }
+        .buttons {
+          margin-top: 12px;
+        }
+        .buttons uprtcl-button {
+          flex: 1 1 auto;
+          --padding: 0px 0px;
+        }
+        .item-separator {
+          width: 12px;
+          height: 100%;
+          flex: 0 0 auto;
         }
         .add-cont {
           width: 100%;
@@ -280,7 +351,7 @@ export default class ShareCard extends ConnectedElement {
         }
 
         .action-copy-cont {
-          margin: 1rem;
+          margin-top: 1rem;
           display: flex;
 
           /* Accent */

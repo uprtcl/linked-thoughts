@@ -119,18 +119,18 @@ export class DraftsManager {
         >(perspectiveId);
 
         /** target it to the remote store  */
-        perspective.casID = this.evees.getRemote().casID;
+        perspective.casID = this.baseEvees.getRemote().casID;
 
         if (newPerspective !== undefined) {
-          await this.evees.client.store.storeEntity(perspective);
-          await this.evees.createEvee({
+          await this.baseEvees.client.store.storeEntity(perspective);
+          await this.baseEvees.createEvee({
             perspectiveId,
             object: data.object,
             guardianId: newPerspective.update.details.guardianId,
           });
         } else {
           /** just update the perspective data (no guardian update or anything) */
-          await this.evees.updatePerspectiveData({
+          await this.baseEvees.updatePerspectiveData({
             perspectiveId,
             object: data.object,
           });
@@ -138,7 +138,7 @@ export class DraftsManager {
       })
     );
 
-    await this.evees.client.flush();
+    await this.baseEvees.client.flush();
 
     /** clean perspectives from the cache */
     await Promise.all(

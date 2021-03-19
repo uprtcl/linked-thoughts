@@ -11,15 +11,10 @@ import {
   getHome,
   SearchResult,
   ClientCachedLocal,
-  CASLocal,
-  CacheLocal,
-  Signed,
-  EveesMutation,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard, Section } from '../containers/types';
-import { DraftsManager } from './drafts.manager';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
@@ -29,12 +24,18 @@ export enum ConceptId {
 export class AppManager {
   elements: AppElements;
   appError: AppError;
-  draftsManager: DraftsManager;
+  draftsEvees: Evees;
 
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
     this.appError = new AppError();
-    this.draftsManager = new DraftsManager(this.evees);
+    const draftsClient = new ClientCachedLocal(
+      this.evees.client.store,
+      this.evees.client,
+      false,
+      'local-drafts'
+    );
+    this.draftsEvees = this.evees.clone('local-drafts', draftsClient);
   }
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
@@ -47,17 +48,12 @@ export class AppManager {
 
   async init() {
     await this.checkStructure();
-    await this.draftsManager.init();
   }
 
   async checkStructure() {
     /** check the app scheleton is there */
     await this.elements.check();
     await this.checkBlogPermissions();
-  }
-
-  getDraftEvees(): Evees {
-    return this.draftsManager.evees;
   }
 
   /** init blog ACL to publicRead privateWrite (HTTP-remote-specific)
@@ -128,7 +124,7 @@ export class AppManager {
     flush: boolean = true
   ): Promise<string> {
     /** moves the page draft changes to the evees client */
-    await this.draftsManager.commitEcosystem(pageId);
+    await this.draftsEvees.client.flush({ under: [{ id: pageId }] });
 
     /** and creates a fork */
     const forkId = await this.evees.forkPerspective(
@@ -221,7 +217,7 @@ export class AppManager {
     };
 
     // Create a temporary workspaces to compute the merge
-    const evees = await this.draftsManager.evees.clone();
+    const evees = this.draftsEvees.clone();
     const merger = new RecursiveContextMergeStrategy(evees);
     await merger.mergePerspectivesExternal(to, from, config);
 

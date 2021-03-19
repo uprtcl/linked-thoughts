@@ -2,6 +2,7 @@ import { html, css, property, internalProperty } from 'lit-element';
 import lodash from 'lodash';
 
 import {
+  ClientEvents,
   Entity,
   Evees,
   EveesMutation,
@@ -17,7 +18,6 @@ import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { LTRouter } from '../router';
 import { ConceptId } from '../services/app.manager';
 import { GenearateReadURL } from '../utils/routes.generator';
-import { DraftsManagerEvents } from '../services/drafts.manager';
 
 interface SectionData {
   id: string;
@@ -65,10 +65,13 @@ export default class ShareCard extends ConnectedElement {
   pendingUpdates: boolean = false;
 
   firstUpdated() {
-    this.appManager.draftsManager.events.on(
-      DraftsManagerEvents.ecosystemUpdated,
-      (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
-    );
+    if (this.appManager.draftsEvees.client.events) {
+      this.appManager.draftsEvees.client.events.on(
+        ClientEvents.ecosystemUpdated,
+        (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
+      );
+    }
+
     this.load();
   }
 
@@ -142,9 +145,9 @@ export default class ShareCard extends ConnectedElement {
         )
     );
 
-    const {
-      details,
-    } = await this.appManager.getDraftEvees().client.getPerspective(this.uref);
+    const { details } = await this.appManager.draftsEvees.client.getPerspective(
+      this.uref
+    );
 
     this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'

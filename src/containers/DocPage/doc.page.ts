@@ -4,10 +4,10 @@ import {
   Secured,
   Perspective,
   Evees,
-  CREATE_PERSPECTIVE_TAG,
-  CreatePerspectiveEvent,
-  UpdatePerspectiveDataEvent,
-  UPDATE_PERSPECTIVE_DATA_TAG,
+  NEW_PERSPECTIVE_TAG,
+  NewPerspectiveEvent,
+  UpdatePerspectiveEvent,
+  UPDATE_PERSPECTIVE_TAG,
 } from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
@@ -16,7 +16,6 @@ import { sharedStyles } from '../../styles';
 
 import RestrictedIcon from '../../assets/icons/left.svg';
 import CloseIcon from '../../assets/icons/x.svg';
-import ShareCard from '../share';
 
 export class DocumentPage extends ConnectedElement {
   @property({ type: String, attribute: 'page-id' })
@@ -58,39 +57,19 @@ export class DocumentPage extends ConnectedElement {
     }
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-
-    this.addEventListener(CREATE_PERSPECTIVE_TAG, ((
-      event: CreatePerspectiveEvent
-    ) => {
-      event.stopPropagation();
-      this.appManager.draftsManager.createPerspective(event.detail);
-    }) as EventListener);
-
-    this.addEventListener(UPDATE_PERSPECTIVE_DATA_TAG, ((
-      event: UpdatePerspectiveDataEvent
-    ) => {
-      event.stopPropagation();
-      this.appManager.draftsManager.updatePerspective(event.detail, 2000);
-    }) as EventListener);
-  }
-
   async load() {
     this.loading = true;
 
     this.hasPull = false;
 
-    const {
-      details,
-    } = await this.appManager
-      .getDraftEvees()
-      .client.getPerspective(this.pageId);
+    const { details } = await this.appManager.draftsEvees.client.getPerspective(
+      this.pageId
+    );
     this.readOnly = details.guardianId !== this.privateSectionPerspective.id;
 
-    const perspective = await this.appManager
-      .getDraftEvees()
-      .client.store.getEntity(this.pageId);
+    const perspective = await this.appManager.draftsEvees.client.store.getEntity(
+      this.pageId
+    );
 
     if (
       perspective.object.payload.meta &&
@@ -195,7 +174,7 @@ export class DocumentPage extends ConnectedElement {
               id="doc-editor"
               uref=${this.pageId}
               emit-updates
-              .localEvees=${this.appManager.getDraftEvees()}
+              .localEvees=${this.appManager.draftsEvees}
               ?read-only=${this.readOnly}
             >
             </documents-editor> `}

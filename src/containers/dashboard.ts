@@ -246,8 +246,8 @@ export class DashboardElement extends ConnectedElement {
       ? html`
           <app-section-page
             uref=${this.selectedSectionId}
-            .localEvees=${this.appManager.getDraftEvees()}
-          />
+            .localEvees=${this.appManager.draftsEvees}
+          ></app-section-page>
         `
       : null}`;
   }

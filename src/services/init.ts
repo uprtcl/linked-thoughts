@@ -12,8 +12,6 @@ import {
   EveesContentModule,
   eveesConstructorHelper,
   MultiContainer,
-  RemoteEveesLocal,
-  Evees,
 } from '@uprtcl/evees';
 
 import { appElementsInit } from './app.elements.init';

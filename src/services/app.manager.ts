@@ -30,7 +30,7 @@ export class AppManager {
     this.elements = new AppElements(evees, appElementsInit);
     this.appError = new AppError();
     const draftsClient = new ClientCachedLocal(
-      this.evees.client.store,
+      undefined,
       this.evees.client,
       false,
       'local-drafts'

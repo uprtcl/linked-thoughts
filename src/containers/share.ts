@@ -253,7 +253,10 @@ export default class ShareCard extends ConnectedElement {
     if (this.pushing) return;
 
     this.pushing = true;
-    await this.eveesPush.client.flush();
+    /** flush from onmemory to local */
+    await this.eveesPush.client.flush({}, false);
+    await this.appManager.commitPage(this.uref);
+
     this.pushing = false;
     this.loadForks();
   }

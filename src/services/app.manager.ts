@@ -117,6 +117,11 @@ export class AppManager {
     return childId;
   }
 
+  /** persist all changes in the drafEvees of a given page to the backend */
+  async commitPage(pageId: string) {
+    await this.draftsEvees.client.flush({ under: [{ id: pageId }] });
+  }
+
   /**  */
   async forkPage(
     pageId: string,
@@ -124,9 +129,10 @@ export class AppManager {
     flush: boolean = true
   ): Promise<string> {
     /** moves the page draft changes to the evees client */
-    await this.draftsEvees.client.flush({ under: [{ id: pageId }] });
-
     /** and creates a fork */
+
+    await this.commitPage(pageId);
+
     const forkId = await this.evees.forkPerspective(
       pageId,
       undefined,

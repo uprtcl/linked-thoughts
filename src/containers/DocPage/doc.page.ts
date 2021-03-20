@@ -1,14 +1,6 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
 import { styles } from '@uprtcl/common-ui';
-import {
-  Secured,
-  Perspective,
-  Evees,
-  NEW_PERSPECTIVE_TAG,
-  NewPerspectiveEvent,
-  UpdatePerspectiveEvent,
-  UPDATE_PERSPECTIVE_TAG,
-} from '@uprtcl/evees';
+import { Secured, Perspective, Evees } from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 
 import { ConnectedElement } from '../../services/connected.element';

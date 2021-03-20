@@ -8,6 +8,7 @@ import {
   GenerateUserRoute,
   GenerateUserDocRoute,
   RouteName,
+  GenerateForksRoute,
 } from './utils/routes.helpers';
 
 export class LTRouter {
@@ -59,6 +60,14 @@ export class LTRouter {
                 context.route.name,
                 context.params.sectionId as string
               );
+            },
+          },
+          {
+            name: RouteName.fork,
+            path: GenerateForksRoute(),
+            component: 'div',
+            action: (context) => {
+              SetLastVisited(context.route.name, '');
             },
           },
         ],

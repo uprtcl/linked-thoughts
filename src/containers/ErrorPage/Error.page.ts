@@ -22,6 +22,7 @@ export class ErrorPage extends EveesBaseElement {
         </div>
 
         <a href=${ORIGIN} class="button">Go Home</a>
+        <app-forks-item></app-forks-item>
       </div>
     `;
   }

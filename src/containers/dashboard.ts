@@ -14,6 +14,9 @@ import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
+import ForkIcon from '../assets/icons/fork.svg';
+import RecentIcon from '../assets/icons/clock.svg';
+
 import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
@@ -100,7 +103,6 @@ export class DashboardElement extends ConnectedElement {
     // /getting-started
 
     this.routeName = LTRouter.Router.location.route.name as RouteName;
-
     const routeParams = LTRouter.Router.location.params as any;
 
     if (this.routeName === RouteName.section) {
@@ -220,7 +222,7 @@ export class DashboardElement extends ConnectedElement {
           @changed=${() => this.loggedUserChanged()}
         ></evees-login-widget>
       </div>
-      <div class="row align-center">
+      <div class="column align-center actions-container">
         <uprtcl-button
           class="button-new-page"
           @click=${() => {
@@ -229,6 +231,13 @@ export class DashboardElement extends ConnectedElement {
         >
           New Page
         </uprtcl-button>
+        <br /><br />
+        <div class="actions-item clickable">
+          ${RecentIcon} <span class="actions-label">Recents</span>
+        </div>
+        <div class="actions-item clickable">
+          ${ForkIcon} <span class="actions-label">Fork</span>
+        </div>
       </div>
       <div class="section-cont">
         ${this.dashboardData.object.sections.map((sectionId, sectionIndex) => {
@@ -243,8 +252,14 @@ export class DashboardElement extends ConnectedElement {
 
   renderSectionContent() {
     return html` ${this.selectedSectionId !== undefined
-      ? html` <app-section-page uref=${this.selectedSectionId} /> `
+      ? html`
+          <app-section-page uref=${this.selectedSectionId}></app-section-page>
+        `
       : null}`;
+  }
+
+  renderForkContnet() {
+    return html`<app-forks-page />`;
   }
 
   render() {
@@ -263,6 +278,8 @@ export class DashboardElement extends ConnectedElement {
                 ? html`<app-document-page page-id=${this.selectedPageId} />`
                 : this.routeName === RouteName.section
                 ? this.renderSectionContent()
+                : this.routeName === RouteName.fork
+                ? this.renderForkContnet()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }
           </div>
@@ -322,7 +339,22 @@ export class DashboardElement extends ConnectedElement {
         .row {
           flex: 0 0 auto;
         }
-
+        .actions-container {
+          width: max-content;
+          align-self: center;
+        }
+        .actions-item {
+          margin: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          align-self: start;
+          color: #5c5c77;
+        }
+        .actions-label {
+          margin-left: 0.6rem;
+          font-size: 1.1rem;
+        }
         .padding-div {
           height: 10%;
           max-height: 5rem;

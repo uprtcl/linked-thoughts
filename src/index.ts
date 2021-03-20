@@ -17,6 +17,10 @@ import UserPage from './containers/UserBlog/User.page';
 import UserPageBlogSection from './containers/UserBlog/User.BlogSection';
 import UserPageBlogSectionItem from './containers/UserBlog/User.BlogSection.Item';
 import AppBarPublic from './components/PublicAppBar/Appbar.public';
+// Forks
+import { ForkPage } from './containers/ForksPage/Forks.Page';
+import ForkItem from './containers/ForksPage/Fork.Item';
+
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
 //
@@ -32,6 +36,7 @@ import '@ui5/webcomponents/dist/Carousel';
   customElements.define('app-getting-started', GettingStartedElement);
   customElements.define('app-visitor', VisitorElement);
   customElements.define('app-section-page', SectionPage);
+
   customElements.define('app-document-page', DocumentPage);
   customElements.define('app-error-page', ErrorPage);
   customElements.define('app-explore-card', ExploreCard);
@@ -45,4 +50,7 @@ import '@ui5/webcomponents/dist/Carousel';
     UserPageBlogSectionItem
   );
   customElements.define('app-appbar-public', AppBarPublic);
+  // Forks
+  customElements.define('app-forks-page', ForkPage);
+  customElements.define('app-forks-item', ForkItem);
 })();

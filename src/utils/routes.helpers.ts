@@ -4,12 +4,14 @@ import {
   PageVisitorRoute,
   SectionBaseRoute,
   UserProfileRoute,
+  ForksRoute,
 } from '../constants/routeNames';
 
 export enum RouteName {
   dashboard = 'dashboard',
   page = 'page',
   section = 'section',
+  fork = 'fork',
 }
 
 export const GenerateDocumentRoute = (docId: string = ':docId') =>
@@ -18,6 +20,9 @@ export const GenerateDocumentRoute = (docId: string = ':docId') =>
 export const GenerateSectionRoute = (sectionId: string = ':sectionId') =>
   `${SectionBaseRoute}/${sectionId}`;
 
+export const GenerateForksRoute = () => {
+  return `${ForksRoute}`;
+};
 export const GenerateReadDocumentRoute = (docId: string = ':docId') =>
   `${PageVisitorRoute}/${docId}`;
 

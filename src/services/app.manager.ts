@@ -36,6 +36,8 @@ export class AppManager {
       'local-drafts'
     );
     this.draftsEvees = this.evees.clone('local-drafts', draftsClient);
+    /** debounce repetitive updates to the same perspective */
+    this.draftsEvees.setDebounce(5000);
   }
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {

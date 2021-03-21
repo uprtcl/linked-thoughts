@@ -1,5 +1,4 @@
 import { html, css, property, internalProperty } from 'lit-element';
-import lodash from 'lodash';
 
 import {
   ClientEvents,
@@ -9,6 +8,8 @@ import {
   Logger,
   Perspective,
   Secured,
+  ClientCachedEvents,
+  EveesEvents,
 } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
@@ -54,6 +55,12 @@ export default class ShareCard extends ConnectedElement {
   @internalProperty()
   pushing = false;
 
+  @internalProperty()
+  clientPending = false;
+
+  @internalProperty()
+  eveesPending = false;
+
   sections: SectionData[];
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
@@ -69,6 +76,24 @@ export default class ShareCard extends ConnectedElement {
       this.appManager.draftsEvees.client.events.on(
         ClientEvents.ecosystemUpdated,
         (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
+      );
+
+      this.appManager.draftsEvees.client.events.on(
+        ClientCachedEvents.pending,
+        (pending: boolean) => {
+          /** set pending off after client flushed */
+          if (!pending) {
+            this.clientPending = pending;
+          }
+        }
+      );
+
+      this.appManager.draftsEvees.events.on(
+        EveesEvents.pending,
+        (pending: boolean) => {
+          /** set pending on after evees debounce */
+          this.eveesPending = pending;
+        }
       );
     }
 
@@ -100,6 +125,53 @@ export default class ShareCard extends ConnectedElement {
     } else {
       this.logger.log('blockUpdates is true');
     }
+  }
+
+  /** resolves once pending is false */
+  async ready() {
+    if (!this.eveesPending && !this.clientPending) return;
+
+    const resolveFn = (resolve: Function) => {
+      resolve();
+    };
+
+    await new Promise<void>((resolve) => {
+      this.appManager.draftsEvees.client.events.on(
+        ClientCachedEvents.pending,
+        (pending: boolean) => {
+          if (!pending) {
+            if (!this.eveesPending) {
+              /** resolve if the draft Evees is also ready */
+              resolveFn(resolve);
+            }
+
+            /** auto remove listener */
+            this.appManager.draftsEvees.client.events.removeListener(
+              ClientCachedEvents.pending,
+              resolveFn
+            );
+          }
+        }
+      );
+
+      this.appManager.draftsEvees.events.on(
+        EveesEvents.pending,
+        (pending: boolean) => {
+          if (!pending) {
+            if (!this.clientPending) {
+              /** resolve if the client is also ready */
+              resolveFn(resolve);
+            }
+
+            /** auto remove listener */
+            this.appManager.draftsEvees.events.removeListener(
+              ClientCachedEvents.pending,
+              resolveFn
+            );
+          }
+        }
+      );
+    });
   }
 
   async copyShareURL() {
@@ -219,6 +291,8 @@ export default class ShareCard extends ConnectedElement {
   navToBlogVersion() {}
 
   async shareTo(toSectionId: string) {
+    await this.ready();
+
     if (this.addingPage) return;
 
     this.addingPage = true;
@@ -241,7 +315,7 @@ export default class ShareCard extends ConnectedElement {
       perspectiveId: forkId,
       object: newObject,
     });
-    await this.evees.client.flush();
+    await this.evees.flush();
 
     this.lastSharedPageId = forkId;
 
@@ -251,6 +325,7 @@ export default class ShareCard extends ConnectedElement {
 
   async pushChanges() {
     if (this.pushing) return;
+    await this.ready();
 
     this.pushing = true;
     /** flush from onmemory to local */
@@ -342,16 +417,19 @@ export default class ShareCard extends ConnectedElement {
   }
 
   render() {
-    return html`<uprtcl-popper>
-      <uprtcl-button slot="icon" skinny secondary
-        >${`${
-          this.forkId === undefined
-            ? 'Share'
-            : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
-        }`}</uprtcl-button
-      >
-      ${this.renderContent()}
-    </uprtcl-popper>`;
+    return html`${this.eveesPending || this.clientPending
+        ? html`<div>pending</div>`
+        : ''}
+      <uprtcl-popper>
+        <uprtcl-button slot="icon" skinny secondary
+          >${`${
+            this.forkId === undefined
+              ? 'Share'
+              : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
+          }`}</uprtcl-button
+        >
+        ${this.renderContent()}
+      </uprtcl-popper>`;
   }
 
   static get styles() {

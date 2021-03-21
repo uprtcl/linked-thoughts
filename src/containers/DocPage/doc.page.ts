@@ -160,16 +160,14 @@ export class DocumentPage extends ConnectedElement {
     return html`
       <div class="page-container">
         ${this.renderTopNav()}
-        ${this.loading
-          ? html`<uprtcl-loading></uprtcl-loading>`
-          : html`<documents-editor
-              id="doc-editor"
-              uref=${this.pageId}
-              emit-updates
-              .localEvees=${this.appManager.draftsEvees}
-              ?read-only=${this.readOnly}
-            >
-            </documents-editor> `}
+        <documents-editor
+          id="doc-editor"
+          uref=${this.pageId}
+          emit-updates
+          .localEvees=${this.appManager.draftsEvees}
+          ?read-only=${this.readOnly}
+        >
+        </documents-editor>
         ${this.hasPull && this.showSnackBar
           ? this.renderSnackBar('pullchanges')
           : null}

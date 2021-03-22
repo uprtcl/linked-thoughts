@@ -134,15 +134,15 @@ export class AppManager {
 
     await this.commitPage(pageId);
 
-    const forkId = await this.draftsEvees.forkPerspective(
+    const forkId = await this.evees.forkPerspective(
       pageId,
       undefined,
       onSectionId
     );
-    await this.draftsEvees.addExistingChild(forkId, onSectionId);
+    await this.evees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.draftsEvees.client.flush();
+      await this.evees.client.flush();
     }
 
     return forkId;

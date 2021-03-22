@@ -124,7 +124,6 @@ export class AppManager {
     await this.draftsEvees.client.flush({ under: [{ id: pageId }] });
   }
 
-  /**  */
   async forkPage(
     pageId: string,
     onSectionId: string,
@@ -135,15 +134,15 @@ export class AppManager {
 
     await this.commitPage(pageId);
 
-    const forkId = await this.evees.forkPerspective(
+    const forkId = await this.draftsEvees.forkPerspective(
       pageId,
       undefined,
       onSectionId
     );
-    await this.evees.addExistingChild(forkId, onSectionId);
+    await this.draftsEvees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.evees.client.flush();
+      await this.draftsEvees.client.flush();
     }
 
     return forkId;

@@ -10,6 +10,7 @@ import {
   Secured,
   ClientCachedEvents,
   EveesEvents,
+  UpdatePerspectiveData,
 } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
@@ -56,9 +57,6 @@ export default class ShareCard extends ConnectedElement {
   pushing = false;
 
   @internalProperty()
-  clientPending = false;
-
-  @internalProperty()
   eveesPending = false;
 
   sections: SectionData[];
@@ -78,20 +76,9 @@ export default class ShareCard extends ConnectedElement {
         (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
       );
 
-      this.appManager.draftsEvees.client.events.on(
-        ClientCachedEvents.pending,
-        (pending: boolean) => {
-          /** set pending off after client flushed */
-          if (!pending) {
-            this.clientPending = pending;
-          }
-        }
-      );
-
       this.appManager.draftsEvees.events.on(
         EveesEvents.pending,
         (pending: boolean) => {
-          /** set pending on after evees debounce */
           this.eveesPending = pending;
         }
       );
@@ -129,39 +116,28 @@ export default class ShareCard extends ConnectedElement {
 
   /** resolves once pending is false */
   async ready() {
-    if (!this.eveesPending && !this.clientPending) return;
+    this.logger.log('ready()', {
+      eveesPending: this.eveesPending,
+    });
+
+    if (!this.eveesPending) return;
 
     const resolveFn = (resolve: Function) => {
       resolve();
     };
 
     await new Promise<void>((resolve) => {
-      this.appManager.draftsEvees.client.events.on(
-        ClientCachedEvents.pending,
-        (pending: boolean) => {
-          if (!pending) {
-            if (!this.eveesPending) {
-              /** resolve if the draft Evees is also ready */
-              resolveFn(resolve);
-            }
-
-            /** auto remove listener */
-            this.appManager.draftsEvees.client.events.removeListener(
-              ClientCachedEvents.pending,
-              resolveFn
-            );
-          }
-        }
-      );
-
       this.appManager.draftsEvees.events.on(
         EveesEvents.pending,
         (pending: boolean) => {
+          this.logger.log(`draftsEvees event: ${EveesEvents.pending}`, {
+            pending,
+            eveesPending: this.eveesPending,
+          });
+
           if (!pending) {
-            if (!this.clientPending) {
-              /** resolve if the client is also ready */
-              resolveFn(resolve);
-            }
+            /** resolve if the client is also ready */
+            resolveFn(resolve);
 
             /** auto remove listener */
             this.appManager.draftsEvees.events.removeListener(
@@ -291,6 +267,8 @@ export default class ShareCard extends ConnectedElement {
   navToBlogVersion() {}
 
   async shareTo(toSectionId: string) {
+    this.logger.log('shareTo', toSectionId);
+
     await this.ready();
 
     if (this.addingPage) return;
@@ -302,6 +280,8 @@ export default class ShareCard extends ConnectedElement {
       false
     );
 
+    this.logger.log('shareTo - forkId', { forkId, uref: this.uref });
+
     const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(forkId);
     const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
 
@@ -311,11 +291,24 @@ export default class ShareCard extends ConnectedElement {
       isA: [blogConcept.id],
     };
 
-    await this.evees.updatePerspectiveData({
+    const updateData: UpdatePerspectiveData = {
       perspectiveId: forkId,
       object: newObject,
+    };
+
+    this.logger.log('shareTo - updatePerspectiveData', { updateData });
+    await this.evees.updatePerspectiveData(updateData);
+
+    this.logger.log('shareTo - updatePerspectiveData - after', {
+      updateData,
+      evees: this.evees,
     });
+
     await this.evees.flush();
+    this.logger.log('shareTo - evees.flush - after', {
+      updateData,
+      evees: this.evees,
+    });
 
     this.lastSharedPageId = forkId;
 
@@ -417,9 +410,7 @@ export default class ShareCard extends ConnectedElement {
   }
 
   render() {
-    return html`${this.eveesPending || this.clientPending
-        ? html`<div>pending</div>`
-        : ''}
+    return html`${this.eveesPending ? html`<div>pending</div>` : ''}
       <uprtcl-popper>
         <uprtcl-button slot="icon" skinny secondary
           >${`${

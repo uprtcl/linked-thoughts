@@ -401,6 +401,7 @@ export default class ShareCard extends ConnectedElement {
           position: absolute;
           left: -40px;
           top: 0px;
+          --fill: var(--gray-light, black);
         }
         .share-card-cont {
           width: 350px;

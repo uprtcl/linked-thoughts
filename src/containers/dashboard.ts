@@ -66,7 +66,7 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      await this.appManager.checkStructure();
+      await this.appManager.init();
 
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
@@ -148,6 +148,9 @@ export class DashboardElement extends ConnectedElement {
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
       this.dashboardPerspective.id
     );
+    if (!this.dashboardData) {
+      throw new Error('dashboard data not defined');
+    }
     await this.loadSections();
   }
 
@@ -243,7 +246,12 @@ export class DashboardElement extends ConnectedElement {
 
   renderSectionContent() {
     return html` ${this.selectedSectionId !== undefined
-      ? html` <app-section-page uref=${this.selectedSectionId} /> `
+      ? html`
+          <app-section-page
+            uref=${this.selectedSectionId}
+            .localEvees=${this.appManager.draftsEvees}
+          ></app-section-page>
+        `
       : null}`;
   }
 

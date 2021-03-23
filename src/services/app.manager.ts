@@ -9,8 +9,8 @@ import {
   Secured,
   Perspective,
   getHome,
-  SearchOptions,
   SearchResult,
+  ClientCachedLocal,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
@@ -24,10 +24,20 @@ export enum ConceptId {
 export class AppManager {
   elements: AppElements;
   appError: AppError;
+  draftsEvees: Evees;
 
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
     this.appError = new AppError();
+    const draftsClient = new ClientCachedLocal(
+      undefined,
+      this.evees.client,
+      false,
+      'local-drafts'
+    );
+    this.draftsEvees = this.evees.clone('local-drafts', draftsClient);
+    /** debounce repetitive updates to the same perspective */
+    this.draftsEvees.setDebounce(2000);
   }
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
@@ -36,6 +46,10 @@ export class AppManager {
       case ConceptId.BLOGPOST:
         return getConceptPerspective(conceptId);
     }
+  }
+
+  async init() {
+    await this.checkStructure();
   }
 
   async checkStructure() {
@@ -85,7 +99,10 @@ export class AppManager {
       };
 
       /** update the section data (adding the link) */
-      await this.evees.updatePerspectiveData(blogSection.id, blogDataNew);
+      await this.evees.updatePerspectiveData({
+        perspectiveId: blogSection.id,
+        object: blogDataNew,
+      });
       await this.evees.client.flush();
     }
   }
@@ -102,12 +119,21 @@ export class AppManager {
     return childId;
   }
 
-  /**  */
+  /** persist all changes in the drafEvees of a given page to the backend */
+  async commitPage(pageId: string) {
+    await this.draftsEvees.client.flush({ under: [{ id: pageId }] });
+  }
+
   async forkPage(
     pageId: string,
     onSectionId: string,
     flush: boolean = true
   ): Promise<string> {
+    /** moves the page draft changes to the evees client */
+    /** and creates a fork */
+
+    await this.commitPage(pageId);
+
     const forkId = await this.evees.forkPerspective(
       pageId,
       undefined,
@@ -198,16 +224,10 @@ export class AppManager {
     };
 
     // Create a temporary workspaces to compute the merge
-    const evees = this.evees.clone();
+    const evees = this.draftsEvees.clone();
     const merger = new RecursiveContextMergeStrategy(evees);
     await merger.mergePerspectivesExternal(to, from, config);
 
     return evees;
-  }
-
-  async workspaceHasChanges(evees: Evees) {
-    // see if the temporary workspaces has updated any perspective
-    const diff = await evees.client.diff();
-    return diff.updates ? diff.updates.length > 0 : false;
   }
 }

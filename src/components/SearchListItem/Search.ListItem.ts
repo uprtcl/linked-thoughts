@@ -17,7 +17,7 @@ export default class SearchListItem extends EveesBaseElement {
   loading: boolean = true;
 
   async firstUpdated() {
-    await this.load();
+    await super.firstUpdated();
   }
 
   async load() {

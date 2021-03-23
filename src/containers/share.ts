@@ -1,13 +1,22 @@
 import { html, css, property, internalProperty } from 'lit-element';
-import lodash from 'lodash';
 
-import { Entity } from '@uprtcl/evees';
+import {
+  ClientEvents,
+  Entity,
+  Evees,
+  EveesMutation,
+  Logger,
+  Perspective,
+  Secured,
+  ClientCachedEvents,
+  EveesEvents,
+  UpdatePerspectiveData,
+} from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
 import { ThoughtsTextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
-import { GenerateReadDocumentRoute } from '../utils/routes.helpers';
 import { LTRouter } from '../router';
 import { ConceptId } from '../services/app.manager';
 import { GenearateReadURL } from '../utils/routes.generator';
@@ -18,6 +27,8 @@ interface SectionData {
 }
 
 export default class ShareCard extends ConnectedElement {
+  logger = new Logger('ShareCard');
+
   @property({ type: String })
   uref: string;
 
@@ -31,21 +42,76 @@ export default class ShareCard extends ConnectedElement {
   loading: boolean = true;
 
   @internalProperty()
-  disableAddButton: boolean = false;
-
-  @internalProperty()
   lastSharedPageId: string = null;
 
   @internalProperty()
   addingPage = false;
 
   @internalProperty()
-  hasPush = false;
+  forkId: string | undefined = undefined;
+
+  @internalProperty()
+  pushDiff!: EveesMutation;
+
+  @internalProperty()
+  pushing = false;
+
+  @internalProperty()
+  eveesPending = false;
 
   sections: SectionData[];
+  privateSection!: Secured<Perspective>;
+  blogSection!: Secured<Perspective>;
+
+  // Evees service storing changes from private to blog
+  eveesPush!: Evees;
+
+  blockUpdates: boolean = false;
+  pendingUpdates: boolean = false;
 
   firstUpdated() {
+    if (this.appManager.draftsEvees.client.events) {
+      this.appManager.draftsEvees.client.events.on(
+        ClientEvents.ecosystemUpdated,
+        (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
+      );
+
+      this.appManager.draftsEvees.events.on(
+        EveesEvents.pending,
+        (pending: boolean) => {
+          this.eveesPending = pending;
+        }
+      );
+    }
+
     this.load();
+  }
+
+  ecosystemUpdated(perspectiveIds: string[]) {
+    if (perspectiveIds.includes(this.uref)) {
+      this.logger.log('ecosystemUpdated()');
+      this.debounceUpdateChanges();
+    }
+  }
+
+  debounceUpdateChanges() {
+    this.pendingUpdates = true;
+
+    if (!this.blockUpdates) {
+      this.blockUpdates = true;
+      this.pendingUpdates = false;
+
+      this.loadChanges();
+
+      setTimeout(() => {
+        this.blockUpdates = false;
+        if (this.pendingUpdates) {
+          this.loadChanges();
+        }
+      }, 2500);
+    } else {
+      this.logger.log('blockUpdates is true');
+    }
   }
 
   async copyShareURL() {
@@ -74,8 +140,7 @@ export default class ShareCard extends ConnectedElement {
   async load() {
     // alert(this.isPagePrivate);
     this.lastSharedPageId = null;
-    this.disableAddButton = false;
-    this.hasPush = false;
+    this.forkId = undefined;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -92,46 +157,94 @@ export default class ShareCard extends ConnectedElement {
         )
     );
 
-    const { details } = await this.evees.client.getPerspective(this.uref);
+    const { details } = await this.appManager.draftsEvees.client.getPerspective(
+      this.uref
+    );
 
-    const privateSectionPerspective = await this.appManager.elements.get(
+    this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
-    const BlogSection = await this.appManager.elements.get(
+    this.blogSection = await this.appManager.elements.get(
       '/linkedThoughts/blogSection'
     );
-    if (
-      details.guardianId &&
-      details.guardianId != privateSectionPerspective.id
-    ) {
+
+    if (details.guardianId && details.guardianId != this.privateSection.id) {
       this.isPagePrivate = false;
     } else {
       this.isPagePrivate = true;
     }
 
-    const forkedIn = await this.appManager.getForkedIn(this.uref);
-
-    const forksInBlog = forkedIn.filter((e) => e.parentId === BlogSection.id);
-
-    if (forksInBlog.length > 0) {
-      // TODO: compare each fork and offer to push changes there
-      // const workspace = await this.appManager.compareForks(
-      //   PreviouslyForkedIn.childId,
-      //   this.uref
-      // );
-      this.hasPush = false; // await this.appManager.workspaceHasChanges(workspace);
-    }
+    await this.loadForks();
 
     this.loading = false;
   }
 
+  async loadForks() {
+    const forkedIn = await this.appManager.getForkedIn(this.uref);
+    const forksInBlog = forkedIn.filter(
+      (e) => e.parentId === this.blogSection.id
+    );
+
+    if (forksInBlog.length > 0) {
+      this.forkId = forksInBlog[0].childId;
+      await this.loadChanges();
+    }
+  }
+
+  async loadChanges() {
+    this.logger.log('loadChanges()', { forkId: this.forkId });
+    if (this.forkId) {
+      this.eveesPush = await this.appManager.compareForks(
+        this.forkId,
+        this.uref
+      );
+      this.pushDiff = await this.eveesPush.client.diff();
+      this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
+    } else {
+      this.pushDiff = {
+        deletedPerspectives: [],
+        entities: [],
+        newPerspectives: [],
+        updates: [],
+      };
+    }
+  }
+
+  get nChanges() {
+    if (!this.pushDiff) return 0;
+
+    return (
+      this.pushDiff.deletedPerspectives.length +
+      this.pushDiff.newPerspectives.length +
+      this.pushDiff.updates.length
+    );
+  }
+
+  toggleBlogVersion() {
+    if (this.forkId) {
+      // delete
+    } else {
+      this.shareTo(this.blogSection.id);
+    }
+  }
+
+  navToBlogVersion() {}
+
   async shareTo(toSectionId: string) {
+    this.logger.log('shareTo', toSectionId);
+
+    await this.appManager.draftsEvees.flushPendingUpdates();
+
+    if (this.addingPage) return;
+
     this.addingPage = true;
     const forkId = await this.appManager.forkPage(
       this.uref,
       toSectionId,
       false
     );
+
+    this.logger.log('shareTo - forkId', { forkId, uref: this.uref });
 
     const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(forkId);
     const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
@@ -142,52 +255,111 @@ export default class ShareCard extends ConnectedElement {
       isA: [blogConcept.id],
     };
 
-    await this.evees.updatePerspectiveData(forkId, newObject);
-    await this.evees.client.flush();
+    const updateData: UpdatePerspectiveData = {
+      perspectiveId: forkId,
+      object: newObject,
+    };
+
+    this.logger.log('shareTo - updatePerspectiveData', { updateData });
+    await this.evees.updatePerspectiveData(updateData);
+
+    this.logger.log('shareTo - updatePerspectiveData - after', {
+      updateData,
+      evees: this.evees,
+    });
+
+    await this.evees.flush();
+    this.logger.log('shareTo - evees.flush - after', {
+      updateData,
+      evees: this.evees,
+    });
 
     this.lastSharedPageId = forkId;
-    this.disableAddButton = true;
+
+    this.loadForks();
     this.addingPage = false;
   }
 
-  render() {
-    if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
-    return html`<div class="share-card-cont">
-      <div class="content">
-        <div class="row">
-          <div class="heading">
-            ${this.isPagePrivate ? html`Add to blog` : html`Share to Web`}
+  async pushChanges() {
+    if (this.pushing) return;
+    await this.appManager.draftsEvees.flushPendingUpdates();
+
+    this.pushing = true;
+    /** flush from onmemory to local */
+    await this.eveesPush.client.flush({}, false);
+    await this.appManager.commitPage(this.uref);
+
+    this.pushing = false;
+    this.loadForks();
+  }
+
+  renderPrivatePage() {
+    return html`<div class="row">
+        <div class="column description-column">
+          <div class="row">
+            <div class="heading">
+              ${this.isPagePrivate ? html`Share to blog` : html`Share to Web`}
+            </div>
+          </div>
+          <div class="row">
+            <div class="description">
+              ${this.isPagePrivate
+                ? html`Sharing to blog creates a public "fork" of this page in
+                  your blog`
+                : html`Anyone with this link can view this page.`}
+            </div>
           </div>
         </div>
-        <div class="row">
-          <div class="description">
-            ${this.isPagePrivate
-              ? html`Share this page by forking it in your Blog section`
-              : html`Anyone with this link can view this page.`}
-          </div>
+        <div class="column center-items">
+          <uprtcl-toggle
+            @click=${() => this.toggleBlogVersion()}
+            ?active=${this.forkId !== undefined}
+          >
+          </uprtcl-toggle>
         </div>
       </div>
-      ${this.isPagePrivate
-        ? html`<uprtcl-button-loading
-              class="add-to-blog-button"
-              @click=${() =>
-                !this.disableAddButton ? this.shareTo(this.sections[0].id) : {}}
-              ?disabled=${this.disableAddButton}
-              ?loading=${this.addingPage}
-            >
-              ${this.disableAddButton ? html`Added` : html`Add`}
-            </uprtcl-button-loading>
-            ${this.hasPush ? html`<!--div>TODO: Push button</div -->` : ''}`
-        : html` <div class="action-copy-cont">
-            <div class="url-cont">
-              ${GenearateReadURL(
-                LTRouter.Router.location.params.docId as string
-              )}
+      ${this.pushDiff && this.pushDiff.updates.length > 0
+        ? html`<div class="separator"></div>
+            <div>
+              <div class="row description">
+                (${this.nChanges}) ${' '} Changes made since last push
+              </div>
             </div>
-            <div @click=${this.copyShareURL} class="copy-url-button clickable">
-              ${ClipboardIcon}
-            </div>
-          </div>`}
+            <div class="row buttons">
+              <uprtcl-button-loading
+                ?loading=${this.pushing}
+                @click=${() => this.pushChanges()}
+                >Push to Blog</uprtcl-button-loading
+              >
+              <div class="item-separator"></div>
+              <uprtcl-button disabled>View Changes</uprtcl-button>
+              <div class="item-separator"></div>
+              <uprtcl-button skinny @click=${() => this.navToBlogVersion()}
+                >See Version</uprtcl-button
+              >
+            </div>`
+        : html``} `;
+  }
+
+  renderBlogPage() {
+    return html`<div class="row description">
+        This is the public version of this document. Use this link to share it
+        with others.
+      </div>
+      <div class="action-copy-cont">
+        <div class="url-cont">
+          ${GenearateReadURL(LTRouter.Router.location.params.docId as string)}
+        </div>
+        <div @click=${this.copyShareURL} class="copy-url-button clickable">
+          ${ClipboardIcon}
+        </div>
+      </div>`;
+  }
+
+  renderContent() {
+    if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
+    return html`<div class="share-card-cont">
+      ${this.isPagePrivate ? this.renderPrivatePage() : this.renderBlogPage()}
       ${this.lastSharedPageId && this.isPagePrivate
         ? html` <div class="action-copy-cont">
             <div class="url-cont">
@@ -201,18 +373,44 @@ export default class ShareCard extends ConnectedElement {
     </div>`;
   }
 
+  render() {
+    return html`${this.eveesPending
+        ? html`<div class="pending"><uprtcl-loading></uprtcl-loading></div>`
+        : ''}
+      <uprtcl-popper>
+        <uprtcl-button slot="icon" skinny secondary
+          >${`${
+            this.forkId === undefined
+              ? 'Share'
+              : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
+          }`}</uprtcl-button
+        >
+        ${this.renderContent()}
+      </uprtcl-popper>`;
+  }
+
   static get styles() {
     return [
       sharedStyles,
       css`
         :host {
-          font-family: 'Poppins', sans-serif;
+          display: block;
+          position: relative;
+        }
+        .pending {
+          position: absolute;
+          left: -40px;
+          top: 0px;
         }
         .share-card-cont {
           width: 350px;
+          padding: 1rem 1rem 1.5rem 1rem;
         }
         .content {
           padding: 0.5rem 1rem 0rem;
+        }
+        .description-column {
+          padding-right: 30px;
         }
         .heading {
           font-size: 1.2rem;
@@ -222,6 +420,26 @@ export default class ShareCard extends ConnectedElement {
         .description {
           font-size: 1rem;
           font-weight: 400;
+          color: var(--gray-light, black);
+        }
+        .separator {
+          width: 100%;
+          border-top-style: solid;
+          border-width: 0.6px;
+          border-color: #bdbdbd;
+          margin: 12px 0px;
+        }
+        .buttons {
+          margin-top: 12px;
+        }
+        .buttons uprtcl-button {
+          flex: 1 1 auto;
+          --padding: 0px 0px;
+        }
+        .item-separator {
+          width: 12px;
+          height: 100%;
+          flex: 0 0 auto;
         }
         .add-cont {
           width: 100%;
@@ -236,7 +454,7 @@ export default class ShareCard extends ConnectedElement {
         }
 
         .action-copy-cont {
-          margin: 1rem;
+          margin-top: 1rem;
           display: flex;
 
           /* Accent */

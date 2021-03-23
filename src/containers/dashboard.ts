@@ -148,6 +148,9 @@ export class DashboardElement extends ConnectedElement {
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
       this.dashboardPerspective.id
     );
+    if (!this.dashboardData) {
+      throw new Error('dashboard data not defined');
+    }
     await this.loadSections();
   }
 

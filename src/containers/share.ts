@@ -114,42 +114,6 @@ export default class ShareCard extends ConnectedElement {
     }
   }
 
-  /** resolves once pending is false */
-  async ready() {
-    this.logger.log('ready()', {
-      eveesPending: this.eveesPending,
-    });
-
-    if (!this.eveesPending) return;
-
-    const resolveFn = (resolve: Function) => {
-      resolve();
-    };
-
-    await new Promise<void>((resolve) => {
-      this.appManager.draftsEvees.events.on(
-        EveesEvents.pending,
-        (pending: boolean) => {
-          this.logger.log(`draftsEvees event: ${EveesEvents.pending}`, {
-            pending,
-            eveesPending: this.eveesPending,
-          });
-
-          if (!pending) {
-            /** resolve if the client is also ready */
-            resolveFn(resolve);
-
-            /** auto remove listener */
-            this.appManager.draftsEvees.events.removeListener(
-              ClientCachedEvents.pending,
-              resolveFn
-            );
-          }
-        }
-      );
-    });
-  }
-
   async copyShareURL() {
     try {
       await window.navigator.clipboard.writeText(
@@ -269,7 +233,7 @@ export default class ShareCard extends ConnectedElement {
   async shareTo(toSectionId: string) {
     this.logger.log('shareTo', toSectionId);
 
-    await this.ready();
+    await this.appManager.draftsEvees.flushPendingUpdates();
 
     if (this.addingPage) return;
 
@@ -318,7 +282,7 @@ export default class ShareCard extends ConnectedElement {
 
   async pushChanges() {
     if (this.pushing) return;
-    await this.ready();
+    await this.appManager.draftsEvees.flushPendingUpdates();
 
     this.pushing = true;
     /** flush from onmemory to local */
@@ -410,7 +374,9 @@ export default class ShareCard extends ConnectedElement {
   }
 
   render() {
-    return html`${this.eveesPending ? html`<div>pending</div>` : ''}
+    return html`${this.eveesPending
+        ? html`<div class="pending"><uprtcl-loading></uprtcl-loading></div>`
+        : ''}
       <uprtcl-popper>
         <uprtcl-button slot="icon" skinny secondary
           >${`${
@@ -429,6 +395,12 @@ export default class ShareCard extends ConnectedElement {
       css`
         :host {
           display: block;
+          position: relative;
+        }
+        .pending {
+          position: absolute;
+          left: -40px;
+          top: 0px;
         }
         .share-card-cont {
           width: 350px;

@@ -260,33 +260,7 @@ export default class ShareCard extends ConnectedElement {
 
     this.logger.log('shareTo - forkId', { forkId, uref: this.uref });
 
-    const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(forkId);
-    const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
-
-    /** keep the the entire object and append the blogConcept to the isA array. */
-    const newObject: ThoughtsTextNode = { ...data.object };
-    newObject.meta = {
-      isA: [blogConcept.id],
-    };
-
-    const updateData: UpdatePerspectiveData = {
-      perspectiveId: forkId,
-      object: newObject,
-    };
-
-    this.logger.log('shareTo - updatePerspectiveData', { updateData });
-    await this.evees.updatePerspectiveData(updateData);
-
-    this.logger.log('shareTo - updatePerspectiveData - after', {
-      updateData,
-      evees: this.evees,
-    });
-
-    await this.evees.flush();
-    this.logger.log('shareTo - evees.flush - after', {
-      updateData,
-      evees: this.evees,
-    });
+    await this.appManager.addBlogPost(forkId);
 
     this.lastSharedPageId = forkId;
 

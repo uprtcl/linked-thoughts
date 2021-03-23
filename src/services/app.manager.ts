@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events';
+
 import { TextNode, TextType } from '@uprtcl/documents';
 import {
   AppElement,
@@ -11,17 +13,25 @@ import {
   getHome,
   SearchResult,
   ClientCachedLocal,
+  UpdatePerspectiveData,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
-import { Dashboard, Section } from '../containers/types';
+import { Dashboard, Section, ThoughtsTextNode } from '../containers/types';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
   BLOGPOST = 'blogpost',
 }
 
+export enum AppEvents {
+  blogPostCreated = 'blog-post-created',
+}
+
+export const BLOG_POST_PUBLISHED_EVENT_TAG = 'blogpost-published';
+
 export class AppManager {
+  events: EventEmitter;
   elements: AppElements;
   appError: AppError;
   draftsEvees: Evees;
@@ -38,6 +48,9 @@ export class AppManager {
     this.draftsEvees = this.evees.clone('local-drafts', draftsClient);
     /** debounce repetitive updates to the same perspective */
     this.draftsEvees.setDebounce(2000);
+
+    this.events = new EventEmitter();
+    this.events.setMaxListeners(1000);
   }
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
@@ -146,6 +159,26 @@ export class AppManager {
     }
 
     return forkId;
+  }
+
+  async addBlogPost(postId: string) {
+    const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(postId);
+    const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
+
+    /** keep the the entire object and append the blogConcept to the isA array. */
+    const newObject: ThoughtsTextNode = { ...data.object };
+    newObject.meta = {
+      isA: [blogConcept.id],
+    };
+
+    const updateData: UpdatePerspectiveData = {
+      perspectiveId: postId,
+      object: newObject,
+    };
+
+    await this.evees.updatePerspectiveData(updateData);
+    await this.evees.flush();
+    this.events.emit(AppEvents.blogPostCreated, [postId]);
   }
 
   async getBlogFeed(

@@ -1,13 +1,16 @@
-import { html, css, property, internalProperty, query } from 'lit-element';
+import lodash from 'lodash';
+import { html, css, internalProperty, query } from 'lit-element';
+
+import { UprtclTextField } from '@uprtcl/common-ui';
+import { Logger } from '@uprtcl/evees';
+
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import SearchIcon from '../../assets/icons/search.svg';
-import { UprtclTextField } from '@uprtcl/common-ui';
+import { AppEvents } from '../../services/app.manager';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
-import { Logger } from '@uprtcl/evees';
-import lodash from 'lodash';
 export default class ExploreCard extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
@@ -39,6 +42,14 @@ export default class ExploreCard extends ConnectedElement {
   firstExpanded: boolean = false;
 
   async firstUpdated() {
+    this.appManager.events.on(
+      AppEvents.blogPostCreated,
+      (elements: string[]) => {
+        this.blogFeedIds.unshift(...elements);
+        this.blogFeedIds = [...this.blogFeedIds];
+      }
+    );
+
     this.load();
   }
 

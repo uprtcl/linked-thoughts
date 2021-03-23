@@ -8,9 +8,9 @@ import {
   Logger,
   Perspective,
   Secured,
-  ClientCachedEvents,
   EveesEvents,
   UpdatePerspectiveData,
+  ParentAndChild,
 } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
@@ -48,7 +48,7 @@ export default class ShareCard extends ConnectedElement {
   addingPage = false;
 
   @internalProperty()
-  forkId: string | undefined = undefined;
+  fork: ParentAndChild | undefined = undefined;
 
   @internalProperty()
   pushDiff!: EveesMutation;
@@ -140,7 +140,7 @@ export default class ShareCard extends ConnectedElement {
   async load() {
     // alert(this.isPagePrivate);
     this.lastSharedPageId = null;
-    this.forkId = undefined;
+    this.fork = undefined;
 
     const sectionIds = await this.appManager.getSections();
     this.sections = await Promise.all(
@@ -186,16 +186,18 @@ export default class ShareCard extends ConnectedElement {
     );
 
     if (forksInBlog.length > 0) {
-      this.forkId = forksInBlog[0].childId;
+      this.fork = forksInBlog[0];
       await this.loadChanges();
+    } else {
+      this.fork = undefined;
     }
   }
 
   async loadChanges() {
-    this.logger.log('loadChanges()', { forkId: this.forkId });
-    if (this.forkId) {
+    this.logger.log('loadChanges()', { fork: this.fork });
+    if (this.fork) {
       this.eveesPush = await this.appManager.compareForks(
-        this.forkId,
+        this.fork.childId,
         this.uref
       );
       this.pushDiff = await this.eveesPush.client.diff();
@@ -221,14 +223,26 @@ export default class ShareCard extends ConnectedElement {
   }
 
   toggleBlogVersion() {
-    if (this.forkId) {
-      // delete
+    if (this.fork) {
+      this.deleteFrom(this.blogSection.id);
     } else {
       this.shareTo(this.blogSection.id);
     }
   }
 
   navToBlogVersion() {}
+
+  async deleteFrom(sectionId: string) {
+    this.addingPage = true;
+    const index = await this.evees.getChildIndex(
+      this.fork.parentId,
+      this.fork.childId
+    );
+    await this.evees.deleteChild(this.fork.parentId, index);
+    await this.evees.client.flush();
+    await this.loadForks();
+    this.addingPage = false;
+  }
 
   async shareTo(toSectionId: string) {
     this.logger.log('shareTo', toSectionId);
@@ -298,24 +312,33 @@ export default class ShareCard extends ConnectedElement {
         <div class="column description-column">
           <div class="row">
             <div class="heading">
-              ${this.isPagePrivate ? html`Share to blog` : html`Share to Web`}
+              ${this.isPagePrivate
+                ? this.fork === undefined
+                  ? html`Share to blog`
+                  : html`Shared to blog`
+                : html`Share to Web`}
             </div>
           </div>
           <div class="row">
             <div class="description">
               ${this.isPagePrivate
-                ? html`Sharing to blog creates a public "fork" of this page in
-                  your blog`
+                ? this.fork === undefined
+                  ? html`Sharing to blog creates a public "fork" of this page in
+                    your blog`
+                  : html`This page is shared in your blog section. Unsharing it
+                    will remove and delete it from your blog.`
                 : html`Anyone with this link can view this page.`}
             </div>
           </div>
         </div>
         <div class="column center-items">
-          <uprtcl-toggle
-            @click=${() => this.toggleBlogVersion()}
-            ?active=${this.forkId !== undefined}
-          >
-          </uprtcl-toggle>
+          ${this.addingPage
+            ? html`<uprtcl-loading></uprtcl-loading>`
+            : html`<uprtcl-toggle
+                @click=${() => this.toggleBlogVersion()}
+                ?active=${this.fork !== undefined}
+              >
+              </uprtcl-toggle>`}
         </div>
       </div>
       ${this.pushDiff && this.pushDiff.updates.length > 0
@@ -380,7 +403,7 @@ export default class ShareCard extends ConnectedElement {
       <uprtcl-popper>
         <uprtcl-button slot="icon" skinny secondary
           >${`${
-            this.forkId === undefined
+            this.fork === undefined
               ? 'Share'
               : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
           }`}</uprtcl-button

@@ -343,7 +343,6 @@ export class DashboardElement extends ConnectedElement {
         .app-content {
           background: var(--background-color);
           min-width: 475px;
-          max-width: calc(100% - 260px - 1px);
           flex-grow: 1;
           display: flex;
           flex-direction: column;

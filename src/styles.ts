@@ -2,14 +2,14 @@ import { css } from 'lit-element';
 
 export const sharedStyles = css`
   :host {
-    --primary: #2f80ed;
+    --primary: #4260f6;
     --secondary: #333333;
     --white: #ffffff;
     --black: #000000;
     --black-transparent: rgba(3, 3, 3, 0.25);
     --gray-dark: #333333;
     --gray-light: #828282;
-    --border-radius-complete: 100vh;
+    --border-radius-complete: 0.5rem;
     --background-color: #fffffb;
   }
   a {

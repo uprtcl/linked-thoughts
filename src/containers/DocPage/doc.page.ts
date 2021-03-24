@@ -551,7 +551,7 @@ export class DocumentPage extends ConnectedElement {
           padding: 1rem 0.5rem;
         }
         .share-card-cont {
-          width: 350px;
+          width: 400px;
           padding: 1rem 1rem 1.5rem 1rem;
         }
         .content {
@@ -580,9 +580,9 @@ export class DocumentPage extends ConnectedElement {
         .buttons {
           margin-top: 12px;
         }
-        .buttons uprtcl-button {
-          flex: 1 1 auto;
-          --padding: 0px 0px;
+        .buttons > * {
+          --padding: 0px 0rem;
+          width: 150px;
         }
         .item-separator {
           width: 12px;

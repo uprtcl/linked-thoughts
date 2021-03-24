@@ -105,7 +105,7 @@ export default class ShareCard extends ConnectedElement {
       setTimeout(() => {
         this.blockUpdates = false;
         if (this.pendingUpdates) {
-          this.loadChanges();
+          this.debounceUpdateChanges();
         }
       }, 2500);
     } else {

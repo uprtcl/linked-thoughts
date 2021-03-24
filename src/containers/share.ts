@@ -10,6 +10,7 @@ import {
   Secured,
   EveesEvents,
   ParentAndChild,
+  ClientOnMemory,
 } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
@@ -198,6 +199,12 @@ export default class ShareCard extends ConnectedElement {
         this.fork.childId,
         this.uref
       );
+
+      /** brute force add onEcosystem to all indexData of the changes in the push client */
+      await (this.eveesPush.client as ClientOnMemory).addOnEcosystem([
+        this.fork.childId,
+      ]);
+
       this.pushDiff = await this.eveesPush.client.diff();
       this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
     } else {
@@ -272,7 +279,6 @@ export default class ShareCard extends ConnectedElement {
 
     this.pushing = true;
     /** flush from onmemory to local */
-    await this.eveesPush.index();
     await this.eveesPush.client.flush({}, false);
     await this.appManager.commitPage(this.fork.childId);
 

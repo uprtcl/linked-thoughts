@@ -153,9 +153,6 @@ export default class ReadOnlyPage extends ConnectedElement {
     return [
       sharedStyles,
       css`
-        :host {
-          font-family: 'Inter';
-        }
         .root {
           height: 100vh;
           width: 100vw;

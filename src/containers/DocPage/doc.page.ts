@@ -205,7 +205,6 @@ export class DocumentPage extends ConnectedElement {
           margin: 0 0.5rem;
         }
         .snackbar-cont {
-          font-family: 'Inter', sans-serif;
           position: absolute;
           bottom: 10%;
           left: 50%;

@@ -80,9 +80,6 @@ export default class ReadOnlyPage extends ConnectedElement {
     return [
       sharedStyles,
       css`
-        :host {
-          font-family: 'Inter';
-        }
         hr {
           opacity: 0.3;
           margin-top: 1rem;
@@ -118,10 +115,7 @@ export default class ReadOnlyPage extends ConnectedElement {
           margin-top: 1rem;
         }
         .read-more {
-          font-family: Inter;
-
           font-weight: 500;
-
           color: #da3e52;
         }
       `,

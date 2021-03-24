@@ -376,9 +376,11 @@ export default class ShareCard extends ConnectedElement {
   }
 
   render() {
-    return html`${this.eveesPending
-        ? html`<div class="pending"><uprtcl-loading></uprtcl-loading></div>`
-        : ''}
+    return html`<div class="pending">
+        ${this.eveesPending
+          ? html`<uprtcl-loading></uprtcl-loading>Saving`
+          : `Saved`}
+      </div>
       <uprtcl-popper>
         <uprtcl-button slot="icon" skinny secondary
           >${`${
@@ -401,9 +403,16 @@ export default class ShareCard extends ConnectedElement {
         }
         .pending {
           position: absolute;
-          left: -40px;
+          left: -152px;
           top: 0px;
           --fill: var(--gray-light, black);
+          width: 140px;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          font-size: 15px;
+          color: var(--gray-light, black);
         }
         .share-card-cont {
           width: 350px;

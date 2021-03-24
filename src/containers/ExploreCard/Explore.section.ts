@@ -340,8 +340,6 @@ export default class ExploreCard extends ConnectedElement {
           box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
 
           /* Note: backdrop-filter has minimal browser support */
-          font-family: 'Inter', sans-serif;
-
           border-radius: 20px 6px 6px 20px;
 
           width: 400px;

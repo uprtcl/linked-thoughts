@@ -34,7 +34,6 @@ export class ErrorPage extends EveesBaseElement {
           height: 100%;
           width: 100%;
           background: #ccc3;
-          font-family: 'Inter', sans-serif;
           padding: 0.5rem;
         }
         a {

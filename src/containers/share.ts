@@ -9,17 +9,15 @@ import {
   Perspective,
   Secured,
   EveesEvents,
-  UpdatePerspectiveData,
   ParentAndChild,
 } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 import { sharedStyles } from '../styles';
-import { ThoughtsTextNode, Section } from './types';
 import ClipboardIcon from '../assets/icons/clipboard.svg';
 import { LTRouter } from '../router';
-import { ConceptId } from '../services/app.manager';
 import { GenearateReadURL } from '../utils/routes.generator';
+import { Section } from './types';
 
 interface SectionData {
   id: string;
@@ -274,8 +272,9 @@ export default class ShareCard extends ConnectedElement {
 
     this.pushing = true;
     /** flush from onmemory to local */
+    await this.eveesPush.index();
     await this.eveesPush.client.flush({}, false);
-    await this.appManager.commitPage(this.uref);
+    await this.appManager.commitPage(this.fork.childId);
 
     this.pushing = false;
     this.loadForks();

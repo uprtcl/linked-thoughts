@@ -18,6 +18,7 @@ import UserPageBlogSectionItem from './containers/UserBlog/User.BlogSection.Item
 import AppBarPublic from './components/PublicAppBar/Appbar.public';
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
+import { BlockInfoPopper } from './containers/BlockInfo/block-info';
 //
 
 (async function () {
@@ -43,4 +44,5 @@ import '@ui5/webcomponents/dist/Carousel';
     UserPageBlogSectionItem
   );
   customElements.define('app-appbar-public', AppBarPublic);
+  customElements.define('app-block-info', BlockInfoPopper);
 })();

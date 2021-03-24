@@ -506,8 +506,10 @@ export class DocumentPage extends ConnectedElement {
           id="doc-editor"
           uref=${this.pageId}
           emit-updates
-          .localEvees=${this.appManager.draftsEvees}
           ?read-only=${this.readOnly}
+          .getEveeInfo=${(uref) =>
+            html`<app-block-info uref=${uref}></app-block-info>`}
+          show-info
         >
         </documents-editor>
         ${this.hasPull && this.showSnackBar

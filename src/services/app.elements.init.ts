@@ -46,6 +46,15 @@ export const appElementsInit: AppElement = {
             };
           },
         },
+        {
+          path: '/forksSection',
+          getInitData: () => {
+            return {
+              title: 'Forks',
+              pages: [],
+            };
+          },
+        },
       ],
     },
   ],

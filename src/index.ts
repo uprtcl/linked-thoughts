@@ -20,6 +20,9 @@ import AppBarPublic from './components/PublicAppBar/Appbar.public';
 // Forks
 import { ForkPage } from './containers/ForksPage/Forks.Page';
 import ForkItem from './containers/ForksPage/Fork.Item';
+import { DocumentPageForkSection } from './containers/DocPage/doc.fork';
+// Components
+import { Snackbar } from './components/Snackbar/Snackbar';
 
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
@@ -53,4 +56,11 @@ import '@ui5/webcomponents/dist/Carousel';
   // Forks
   customElements.define('app-forks-page', ForkPage);
   customElements.define('app-forks-item', ForkItem);
+  customElements.define(
+    'app-document-page-fork-section',
+    DocumentPageForkSection
+  );
+
+  //Components
+  customElements.define('app-component-snackbar', Snackbar);
 })();

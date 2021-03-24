@@ -23,6 +23,10 @@ export class ErrorPage extends EveesBaseElement {
 
         <a href=${ORIGIN} class="button">Go Home</a>
         <app-forks-item></app-forks-item>
+        <app-component-snackbar autoCloseDelay=${10000}>
+          <p slot="description">Hello there</p>
+          <p slot="action">Hello there</p>
+        </app-component-snackbar>
       </div>
     `;
   }

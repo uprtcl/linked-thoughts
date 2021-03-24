@@ -168,7 +168,7 @@ export class DocumentPage extends ConnectedElement {
           ?read-only=${this.readOnly}
         >
         </documents-editor>
-
+        <app-document-page-fork-section></app-document-page-fork-section>
         ${this.hasPull && this.showSnackBar
           ? this.renderSnackBar('pullchanges')
           : null}

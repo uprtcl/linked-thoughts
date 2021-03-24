@@ -37,9 +37,6 @@ export class DashboardElement extends ConnectedElement {
   isLogged = false;
 
   @internalProperty()
-  showNewPageDialog = false;
-
-  @internalProperty()
   routeName: RouteName;
 
   @internalProperty()
@@ -181,37 +178,6 @@ export class DashboardElement extends ConnectedElement {
     Router.go(GenerateDocumentRoute(pageId));
   }
 
-  renderNewPageDialog(showOptions = true) {
-    return html`<uprtcl-dialog id="updates-dialog">
-      <span
-        @click=${() => (this.showNewPageDialog = false)}
-        class="new-page-close-icon clickable"
-        >${CloseIcon}</span
-      >
-      <span class="new-page-modal-heading">Add new page to</span>
-      <div class="new-page-modal-options">
-        <div
-          @click=${() => {
-            this.showNewPageDialog = false;
-            this.newPage(0);
-          }}
-          class="clickable"
-        >
-          ${LockIcon} Private
-        </div>
-        <!-- <div
-          @click=${() => {
-          this.showNewPageDialog = false;
-          this.newPage(1);
-        }}
-          class="clickable"
-        >
-          ${GlobeIcon} Blog
-        </div> -->
-      </div>
-    </uprtcl-dialog>`;
-  }
-
   renderHome() {
     return html``;
   }
@@ -224,12 +190,7 @@ export class DashboardElement extends ConnectedElement {
         ></evees-login-widget>
       </div>
       <div class="row align-center">
-        <uprtcl-button
-          class="button-new-page"
-          @click=${() => {
-            this.showNewPageDialog = true;
-          }}
-        >
+        <uprtcl-button class="button-new-page" @click=${() => this.newPage()}>
           New Page
         </uprtcl-button>
       </div>
@@ -240,8 +201,7 @@ export class DashboardElement extends ConnectedElement {
             idx=${sectionIndex}
           ></app-nav-section>`;
         })}
-      </div>
-      ${this.showNewPageDialog ? this.renderNewPageDialog() : ''}`;
+      </div> `;
   }
 
   renderSectionContent() {
@@ -442,40 +402,6 @@ export class DashboardElement extends ConnectedElement {
           width: 340px;
           margin: 16px auto;
           padding: 12px 16px;
-        }
-        .new-page-modal-heading {
-          font-size: 1.75rem;
-          font-weight: 600;
-          text-align: center;
-          margin: 1rem 0rem;
-        }
-        .new-page-close-icon {
-          position: absolute;
-          right: 1rem;
-        }
-        .new-page-modal-options {
-          width: 100%;
-          text-align: center;
-          display: flex;
-          flex-wrap: wrap;
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin: 1rem 0;
-          justify-content: center;
-        }
-        .new-page-modal-options > * {
-          margin: 0 1rem;
-          /* flex: 1; */
-          box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          height: 158px;
-          justify-content: center;
-          flex-basis: 40%;
-        }
-        .new-page-modal-options img {
-          margin-bottom: 1rem;
         }
       `,
     ];

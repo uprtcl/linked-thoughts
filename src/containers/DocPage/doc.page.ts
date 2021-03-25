@@ -505,6 +505,7 @@ export class DocumentPage extends ConnectedElement {
           uref=${this.pageId}
           emit-updates
           ?read-only=${this.readOnly}
+          .localEvees=${this.appManager.draftsEvees}
           .getEveeInfo=${(uref) =>
             html`<app-block-info uref=${uref}></app-block-info>`}
           show-info

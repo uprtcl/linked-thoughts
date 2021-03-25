@@ -275,8 +275,6 @@ export class DocumentPage extends ConnectedElement {
   async shareTo(toSectionId: string) {
     this.logger.log('shareTo', toSectionId);
 
-    await this.appManager.draftsEvees.flushPendingUpdates();
-
     if (this.addingPage) return;
 
     this.addingPage = true;
@@ -506,8 +504,10 @@ export class DocumentPage extends ConnectedElement {
           id="doc-editor"
           uref=${this.pageId}
           emit-updates
-          .localEvees=${this.appManager.draftsEvees}
           ?read-only=${this.readOnly}
+          .getEveeInfo=${(uref) =>
+            html`<app-block-info uref=${uref}></app-block-info>`}
+          show-info
         >
         </documents-editor>
         ${this.hasPull && this.showSnackBar

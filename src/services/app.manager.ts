@@ -145,6 +145,7 @@ export class AppManager {
     /** moves the page draft changes to the evees client */
     /** and creates a fork */
 
+    await this.draftsEvees.flushPendingUpdates();
     await this.commitPage(pageId);
 
     const forkId = await this.evees.forkPerspective(

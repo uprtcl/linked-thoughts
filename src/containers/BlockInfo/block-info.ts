@@ -15,7 +15,7 @@ export class BlockInfoPopper extends ConnectedElement {
 
   async firstUpdated() {
     this.forksSection = await this.appManager.elements.get(
-      '/linkedThoughts//forksSection'
+      '/linkedThoughts/forksSection'
     );
   }
 
@@ -25,13 +25,21 @@ export class BlockInfoPopper extends ConnectedElement {
 
   render() {
     return html`
-      <uprtcl-popper icon="clear">
+      <uprtcl-popper skinny icon="menu" position="bottom-left">
         <uprtcl-card><uprtcl-button @click=${() =>
           this.forkBlock()}>Fork</uprtcl-button></uprtcl-button></uprtcl-card>
       </uprtcl-popper>
     `;
   }
   static get styles() {
-    return [styles, sharedStyles, css``];
+    return [
+      styles,
+      sharedStyles,
+      css`
+        :host {
+          padding: 0 5px;
+        }
+      `,
+    ];
   }
 }

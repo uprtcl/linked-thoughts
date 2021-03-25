@@ -275,8 +275,6 @@ export class DocumentPage extends ConnectedElement {
   async shareTo(toSectionId: string) {
     this.logger.log('shareTo', toSectionId);
 
-    await this.appManager.draftsEvees.flushPendingUpdates();
-
     if (this.addingPage) return;
 
     this.addingPage = true;

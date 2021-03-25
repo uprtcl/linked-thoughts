@@ -195,12 +195,14 @@ export class DashboardElement extends ConnectedElement {
         </uprtcl-button>
       </div>
       <div class="section-cont">
-        ${this.dashboardData.object.sections.map((sectionId, sectionIndex) => {
-          return html`<app-nav-section
-            uref=${sectionId}
-            idx=${sectionIndex}
-          ></app-nav-section>`;
-        })}
+        <app-nav-section
+          uref=${this.dashboardData.object.sections[0]}
+          idx=${0}
+        ></app-nav-section>
+        <app-nav-section
+          uref=${this.dashboardData.object.sections[1]}
+          idx=${0}
+        ></app-nav-section>
       </div> `;
   }
 

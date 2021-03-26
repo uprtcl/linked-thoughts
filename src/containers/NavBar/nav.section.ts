@@ -16,8 +16,6 @@ import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 
-const sectionHeight = 30;
-
 export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: String })
   uref: string;
@@ -58,6 +56,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     } else if (LTRouter.Router.location.params.sectionId)
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
+
   async newPage(e: Event) {
     if (this.creatingPage) return;
     this.creatingPage = true;
@@ -70,6 +69,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   navigateSection() {
     Router.go(GenerateSectionRoute(this.uref));
   }
+
   async deletePage(pageIx: number) {
     const confirmResponse = window.confirm(
       'Are you sure you want to delete this item?'
@@ -100,48 +100,38 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       classes.push('selected-item');
     }
 
-    /** same as value */
-    let overlayClass = [];
-
-    // WARNING the number of pages most be related to the scroll height
-    if (this.data.object.pages.length >= Math.floor(sectionHeight / 30)) {
-      overlayClass.push('list-overlay');
-      this.showPaddingDiv = true;
-    }
-
     return html`<div class=${classes.join(' ')} @click=${this.navigateSection}>
         <span class="section-text">${this.data.object.title}</span>
-        ${this.canCreate
-          ? html`<uprtcl-icon-button
-              skinny
-              secondary
-              @click=${(e) => this.newPage(e)}
-              icon="add_box"
-            ></uprtcl-icon-button>`
-          : html`<uprtcl-help position="bottom-right">
-              <span>
-                To add a page on the "Blog" section, create or select a Private
-                page and then "share" it.
-              </span>
-            </uprtcl-help>`}
+        ${
+          this.canCreate
+            ? html`<uprtcl-icon-button
+                skinny
+                secondary
+                @click=${(e) => this.newPage(e)}
+                icon="add_box"
+              ></uprtcl-icon-button>`
+            : html`<uprtcl-help position="bottom-right">
+                <span>
+                  To add a page on the "Blog" section, create or select a
+                  Private page and then "share" it.
+                </span>
+              </uprtcl-help>`
+        }
       </div>
       <div class="page-list-container">
-        <div class="page-list-scroller">
-          <uprtcl-list id="pages-list" class="page-list">
-            ${this.data.object.pages.map((pageId, pageIndex) => {
-              return html`<app-nav-page-item
-                ?selected=${this.selectedId === pageId ? true : false}
-                uref=${pageId}
-                ui-parent=${this.uref}
-                idx=${pageIndex}
-                @delete-element=${() => this.deletePage(pageIndex)}
-                .localEvees=${this.appManager.draftsEvees}
-              ></app-nav-page-item>`;
-            })}
-            <div class="padding-div"></div>
-          </uprtcl-list>
-        </div>
-        <div class=${overlayClass.join(' ')}></div>
+        <div class="recent">RECENT:</div>
+        <uprtcl-list class="page-list"></uprtcl-list>
+          ${this.data.object.pages.slice(0, 3).map((pageId, pageIndex) => {
+            return html`<app-nav-page-item
+              ?selected=${this.selectedId === pageId ? true : false}
+              uref=${pageId}
+              ui-parent=${this.uref}
+              idx=${pageIndex}
+              @delete-element=${() => this.deletePage(pageIndex)}
+              .localEvees=${this.appManager.draftsEvees}
+            ></app-nav-page-item>`;
+          })}
+        </uprtcl-list>
       </div>`;
   }
   static get styles() {
@@ -158,42 +148,25 @@ export class NavSectionElement extends EveesBaseElement<Section> {
 
         .page-list-container {
           position: relative;
-          /* SAME AS scroller and condition for overlay in the render function!!! */
-          max-height: ${css`
-            ${sectionHeight}vh
-          `};
-          overflow: hidden;
+          color: var(--gray-dark, black);
         }
-        .page-list-scroller {
-          max-height: ${css`
-            ${sectionHeight}vh
-          `};
-          overflow-y: auto;
+
+        .recent {
+          font-size: 12px;
+          padding: 0px 2rem;
+          font-weight: bold;
+          color: rgb(204, 204, 204);
         }
 
         .padding-div {
           height: 55px;
         }
-        .page-list-scroller::-webkit-scrollbar {
-          width: 0px;
-          display: block;
-          scrollbar-width: 0px; /* Firefox */
-          overflow-y: scroll;
-        }
 
-        .page-list::-webkit-scrollbar-track {
-          /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
-        }
-
-        .page-list::-webkit-scrollbar-thumb {
-          background-color: var(--black-transparent, #0003);
-          border-radius: 1rem;
-        }
         .section-heading {
           font-size: 1.2rem;
           text-transform: uppercase;
           font-weight: 600;
-          color: grey;
+          color: var(--gray-dark, gray);
           padding: 0.3rem 0.2rem 0.3rem 2rem;
           display: flex;
           align-items: center;

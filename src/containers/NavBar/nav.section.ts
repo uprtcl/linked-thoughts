@@ -33,6 +33,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
 
   // TODO request app mananger on an ConnectedEveeElement base class...
   appManager: AppManager;
+  creatingPage: boolean = false;
 
   showPaddingDiv: boolean = false;
 
@@ -58,8 +59,11 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
   async newPage(e: Event) {
+    if (this.creatingPage) return;
+    this.creatingPage = true;
     e.stopPropagation();
     const pageId = await this.appManager.newPage(this.uref);
+    this.creatingPage = false;
     Router.go(GenerateDocumentRoute(pageId));
   }
 

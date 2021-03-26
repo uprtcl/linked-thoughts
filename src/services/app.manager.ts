@@ -18,10 +18,12 @@ import {
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard, Section, ThoughtsTextNode } from '../containers/types';
+import { MetaHelper } from './meta.helper';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
   BLOGPOST = 'blogpost',
+  PAGE = 'page',
 }
 
 export enum AppEvents {
@@ -54,11 +56,7 @@ export class AppManager {
   }
 
   async getConcept(conceptId: ConceptId): Promise<Secured<Perspective>> {
-    switch (conceptId) {
-      case ConceptId.BLOGHOME:
-      case ConceptId.BLOGPOST:
-        return getConceptPerspective(conceptId);
-    }
+    return getConceptPerspective(conceptId);
   }
 
   async init() {
@@ -121,10 +119,14 @@ export class AppManager {
   }
 
   async newPage(onSectionId: string): Promise<string> {
-    const page: TextNode = {
+    const pageConcept = await this.getConcept(ConceptId.PAGE);
+    const page: ThoughtsTextNode = {
       text: '',
       type: TextType.Title,
       links: [],
+      meta: {
+        isA: [pageConcept.id],
+      },
     };
     const childId = await this.evees.addNewChild(onSectionId, page);
     await this.evees.client.flush();
@@ -167,10 +169,7 @@ export class AppManager {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
 
     /** keep the the entire object and append the blogConcept to the isA array. */
-    const newObject: ThoughtsTextNode = { ...data.object };
-    newObject.meta = {
-      isA: [blogConcept.id],
-    };
+    const newObject = MetaHelper.addIsA(data.object, [blogConcept.id]);
 
     const updateData: UpdatePerspectiveData = {
       perspectiveId: postId,

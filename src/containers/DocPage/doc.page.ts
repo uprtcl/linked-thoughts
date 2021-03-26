@@ -549,7 +549,7 @@ export class DocumentPage extends ConnectedElement {
           align-items: center;
           font-weight: 400;
           font-size: 1.1rem;
-          padding: 1rem 0.5rem;
+          padding: 1rem 1rem;
         }
         .share-card-cont {
           width: 400px;

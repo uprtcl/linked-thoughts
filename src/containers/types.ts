@@ -13,7 +13,7 @@ export interface Section {
   pages: string[];
   text: string;
   meta?: {
-    isA: string[];
+    isA?: string[];
   };
 }
 

@@ -107,21 +107,13 @@ export class ThoughtsTextNodeBehaviors
       config
     );
 
-    const isAOrg = originalNode.meta ? originalNode.meta.isA : [];
-    const isAMod = modifications.map((mod) =>
-      mod.meta ? mod.meta.isA : isAOrg
-    );
-
-    const mergedIsA = mergeArrays(isAOrg, isAMod);
-    const mergedMeta = {
-      isA: mergedIsA,
-    };
+    /** meta.isA is not merged */
 
     return {
       text: resultText,
       type: resultType,
       links: mergedLinks,
-      meta: mergedMeta,
+      meta: originalNode.meta,
     };
   };
 }

@@ -246,8 +246,21 @@ export class AppManager {
   /** find all the sections where other perspectives of a page have been
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
-    const locations = await this.evees.client.searchEngine.locate(pageId, true);
-    return locations;
+    const forks = await this.evees.client.searchEngine.explore({
+      under: [{ id: pageId, levels: 0 }],
+      forks: {
+        include: true,
+        independent: true,
+      },
+    });
+
+    const locations = await Promise.all(
+      forks.perspectiveIds.map(async (forkId) => {
+        return this.evees.client.searchEngine.locate(forkId, false);
+      })
+    );
+
+    return Array.prototype.concat.apply([], locations);
   }
 
   /** returns an Evees service with its state modified with the effect of the merge */

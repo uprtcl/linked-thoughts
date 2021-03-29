@@ -137,7 +137,9 @@ export class AppManager {
 
   /** persist all changes in the drafEvees of a given page to the backend */
   async commitPage(pageId: string) {
-    await this.draftsEvees.client.flush({ under: [{ id: pageId }] });
+    await this.draftsEvees.client.flush({
+      under: { elements: [{ id: pageId }] },
+    });
   }
 
   async forkPage(
@@ -195,8 +197,8 @@ export class AppManager {
 
     const result = await this.evees.client.searchEngine.explore(
       {
-        under: userHome ? [{ id: userHome.id }] : undefined,
-        linksTo: [{ id: blogConcept.id }],
+        under: userHome ? { elements: [{ id: userHome.id }] } : undefined,
+        linksTo: { elements: [{ id: blogConcept.id }] },
         pagination: {
           offset,
           first,
@@ -223,8 +225,8 @@ export class AppManager {
     const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
 
     const result = await this.evees.client.searchEngine.explore({
-      under: [{ id: userHome.id }],
-      linksTo: [{ id: blogHomeConcept.id }],
+      under: { elements: [{ id: userHome.id }] },
+      linksTo: { elements: [{ id: blogHomeConcept.id }] },
     });
 
     if (result.perspectiveIds.length > 1) {

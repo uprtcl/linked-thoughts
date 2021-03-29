@@ -19,6 +19,7 @@ import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard, Section, ThoughtsTextNode } from '../containers/types';
 import { MetaHelper } from './meta.helper';
+import { trim } from 'lodash';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
@@ -208,6 +209,7 @@ export class AppManager {
           : undefined,
       },
       {
+        details: true,
         entities: true,
         levels: 0,
       }

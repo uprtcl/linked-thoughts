@@ -40,7 +40,7 @@ export class BlockInfoPopper extends ConnectedElement {
       ${
         this.forks && this.forks.length > 0
           ? html`<uprtcl-popper skinny position="bottom-left">
-              <uprtcl-icon-button icon="fork" slot="icon"
+              <uprtcl-icon-button icon="fork" slot="icon" button skinny
                 >${this.forks.length}
               </uprtcl-icon-button>
               <uprtcl-card

@@ -203,6 +203,10 @@ export class DashboardElement extends ConnectedElement {
           uref=${this.dashboardData.object.sections[1]}
           idx=${1}
         ></app-nav-section>
+        <app-nav-section
+          uref=${this.dashboardData.object.sections[2]}
+          idx=${2}
+        ></app-nav-section>
       </div> `;
   }
 

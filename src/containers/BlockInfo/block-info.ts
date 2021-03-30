@@ -39,7 +39,17 @@ export class BlockInfoPopper extends ConnectedElement {
     return html`
       ${
         this.forks && this.forks.length > 0
-          ? html`<uprtcl-icon>${this.forks.length}</uprtcl-icon>`
+          ? html`<uprtcl-popper skinny position="bottom-left">
+              <uprtcl-icon-button icon="fork" slot="icon"
+                >${this.forks.length}
+              </uprtcl-icon-button>
+              <uprtcl-card
+                >Fork ids:
+                ${this.forks.map(
+                  (e) => html`<li>${e.childId} on ${e.parentId}</li>`
+                )}
+              </uprtcl-card>
+            </uprtcl-popper>`
           : ``
       }
       <uprtcl-popper skinny icon="menu" position="bottom-left">
@@ -55,6 +65,7 @@ export class BlockInfoPopper extends ConnectedElement {
       css`
         :host {
           padding: 0 5px;
+          display: flex;
         }
       `,
     ];

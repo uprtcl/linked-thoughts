@@ -251,7 +251,7 @@ export class AppManager {
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
     const forks = await this.evees.client.searchEngine.explore({
-      under: [{ id: pageId, levels: 0 }],
+      under: { elements: [{ id: pageId }], levels: 0 },
       forks: {
         include: true,
         independent: true,

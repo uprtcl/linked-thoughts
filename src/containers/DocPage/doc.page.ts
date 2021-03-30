@@ -202,7 +202,6 @@ export class DocumentPage extends ConnectedElement {
 
   async loadForks() {
     const forkedIn = await this.appManager.getForkedIn(this.pageId);
-
     const otherForks = forkedIn.filter((e) => e.childId !== this.pageId);
 
     if (otherForks.length > 0) {

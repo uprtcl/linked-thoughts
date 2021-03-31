@@ -5,3 +5,5 @@ export const GettingStarted = '/getting-started';
 export const Home = '/';
 export const PageVisitorRoute = '/read';
 export const UserProfileRoute = '/user';
+
+export const ForksRoute = '/forks';

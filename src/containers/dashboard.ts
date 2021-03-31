@@ -181,6 +181,9 @@ export class DashboardElement extends ConnectedElement {
   renderHome() {
     return html``;
   }
+  renderForkContnet() {
+    return html`<app-forks-page />`;
+  }
 
   renderNavbar() {
     return html`<div class="user-container">
@@ -202,6 +205,10 @@ export class DashboardElement extends ConnectedElement {
         <app-nav-section
           uref=${this.dashboardData.object.sections[1]}
           idx=${1}
+        ></app-nav-section>
+        <app-nav-section
+          uref=${this.dashboardData.object.sections[2]}
+          idx=${2}
         ></app-nav-section>
       </div> `;
   }
@@ -233,6 +240,8 @@ export class DashboardElement extends ConnectedElement {
                 ? html`<app-document-page page-id=${this.selectedPageId} />`
                 : this.routeName === RouteName.section
                 ? this.renderSectionContent()
+                : this.routeName === RouteName.fork
+                ? this.renderForkContnet()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }
           </div>

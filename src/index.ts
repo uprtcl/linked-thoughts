@@ -19,7 +19,9 @@ import AppBarPublic from './components/PublicAppBar/Appbar.public';
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
 import { BlockInfoPopper } from './containers/BlockInfo/block-info';
-//
+// Forks
+import { ForksPage } from './containers/ForksPage/Forks.page';
+import { ForkItem } from './containers/ForksPage/Forks.item';
 
 (async function () {
   await initUprtcl();
@@ -45,4 +47,7 @@ import { BlockInfoPopper } from './containers/BlockInfo/block-info';
   );
   customElements.define('app-appbar-public', AppBarPublic);
   customElements.define('app-block-info', BlockInfoPopper);
+  // Forks
+  customElements.define('app-forks-page', ForksPage);
+  customElements.define('app-forks-item', ForkItem);
 })();

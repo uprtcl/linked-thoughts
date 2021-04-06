@@ -142,6 +142,7 @@ export class DashboardElement extends ConnectedElement {
 
   /** overwrite */
   async load() {
+    this.loading = true;
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
       this.dashboardPerspective.id
     );
@@ -149,6 +150,7 @@ export class DashboardElement extends ConnectedElement {
       throw new Error('dashboard data not defined');
     }
     await this.loadSections();
+    this.loading = false;
   }
 
   async loadSections() {
@@ -183,6 +185,8 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderNavbar() {
+    // this.logger.log('renderNavbar()', { dashboardData: this.dashboardData });
+
     return html`<div class="user-container">
         <evees-login-widget
           slot="icon"

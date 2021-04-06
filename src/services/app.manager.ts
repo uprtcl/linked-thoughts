@@ -48,9 +48,13 @@ export class AppManager {
       false,
       'local-drafts'
     );
-    this.draftsEvees = this.evees.clone('local-drafts', draftsClient);
-    /** debounce repetitive updates to the same perspective */
-    this.draftsEvees.setDebounce(2000);
+    const config = { ...this.evees.config };
+    config.flush = {
+      autoflush: false,
+      debounce: 2000,
+    };
+
+    this.draftsEvees = this.evees.clone('local-drafts', draftsClient, config);
 
     this.events = new EventEmitter();
     this.events.setMaxListeners(1000);

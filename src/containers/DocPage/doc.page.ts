@@ -295,12 +295,18 @@ export class DocumentPage extends ConnectedElement {
 
   async pushChanges() {
     if (this.pushing) return;
-    await this.appManager.draftsEvees.flushPendingUpdates();
-
     this.pushing = true;
+
+    await this.appManager.draftsEvees.flushPendingUpdates();
+    await this.appManager.commitPage(this.pageId);
+
     /** flush from onmemory to local */
-    await this.eveesPush.client.flush({}, false);
-    await this.appManager.commitPage(this.fork.childId);
+    await this.eveesPush.client.flush(
+      {
+        under: { elements: [{ id: this.fork.childId }] },
+      },
+      true
+    );
 
     this.pushing = false;
     this.loadForks();

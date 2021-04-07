@@ -185,7 +185,7 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderNavbar() {
-    // this.logger.log('renderNavbar()', { dashboardData: this.dashboardData });
+    if (!this.dashboardData) return html` <uprtcl-loading></uprtcl-loading> `;
 
     return html`<div class="user-container">
         <evees-login-widget

@@ -31,6 +31,8 @@ interface SectionData {
   data: Entity<Section>;
 }
 
+const LOGINFO = false;
+
 export class DocumentPage extends ConnectedElement {
   logger = new Logger('DocPage');
 
@@ -117,7 +119,7 @@ export class DocumentPage extends ConnectedElement {
 
   ecosystemUpdated(perspectiveIds: string[]) {
     if (perspectiveIds.includes(this.pageId)) {
-      this.logger.log('ecosystemUpdated()');
+      if (LOGINFO) this.logger.log('ecosystemUpdated()');
       this.debounceUpdateChanges();
     }
   }
@@ -138,7 +140,7 @@ export class DocumentPage extends ConnectedElement {
         }
       }, 2500);
     } else {
-      this.logger.log('blockUpdates is true');
+      if (LOGINFO) this.logger.log('blockUpdates is true');
     }
   }
 
@@ -213,7 +215,7 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async loadChanges() {
-    this.logger.log('loadChanges()', { fork: this.fork });
+    if (LOGINFO) this.logger.log('loadChanges()', { fork: this.fork });
     if (this.fork) {
       this.eveesPush = await this.appManager.compareForks(
         this.fork.childId,
@@ -226,7 +228,8 @@ export class DocumentPage extends ConnectedElement {
       ]);
 
       this.pushDiff = await this.eveesPush.client.diff();
-      this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
+      if (LOGINFO)
+        this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
     } else {
       this.pushDiff = {
         deletedPerspectives: [],
@@ -272,18 +275,19 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async shareTo(toSectionId: string) {
-    this.logger.log('shareTo', toSectionId);
+    if (LOGINFO) this.logger.log('shareTo', toSectionId);
 
     if (this.addingPage) return;
-
     this.addingPage = true;
+
     const forkId = await this.appManager.forkPage(
       this.pageId,
       toSectionId,
-      false
+      true
     );
 
-    this.logger.log('shareTo - forkId', { forkId, uref: this.pageId });
+    if (LOGINFO)
+      this.logger.log('shareTo - forkId', { forkId, uref: this.pageId });
 
     await this.appManager.addBlogPost(forkId);
 
@@ -296,9 +300,6 @@ export class DocumentPage extends ConnectedElement {
   async pushChanges() {
     if (this.pushing) return;
     this.pushing = true;
-
-    await this.appManager.draftsEvees.flushPendingUpdates();
-    await this.appManager.commitPage(this.pageId);
 
     /** flush from onmemory to local */
     await this.eveesPush.client.flush(

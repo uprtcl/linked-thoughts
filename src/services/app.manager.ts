@@ -51,7 +51,7 @@ export class AppManager {
     const config = { ...this.evees.config };
     config.flush = {
       autoflush: false,
-      debounce: 2000,
+      debounce: 1000,
     };
 
     this.draftsEvees = this.evees.clone('local-drafts', draftsClient, config);

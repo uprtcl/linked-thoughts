@@ -2,21 +2,26 @@ import { Commit, Signed } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { ConnectedElement } from '../../services/connected.element';
-import { sharedStyles } from '../../styles';
+import { sharedStyles, tableStyles } from '../../styles';
 import MinusIcon from '../../assets/icons/minus.svg';
 import MoveToIcon from '../../assets/icons/move-to.svg';
 import DuplicateIcon from '../../assets/icons/duplicate.svg';
-import { GenerateUserRoute } from '../../utils/routes.helpers';
+import {
+  GenerateDocumentRoute,
+  GenerateUserRoute,
+} from '../../utils/routes.helpers';
 import { Router } from '@vaadin/router';
-
 import { TimestampToDate } from '../../utils/date';
-const MAX_DESCRIPTION_LENGTH = 170;
+const MAX_DESCRIPTION_LENGTH = 250;
 const MAX_TITLE_LENGTH = 50;
 
 export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
 export class ForkItem extends ConnectedElement {
   @property({ type: String })
   uref: string;
+
+  @property({ type: String })
+  viewType: 'list' | 'grid';
 
   @internalProperty()
   loading: boolean = true;
@@ -31,13 +36,17 @@ export class ForkItem extends ConnectedElement {
 
   async load() {
     this.loading = true;
+
     const ForkData = await this.evees.getPerspectiveData(this.uref);
     this.forkData = ForkData;
+
+    // const title = this.evees.behaviorFirst(ForkData.object, 'titleHtml');
+    // const previewLense = this.evees.behaviorFirst(ForkData.object, 'preview');
+
     const perspectiveData = await this.appManager.draftsEvees.client.store.getEntity(
       this.uref
     );
     this.perspectiveData = perspectiveData;
-    // debugger;
 
     switch (this.forkData.object.type) {
       case 'Title':
@@ -54,6 +63,11 @@ export class ForkItem extends ConnectedElement {
     this.loading = false;
   }
   derivedTitle() {
+    if (
+      this.forkData.object.text.startsWith('<img') &&
+      this.viewType === 'list'
+    )
+      return '<i>Image<i>';
     return this.forkData.object.text.startsWith('<img')
       ? ''
       : this.forkData.object.text
@@ -84,37 +98,81 @@ export class ForkItem extends ConnectedElement {
       ${this.forkData.object.type.toUpperCase()}
     </p>`;
   }
+
   render() {
     if (this.loading) {
       return html`<evees-loading></evees-loading>`;
     }
+    if (this.viewType === 'list') {
+      return html`
+        <div class="table_small">
+          <a href=${GenerateDocumentRoute(this.uref)} target="_blank">
+            <div class="table_cell">${unsafeHTML(this.derivedTitle())}</div>
+          </a>
+        </div>
+        <div class="table_small">
+          <div class="table_cell">
+            ${TimestampToDate(this.perspectiveData.object.payload.timestamp)}
+          </div>
+        </div>
+        <div class="table_small">
+          <div class="table_cell">
+            <a
+              href=${GenerateUserRoute(
+                this.perspectiveData.object.payload.creatorId
+              )}
+              target="_blank"
+            >
+              ${this.perspectiveData.object.payload.creatorId}
+            </a>
+          </div>
+        </div>
 
-    return html`<div class="cont">
-      ${this.renderLabel()}
-      <h3>${this.derivedTitle()}</h3>
-      <p class="description">${unsafeHTML(this.deriveDescription())}</p>
-      <a
-        href=${GenerateUserRoute(this.perspectiveData.object.payload.creatorId)}
-        target="_blank"
-      >
-        <p class="author">${this.perspectiveData.object.payload.creatorId}</p>
-      </a>
-      <div class="actions">
-        <div>${MinusIcon} <span>Remove</span></div>
-        <div>${MoveToIcon} <span>Remove</span></div>
-        <div>${DuplicateIcon} <span>Remove</span></div>
-      </div>
-    </div> `;
+   
+      `;
+    } else {
+      // <!-- ${this.type === 'title' ? this.titleHtml : null} -->
+      // <!-- ${this.preview.render({ uref: this.uref })}   -->
+      return html`<div class="cont">
+        <div class="card-content">
+          ${this.type === 'title'
+            ? html`<h3>${unsafeHTML(this.derivedTitle())}</h3>`
+            : html`<p class="description">
+                ${unsafeHTML(this.deriveDescription())}
+              </p>`}
+        </div>
+        <div class="card-footer">
+          <a
+            href=${GenerateUserRoute(
+              this.perspectiveData.object.payload.creatorId
+            )}
+            target="_blank"
+          >
+            <p class="author">
+              ${this.perspectiveData.object.payload.creatorId}
+            </p>
+          </a>
+          <div class="actions">
+            <div>${MinusIcon} <span>Remove</span></div>
+            <div>${MoveToIcon} <span>Remove</span></div>
+            <div>${DuplicateIcon} <span>Remove</span></div>
+          </div>
+        </div>
+      </div> `;
+    }
   }
 
   static get styles() {
     return [
       sharedStyles,
+      tableStyles,
       css`
         :host {
           font-family: 'Inter';
           height: 100%;
+          display: table-row;
         }
+
         .cont {
           padding-top: 1rem;
           padding-bottom: 1.5rem;
@@ -140,10 +198,15 @@ export class ForkItem extends ConnectedElement {
         }
         .description {
           color: #828282;
-          font-size: 0.9rem;
+          font-size: 1rem;
+        }
+        .card-content {
+          min-height: 120px;
+        }
+        .card-footer {
         }
         .description img {
-          max-height: 300px;
+          max-height: 100px;
         }
         .author {
           font-family: Poppins;
@@ -169,6 +232,14 @@ export class ForkItem extends ConnectedElement {
         }
         .actions span {
           margin-left: 0.25rem;
+        }
+        .list-row {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+        .list-row-title {
+          flex: 1;
         }
       `,
     ];

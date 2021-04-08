@@ -14,9 +14,12 @@ import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import CloseIcon from '../assets/icons/x.svg';
+import ForkIcon from '../assets/icons/fork.svg';
+import RecentIcon from '../assets/icons/clock.svg';
 import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
+  GenerateForksRoute,
   RouteName,
   NavigateTo404,
 } from '../utils/routes.helpers';
@@ -192,11 +195,22 @@ export class DashboardElement extends ConnectedElement {
           @changed=${() => this.loggedUserChanged()}
         ></evees-login-widget>
       </div>
-      <div class="row align-center">
+      <div class="column align-center actions-container">
         <uprtcl-button class="button-new-page" @click=${() => this.newPage()}>
           New Page
         </uprtcl-button>
+        <br />
+        <div class="actions-item clickable">
+          ${RecentIcon} <span class="actions-label">Recents</span>
+        </div>
+        <div
+          class="actions-item clickable"
+          @click=${() => Router.go(GenerateForksRoute())}
+        >
+          ${ForkIcon} <span class="actions-label">Fork</span>
+        </div>
       </div>
+
       <div class="section-cont">
         <app-nav-section
           uref=${this.dashboardData.object.sections[0]}
@@ -205,10 +219,6 @@ export class DashboardElement extends ConnectedElement {
         <app-nav-section
           uref=${this.dashboardData.object.sections[1]}
           idx=${1}
-        ></app-nav-section>
-        <app-nav-section
-          uref=${this.dashboardData.object.sections[2]}
-          idx=${2}
         ></app-nav-section>
       </div> `;
   }
@@ -281,6 +291,22 @@ export class DashboardElement extends ConnectedElement {
           overflow: hidden;
         }
 
+        .actions-container {
+          width: max-content;
+          align-self: center;
+        }
+        .actions-item {
+          margin: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          align-self: start;
+          color: #5c5c77;
+        }
+        .actions-label {
+          margin-left: 0.6rem;
+          font-size: 1.1rem;
+        }
         .app-navbar {
           scrollbar-width: 0; /* Firefox */
           width: 250px;

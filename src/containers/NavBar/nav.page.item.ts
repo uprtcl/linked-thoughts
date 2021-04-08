@@ -60,6 +60,13 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
     }
   }
 
+  deriveTitle(title) {
+    const MAX_TITLE_LENGTH = 20;
+    return title.length > MAX_TITLE_LENGTH
+      ? title.substr(0, MAX_TITLE_LENGTH) + '...'
+      : title;
+  }
+
   render() {
     const menuConfig: MenuConfig = {
       remove: {
@@ -78,11 +85,15 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
     const titleStr = this.title ? this.title : 'Untitled';
 
     return html`
-      <div class=${classes.join(' ')} @click=${() => this.selectPage()}>
+      <div
+        class=${classes.join(' ')}
+        @click=${() => this.selectPage()}
+        title=${titleStr}
+      >
         ${this.isShortcut
           ? html`<div class="item-icon-container">${ShortcutIcon}</div>`
           : ''}
-        <span class="text-container">${titleStr}</span>
+        <span class="text-container">${this.deriveTitle(titleStr)}</span>
 
         <span class="item-menu-container">
           <uprtcl-options-menu

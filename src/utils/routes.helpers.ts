@@ -4,12 +4,14 @@ import {
   PageVisitorRoute,
   SectionBaseRoute,
   UserProfileRoute,
+  ForksRoute,
 } from '../constants/routeNames';
 
 export enum RouteName {
   dashboard = 'dashboard',
   page = 'page',
   section = 'section',
+  fork = 'forks',
 }
 
 export const GenerateDocumentRoute = (docId: string = ':docId') =>
@@ -28,5 +30,9 @@ export const GenerateUserDocRoute = (
   userId: string = ':userId',
   docId: string = ':docId'
 ) => `${UserProfileRoute}/${userId}/${docId}`;
+
+export const GenerateForksRoute = () => {
+  return `${ForksRoute}`;
+};
 
 export const NavigateTo404 = () => Router.go('/404');

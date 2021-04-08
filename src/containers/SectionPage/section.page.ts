@@ -312,7 +312,7 @@ export class SectionPage extends EveesBaseElement<Section> {
   renderPageListTable() {
     return html`
       <table style="width:100%">
-        <thead class="table-head">
+        <thead >
           <tr>
             <th>Title</th>
             <th>Last Updated</th>

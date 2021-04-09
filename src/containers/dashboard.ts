@@ -1,11 +1,9 @@
 import { html, css, internalProperty, query } from 'lit-element';
 import { Router } from '@vaadin/router';
 import { EveesHttp } from '@uprtcl/evees-http';
-import { styles, UprtclTextField } from '@uprtcl/common-ui';
+import { styles } from '@uprtcl/common-ui';
 import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
-import LockIcon from '../assets/icons/lock.svg';
-import GlobeIcon from '../assets/icons/globe.svg';
 import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
 import { GettingStarted } from '../constants/routeNames';
@@ -13,7 +11,6 @@ import { GettingStarted } from '../constants/routeNames';
 import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
-import CloseIcon from '../assets/icons/x.svg';
 import ForkIcon from '../assets/icons/fork.svg';
 import RecentIcon from '../assets/icons/clock.svg';
 import {

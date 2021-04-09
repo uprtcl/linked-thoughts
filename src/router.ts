@@ -6,7 +6,6 @@ import {
   GenerateReadDocumentRoute,
   GenerateSectionRoute,
   GenerateUserRoute,
-  GenerateUserDocRoute,
   GenerateForksRoute,
   RouteName,
 } from './utils/routes.helpers';
@@ -18,6 +17,10 @@ export class LTRouter {
     const router = new Router(outlet);
 
     router.setRoutes([
+      {
+        path: Routes.Test,
+        component: 'app-test',
+      },
       {
         path: Routes.GettingStarted,
         component: 'app-getting-started',

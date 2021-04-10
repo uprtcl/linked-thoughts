@@ -15,7 +15,9 @@ export default class ExploreCard extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
   @internalProperty()
-  exploreState: number = 0;
+  selectedSection: 'explore' | 'jotter' = 'explore';
+  @internalProperty()
+  exploreState: number = 1;
 
   @internalProperty()
   blogFeedIds: string[] = [];
@@ -166,31 +168,47 @@ export default class ExploreCard extends ConnectedElement {
   }
 
   renderHeader() {
-    return html`<div class="header">
-      <div class="search-cont">
-        <div @click=${this.searchByText}>${SearchIcon}</div>
-        <uprtcl-textfield
-          id="search-input"
-          @input=${() => {
-            this.debouncedSearchByText();
-          }}
-          label="Search Intercreativity"
-        ></uprtcl-textfield>
+    return html` <div class="header-tabs">
+        <span
+          @click=${() => (this.selectedSection = 'explore')}
+          class=${`header-tab-item clickable ${
+            this.selectedSection == 'explore' ? 'selected-section' : ''
+          }`}
+          >Explore</span
+        >
+        <span
+          @click=${() => (this.selectedSection = 'jotter')}
+          class=${`header-tab-item clickable ${
+            this.selectedSection === 'jotter' ? 'selected-section' : ''
+          }`}
+          >Jotter</span
+        >
       </div>
-      <uprtcl-icon-button
-        icon="refresh"
-        button
-        skinny
-        style="margin-right: 6px"
-        @click=${() => this.refresh()}
-      ></uprtcl-icon-button>
-      <uprtcl-icon-button
-        icon="clear"
-        button
-        skinny
-        @click=${() => this.closeExplore()}
-      ></uprtcl-icon-button>
-    </div>`;
+      <div class="header">
+        <div class="search-cont">
+          <div @click=${this.searchByText}>${SearchIcon}</div>
+          <uprtcl-textfield
+            id="search-input"
+            @input=${() => {
+              this.debouncedSearchByText();
+            }}
+            label="Search Intercreativity"
+          ></uprtcl-textfield>
+        </div>
+        <uprtcl-icon-button
+          icon="refresh"
+          button
+          skinny
+          style="margin-right: 6px"
+          @click=${() => this.refresh()}
+        ></uprtcl-icon-button>
+        <uprtcl-icon-button
+          icon="clear"
+          button
+          skinny
+          @click=${() => this.closeExplore()}
+        ></uprtcl-icon-button>
+      </div>`;
   }
 
   renderItems() {
@@ -286,6 +304,25 @@ export default class ExploreCard extends ConnectedElement {
           align-items: center;
           z-index: 5;
         }
+        .header-tabs {
+          margin-top: 1rem;
+          padding: 0 1.5rem;
+          display: flex;
+          align-items: center;
+        }
+        .header-tab-item {
+          color: var(--gray-text);
+          font-size: 1.2rem;
+          padding: 0.5rem 1rem;
+          border-radius: 5px;
+        }
+        .selected-section {
+          background: var(--primary);
+
+          color: var(--white);
+          box-shadow: 0px 10px 55px -10px var(--primary);
+        }
+
         .readCont {
           flex: 1;
           width: 100%;
@@ -295,6 +332,7 @@ export default class ExploreCard extends ConnectedElement {
           height: 25px;
           padding: 5px;
         }
+
         /* ToolTip */
         .explore-navigation-tooltip {
           background: rgb(255, 255, 255);
@@ -390,6 +428,7 @@ export default class ExploreCard extends ConnectedElement {
           display: flex;
           margin: 0 1rem;
           position: relative;
+          background: transparent;
         }
 
         /* Explore Page */

@@ -40,6 +40,7 @@ export class AppTestElement extends ConnectedElement {
   }
 
   async run() {
+    this.logger.log('run()');
     const isLogged = await this.remote.isLogged();
 
     if (!isLogged) {
@@ -52,6 +53,9 @@ export class AppTestElement extends ConnectedElement {
 
     this.state = 'updating page';
     await this.updatePage();
+
+    this.state = 'publishToBlog';
+    await this.publishToBlog();
 
     this.loading = false;
     this.state = 'finished';
@@ -68,6 +72,7 @@ export class AppTestElement extends ConnectedElement {
   }
 
   async initializeElements() {
+    this.logger.log('initializeElements()');
     await this.appManager.init();
 
     this.privateSection = await this.appManager.elements.get(
@@ -80,6 +85,7 @@ export class AppTestElement extends ConnectedElement {
     const privateSectionData = await this.evees.getPerspectiveData<Section>(
       this.privateSection.id
     );
+
     if (privateSectionData.object.pages.length !== 1) {
       this.error = 'private page not created';
       throw new Error();
@@ -87,6 +93,7 @@ export class AppTestElement extends ConnectedElement {
   }
 
   async updatePage() {
+    this.logger.log('updatePage()');
     const privateSectionData = await this.evees.getPerspectiveData<Section>(
       this.privateSection.id
     );
@@ -121,6 +128,37 @@ export class AppTestElement extends ConnectedElement {
     });
 
     await this.evees.flush();
+  }
+
+  async publishToBlog() {
+    this.logger.log('publishToBlog()');
+
+    const privateSectionData = await this.evees.getPerspectiveData<Section>(
+      this.privateSection.id
+    );
+
+    const pageId = privateSectionData.object.pages[0];
+
+    const pageData = await this.evees.getPerspectiveData<TextNode>(pageId);
+
+    // fork of page
+    await this.appManager.createForkOn(pageId, this.blogSection.id);
+
+    // assert
+    const forks = await this.appManager.getForkedIn(pageId);
+    if (forks.length !== 1) {
+      this.logger.error(`fork of ${pageId} not correct`, { forks });
+    }
+
+    // forks of paragraphs
+    await Promise.all(
+      pageData.object.links.map(async (par) => {
+        const parForks = await this.appManager.getForkedIn(par);
+        if (parForks.length !== 1) {
+          this.logger.error(`fork of ${par} not correct`, { parForks });
+        }
+      })
+    );
   }
 
   render() {

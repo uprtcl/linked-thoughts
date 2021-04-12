@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { TextNode, TextType } from '@uprtcl/documents';
+import { TextType } from '@uprtcl/documents';
 import {
   AppElement,
   AppElements,
@@ -14,12 +14,12 @@ import {
   SearchResult,
   ClientCachedLocal,
   UpdatePerspectiveData,
+  Logger,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
 import { Dashboard, Section, ThoughtsTextNode } from '../containers/types';
 import { MetaHelper } from './meta.helper';
-import { trim } from 'lodash';
 
 export enum ConceptId {
   BLOGHOME = 'bloghome',
@@ -33,7 +33,11 @@ export enum AppEvents {
 
 export const BLOG_POST_PUBLISHED_EVENT_TAG = 'blogpost-published';
 
+const LOGINFO = false;
+
 export class AppManager {
+  logger = new Logger('AppManager');
+
   events: EventEmitter;
   elements: AppElements;
   appError: AppError;
@@ -186,6 +190,13 @@ export class AppManager {
     await this.evees.updatePerspectiveData(updateData);
     await this.evees.flush();
     this.events.emit(AppEvents.blogPostCreated, [postId]);
+  }
+
+  async createForkOn(pageId: string, onSectionId: string): Promise<string> {
+    const forkId = await this.forkPage(pageId, onSectionId, true);
+    if (LOGINFO) this.logger.log('createForkOn', { forkId, uref: pageId });
+    await this.addBlogPost(forkId);
+    return forkId;
   }
 
   async getBlogFeed(

@@ -1,6 +1,4 @@
-import { EveesBaseElement } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 

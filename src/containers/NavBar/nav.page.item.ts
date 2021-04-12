@@ -2,7 +2,7 @@ import { html, css, internalProperty, property } from 'lit-element';
 import { Router } from '@vaadin/router';
 
 import { MenuConfig, styles } from '@uprtcl/common-ui';
-import { EveesBaseElement } from '@uprtcl/evees';
+import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { TextNode } from '@uprtcl/documents';
 
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';

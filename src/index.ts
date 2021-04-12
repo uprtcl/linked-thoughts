@@ -22,6 +22,7 @@ import { BlockInfoPopper } from './containers/BlockInfo/block-info';
 // Forks
 import { ForksPage } from './containers/ForksPage/Forks.page';
 import { ForkItem } from './containers/ForksPage/Forks.item';
+import { AppTestElement } from './containers/Test/app.e2e.test';
 
 (async function () {
   await initUprtcl();
@@ -50,4 +51,6 @@ import { ForkItem } from './containers/ForksPage/Forks.item';
   // Forks
   customElements.define('app-forks-page', ForksPage);
   customElements.define('app-forks-item', ForkItem);
+
+  customElements.define('app-test', AppTestElement);
 })();

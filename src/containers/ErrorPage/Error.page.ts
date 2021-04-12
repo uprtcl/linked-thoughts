@@ -1,12 +1,11 @@
-import { html, css, internalProperty } from 'lit-element';
-import lodash, { pad } from 'lodash';
-import moment from 'moment';
-import { Router } from '@vaadin/router';
+import { html, css } from 'lit-element';
 
 import { styles } from '@uprtcl/common-ui';
-import { EveesBaseElement } from '@uprtcl/evees';
+import { EveesBaseElement } from '@uprtcl/evees-ui';
+
 import { sharedStyles } from '../../styles';
 import { ORIGIN } from '../../utils/routes.generator';
+
 export class ErrorPage extends EveesBaseElement {
   render() {
     return html`

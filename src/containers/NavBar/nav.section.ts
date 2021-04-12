@@ -1,6 +1,5 @@
-import { html, css, internalProperty, property, query } from 'lit-element';
-import lodash from 'lodash';
-import { EveesBaseElement } from '@uprtcl/evees';
+import { html, css, internalProperty, property } from 'lit-element';
+import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { styles } from '@uprtcl/common-ui';
 import { Router } from '@vaadin/router';
 

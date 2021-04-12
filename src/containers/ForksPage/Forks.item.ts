@@ -1,6 +1,6 @@
-import { Commit, Signed } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles, tableStyles } from '../../styles';
 import MinusIcon from '../../assets/icons/minus.svg';
@@ -10,8 +10,8 @@ import {
   GenerateDocumentRoute,
   GenerateUserRoute,
 } from '../../utils/routes.helpers';
-import { Router } from '@vaadin/router';
 import { TimestampToDate } from '../../utils/date';
+
 const MAX_DESCRIPTION_LENGTH = 250;
 const MAX_TITLE_LENGTH = 50;
 
@@ -127,8 +127,6 @@ export class ForkItem extends ConnectedElement {
             </a>
           </div>
         </div>
-
-   
       `;
     } else {
       // <!-- ${this.type === 'title' ? this.titleHtml : null} -->

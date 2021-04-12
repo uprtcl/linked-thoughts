@@ -1,7 +1,7 @@
-import { EveesBaseElement, Logger } from '@uprtcl/evees';
 import lodash from 'lodash';
-import { html, css, property, internalProperty, query } from 'lit-element';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { html, css, internalProperty, query } from 'lit-element';
+import { Logger } from '@uprtcl/evees';
+
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles, tableStyles } from '../../styles';
 import SearchIcon from '../../assets/icons/search.svg';

@@ -1,7 +1,8 @@
 import { html, css, internalProperty, property } from 'lit-element';
+
 import { styles } from '@uprtcl/common-ui';
-import { Logger } from '@uprtcl/evees';
 import { EveesHttp } from '@uprtcl/evees-http';
+
 import { sharedStyles } from '../../styles';
 import { ConnectedElement } from '../../services/connected.element';
 import IntercreativityLogo from '../../assets/intercreativity.svg';

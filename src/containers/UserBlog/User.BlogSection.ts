@@ -1,15 +1,16 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
-import { EveesBaseElement, Logger } from '@uprtcl/evees';
+
+import { Logger } from '@uprtcl/evees';
+import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { styles } from '@uprtcl/common-ui';
+
 import { sharedStyles } from '../../styles';
 import { APP_MANAGER } from '../../services/init';
 import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
-import { LTRouter } from '../../router';
-import { Router } from '@vaadin/router';
-import { GenerateUserRoute } from '../../utils/routes.helpers';
+
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   logger = new Logger('UserPublicBlogSection');
 

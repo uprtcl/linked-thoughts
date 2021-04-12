@@ -7,12 +7,13 @@ import { MenuConfig, styles } from '@uprtcl/common-ui';
 import {
   Secured,
   Commit,
-  EveesBaseElement,
   Perspective,
   Signed,
   PerspectiveDetails,
   Entity,
 } from '@uprtcl/evees';
+import { EveesBaseElement } from '@uprtcl/evees-ui';
+
 import { TextNode } from '@uprtcl/documents';
 
 import { ErrorBase } from '../../utils/error.base';
@@ -312,7 +313,7 @@ export class SectionPage extends EveesBaseElement<Section> {
   renderPageListTable() {
     return html`
       <table style="width:100%">
-        <thead >
+        <thead>
           <tr>
             <th>Title</th>
             <th>Last Updated</th>

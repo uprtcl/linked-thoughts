@@ -1,5 +1,6 @@
 import { LitElement } from 'lit-element';
-import { servicesConnect } from '@uprtcl/evees';
+import { servicesConnect } from '@uprtcl/evees-ui';
+
 import { APP_MANAGER } from './init';
 import { AppManager } from './app.manager';
 

@@ -1,5 +1,7 @@
-import { Perspective, Secured, EveesBaseElement } from '@uprtcl/evees';
 import { html, css, property, internalProperty } from 'lit-element';
+
+import { EveesBaseElement } from '@uprtcl/evees-ui';
+
 import { TimestampToDate } from '../../utils/date';
 import { sharedStyles } from '../../styles';
 

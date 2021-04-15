@@ -30,6 +30,7 @@ export class ForkItem extends ConnectedElement {
   perspectiveData;
 
   type;
+
   async firstUpdated() {
     await this.load();
   }
@@ -62,6 +63,17 @@ export class ForkItem extends ConnectedElement {
     }
     this.loading = false;
   }
+
+  async handleAddToClipboard() {
+    const clipboardSection = await this.appManager.elements.get(
+      '/linkedThoughts/clipboardSection'
+    );
+
+    await this.appManager.addToClipboard(this.uref, clipboardSection.id, true);
+
+    // const x = await this.evees.getPerspectiveData(clipboardSection.id);
+  }
+
   derivedTitle() {
     if (
       this.forkData.object.text.startsWith('<img') &&
@@ -131,32 +143,36 @@ export class ForkItem extends ConnectedElement {
     } else {
       // <!-- ${this.type === 'title' ? this.titleHtml : null} -->
       // <!-- ${this.preview.render({ uref: this.uref })}   -->
-      return html`<div class="cont">
-        <div class="card-content">
-          ${this.type === 'title'
-            ? html`<h3>${unsafeHTML(this.derivedTitle())}</h3>`
-            : html`<p class="description">
-                ${unsafeHTML(this.deriveDescription())}
-              </p>`}
-        </div>
-        <div class="card-footer">
-          <a
-            href=${GenerateUserRoute(
-              this.perspectiveData.object.payload.creatorId
-            )}
-            target="_blank"
-          >
-            <p class="author">
-              ${this.perspectiveData.object.payload.creatorId}
-            </p>
-          </a>
-          <div class="actions">
-            <div>${MinusIcon} <span>Remove</span></div>
-            <div>${MoveToIcon} <span>Remove</span></div>
-            <div>${DuplicateIcon} <span>Remove</span></div>
+      return html`
+        <div class="cont">
+          <div class="card-content">
+            ${this.type === 'title'
+              ? html`<h3>${unsafeHTML(this.derivedTitle())}</h3>`
+              : html`<p class="description">
+                  ${unsafeHTML(this.deriveDescription())}
+                </p>`}
+          </div>
+          <div class="card-footer">
+            <a
+              href=${GenerateUserRoute(
+                this.perspectiveData.object.payload.creatorId
+              )}
+              target="_blank"
+            >
+              <p class="author">
+                ${this.perspectiveData.object.payload.creatorId}
+              </p>
+            </a>
+            <div class="actions">
+              <div>${MinusIcon} <span>Remove</span></div>
+
+              <div class="clickable" @click=${this.handleAddToClipboard}>
+                ${DuplicateIcon} <span>Add To Clipboard</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div> `;
+      `;
     }
   }
 

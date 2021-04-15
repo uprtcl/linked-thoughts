@@ -55,6 +55,15 @@ export const appElementsInit: AppElement = {
             };
           },
         },
+        {
+          path: '/clipboardSection',
+          getInitData: () => {
+            return {
+              title: 'Clipboard',
+              pages: [],
+            };
+          },
+        },
       ],
     },
   ],

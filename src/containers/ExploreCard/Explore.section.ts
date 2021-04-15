@@ -15,11 +15,15 @@ export default class ExploreCard extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
   @internalProperty()
+  selectedSection: 'explore' | 'clipboard' = 'explore';
+  @internalProperty()
   exploreState: number = 0;
 
   @internalProperty()
-  blogFeedIds: string[] = [];
+  blogFeedIds: string[] = []; // Explore Section
 
+  @internalProperty()
+  clipboardFeedIds: string[] = []; // Clipboard
   @internalProperty()
   selectedBlogId: string;
 
@@ -54,10 +58,19 @@ export default class ExploreCard extends ConnectedElement {
   }
 
   async refresh() {
-    this.isVisibleEl.enable = false;
+    if (this.isVisibleEl) this.isVisibleEl.enable = false;
     this.blogFeedIds = [];
 
     this.load();
+  }
+  async getClipboardFeed() {
+    const clipboardSection = await this.appManager.elements.get(
+      '/linkedThoughts/clipboardSection'
+    );
+
+    this.clipboardFeedIds = (
+      await this.evees.getPerspectiveData(clipboardSection.id)
+    ).object.pages;
   }
 
   async load() {
@@ -68,9 +81,13 @@ export default class ExploreCard extends ConnectedElement {
 
     /** get first results */
     await this.getMoreFeed(10);
+    await this.getClipboardFeed();
     this.loading = false;
   }
 
+  async handleToggleSection(type: 'explore' | 'clipboard') {
+    this.selectedSection = type;
+  }
   async updated(cp) {
     if (cp.has('exploreState')) {
       if (this.exploreState > 0 && cp.get('exploreState') === 0) {
@@ -166,31 +183,49 @@ export default class ExploreCard extends ConnectedElement {
   }
 
   renderHeader() {
-    return html`<div class="header">
-      <div class="search-cont">
-        <div @click=${this.searchByText}>${SearchIcon}</div>
-        <uprtcl-textfield
-          id="search-input"
-          @input=${() => {
-            this.debouncedSearchByText();
-          }}
-          label="Search Intercreativity"
-        ></uprtcl-textfield>
+    return html` <div class="header-tabs">
+        <span
+          @click=${() => this.handleToggleSection('explore')}
+          class=${`header-tab-item clickable ${
+            this.selectedSection == 'explore' ? 'selected-section' : ''
+          }`}
+          >Explore</span
+        >
+        <span
+          @click=${() => this.handleToggleSection('clipboard')}
+          class=${`header-tab-item clickable ${
+            this.selectedSection === 'clipboard' ? 'selected-section' : ''
+          }`}
+          >Clipboard</span
+        >
+        <div class="close-icon">
+          <uprtcl-icon-button
+            icon="close_purple"
+            button
+            skinny
+            @click=${() => this.closeExplore()}
+          ></uprtcl-icon-button>
+        </div>
       </div>
-      <uprtcl-icon-button
-        icon="refresh"
-        button
-        skinny
-        style="margin-right: 6px"
-        @click=${() => this.refresh()}
-      ></uprtcl-icon-button>
-      <uprtcl-icon-button
-        icon="clear"
-        button
-        skinny
-        @click=${() => this.closeExplore()}
-      ></uprtcl-icon-button>
-    </div>`;
+      <div class="header">
+        <div class="search-cont">
+          <div @click=${this.searchByText}>${SearchIcon}</div>
+          <uprtcl-textfield
+            id="search-input"
+            @input=${() => {
+              this.debouncedSearchByText();
+            }}
+            label="Search Intercreativity"
+          ></uprtcl-textfield>
+        </div>
+        <uprtcl-icon-button
+          icon="refresh"
+          button
+          skinny
+          style="margin-right: 6px"
+          @click=${() => this.refresh()}
+        ></uprtcl-icon-button>
+      </div>`;
   }
 
   renderItems() {
@@ -201,7 +236,8 @@ export default class ExploreCard extends ConnectedElement {
     return html`
       ${this.loading
         ? html`<uprtcl-loading></uprtcl-loading>`
-        : this.blogFeedIds.map((docId) => {
+        : this.selectedSection === 'explore'
+        ? this.blogFeedIds.map((docId) => {
             return html`
               <app-explore-list-item
                 @click=${() => {
@@ -209,14 +245,23 @@ export default class ExploreCard extends ConnectedElement {
                 }}
                 uref=${docId}
               ></app-explore-list-item>
+              <app-intersection-observer
+                id="is-visible"
+                @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
+              >
+              </app-intersection-observer>
+            `;
+          })
+        : this.clipboardFeedIds.map((docId) => {
+            return html`
+              <app-explore-clipboard-list-item
+                @click=${() => {
+                  this.selectedBlogId = docId;
+                }}
+                uref=${docId}
+              ></app-explore-clipboard-list-item>
             `;
           })}
-
-      <app-intersection-observer
-        id="is-visible"
-        @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
-      >
-      </app-intersection-observer>
     `;
   }
 
@@ -286,6 +331,25 @@ export default class ExploreCard extends ConnectedElement {
           align-items: center;
           z-index: 5;
         }
+        .header-tabs {
+          margin-top: 1rem;
+          padding: 0 1.5rem;
+          display: flex;
+          align-items: center;
+        }
+        .header-tab-item {
+          color: var(--gray-text);
+          font-size: 1rem;
+          padding: 0.5rem 0.7rem;
+          border-radius: 5px;
+        }
+        .selected-section {
+          background: var(--primary);
+
+          color: var(--white);
+          box-shadow: 0px 10px 55px -10px var(--primary);
+        }
+
         .readCont {
           flex: 1;
           width: 100%;
@@ -294,6 +358,10 @@ export default class ExploreCard extends ConnectedElement {
           width: 25px;
           height: 25px;
           padding: 5px;
+        }
+        .close-icon {
+          right: 1rem;
+          position: absolute;
         }
         /* ToolTip */
         .explore-navigation-tooltip {
@@ -390,6 +458,7 @@ export default class ExploreCard extends ConnectedElement {
           display: flex;
           margin: 0 1rem;
           position: relative;
+          background: transparent;
         }
 
         /* Explore Page */
@@ -405,6 +474,7 @@ export default class ExploreCard extends ConnectedElement {
           margin-right: 3vw;
           animation: slideLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1);
           width: 90vw;
+          position: relative;
         }
 
         .explore-page-cont {

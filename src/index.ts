@@ -10,6 +10,7 @@ import { DocumentPage } from './containers/DocPage/doc.page';
 import { ErrorPage } from './containers/ErrorPage/Error.page';
 import ExploreCard from './containers/ExploreCard/Explore.section';
 import SearchListItem from './components/SearchListItem/Search.ListItem';
+import ClipboardListItem from './components/SearchListItem/Clipboard.ListItem';
 import ReadOnlyPage from './containers/ReadOnlyPage/ReadOnly.page';
 import LTIntersectionObserver from './containers/IntersectionObserver/IntersectionObserver';
 import UserPage from './containers/UserBlog/User.page';
@@ -23,6 +24,7 @@ import { BlockInfoPopper } from './containers/BlockInfo/block-info';
 import { ForksPage } from './containers/ForksPage/Forks.page';
 import { ForkItem } from './containers/ForksPage/Forks.item';
 import { AppTestElement } from './containers/Test/app.e2e.test';
+import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
 
 (async function () {
   await initUprtcl();
@@ -38,6 +40,7 @@ import { AppTestElement } from './containers/Test/app.e2e.test';
   customElements.define('app-error-page', ErrorPage);
   customElements.define('app-explore-card', ExploreCard);
   customElements.define('app-explore-list-item', SearchListItem);
+  customElements.define('app-explore-clipboard-list-item', ClipboardListItem);
   customElements.define('app-read-only-page', ReadOnlyPage);
   customElements.define('app-intersection-observer', LTIntersectionObserver);
   customElements.define('app-user-page', UserPage);
@@ -53,4 +56,5 @@ import { AppTestElement } from './containers/Test/app.e2e.test';
   customElements.define('app-forks-item', ForkItem);
 
   customElements.define('app-test', AppTestElement);
+  customElements.define('app-error-block-not-found', BlockNotFound);
 })();

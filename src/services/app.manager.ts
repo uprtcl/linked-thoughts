@@ -175,6 +175,18 @@ export class AppManager {
     return forkId;
   }
 
+  async addToClipboard(
+    forkId: string,
+    onSectionId: string,
+    flush: boolean = true
+  ): Promise<void> {
+    await this.evees.addExistingChild(forkId, onSectionId);
+
+    if (flush) {
+      await this.evees.client.flush();
+    }
+  }
+
   async addBlogPost(postId: string) {
     const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(postId);
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);

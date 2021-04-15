@@ -130,6 +130,9 @@ export default class ReadOnlyPage extends ConnectedElement {
                 class="docRead"
                 uref=${this.selectedBlogId}
                 ?read-only=${true}
+                .getEveeInfo=${(uref) =>
+                  html`<app-block-info uref=${uref}></app-block-info>`}
+                show-info
               >
               </documents-editor
             ></uprtcl-dialog>`

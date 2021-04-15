@@ -15,15 +15,15 @@ export default class ExploreCard extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
   @internalProperty()
-  selectedSection: 'explore' | 'clipboard' = 'clipboard';
+  selectedSection: 'explore' | 'clipboard' = 'explore';
   @internalProperty()
-  exploreState: number = 1;
+  exploreState: number = 0;
 
   @internalProperty()
-  blogFeedIds: string[] = [];
+  blogFeedIds: string[] = []; // Explore Section
 
   @internalProperty()
-  clipboardFeedIds: string[] = [];
+  clipboardFeedIds: string[] = []; // Clipboard
   @internalProperty()
   selectedBlogId: string;
 
@@ -474,6 +474,7 @@ export default class ExploreCard extends ConnectedElement {
           margin-right: 3vw;
           animation: slideLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1);
           width: 90vw;
+          position: relative;
         }
 
         .explore-page-cont {

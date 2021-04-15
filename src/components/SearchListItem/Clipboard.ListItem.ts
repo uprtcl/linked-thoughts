@@ -17,6 +17,8 @@ export default class ClipboardListItem extends EveesBaseElement {
 
   @internalProperty()
   loading: boolean = true;
+  @internalProperty()
+  hasError: boolean = true;
 
   async firstUpdated() {
     await super.firstUpdated();
@@ -24,9 +26,17 @@ export default class ClipboardListItem extends EveesBaseElement {
 
   async load() {
     this.loading = true;
-    await super.load();
-    const data = await this.evees.getPerspectiveData(this.uref);
-    this.title = this.evees.behaviorFirst(data.object, 'title');
+    this.hasError = false;
+    try {
+      await super.load();
+
+      const data = await this.evees.getPerspectiveData(this.uref);
+      this.title = this.evees.behaviorFirst(data.object, 'title');
+    } catch (e) {
+      if (!this.data) {
+        this.hasError = true;
+      }
+    }
 
     this.loading = false;
   }
@@ -43,7 +53,8 @@ export default class ClipboardListItem extends EveesBaseElement {
   }
   render() {
     if (this.loading) return null;
-
+    if (this.hasError)
+      return html`<app-error-block-not-found></app-error-block-not-found>`;
     return html`<div class="cont clickable">
         <div class="header">
           ${this.renderTags()} <span> ${CloseIcon} </span>
@@ -67,6 +78,7 @@ export default class ClipboardListItem extends EveesBaseElement {
         :host {
           min-height: 150px;
           min-width: 33%;
+          position: relative;
         }
         .cont {
           padding: 1rem 1.5rem;

@@ -15,13 +15,15 @@ export default class ExploreCard extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
   @internalProperty()
-  selectedSection: 'explore' | 'jotter' = 'explore';
+  selectedSection: 'explore' | 'clipboard' = 'clipboard';
   @internalProperty()
   exploreState: number = 1;
 
   @internalProperty()
   blogFeedIds: string[] = [];
 
+  @internalProperty()
+  clipboardFeedIds: string[] = [];
   @internalProperty()
   selectedBlogId: string;
 
@@ -56,10 +58,19 @@ export default class ExploreCard extends ConnectedElement {
   }
 
   async refresh() {
-    this.isVisibleEl.enable = false;
+    if (this.isVisibleEl) this.isVisibleEl.enable = false;
     this.blogFeedIds = [];
 
     this.load();
+  }
+  async getClipboardFeed() {
+    const clipboardSection = await this.appManager.elements.get(
+      '/linkedThoughts/clipboardSection'
+    );
+
+    this.clipboardFeedIds = (
+      await this.evees.getPerspectiveData(clipboardSection.id)
+    ).object.pages;
   }
 
   async load() {
@@ -70,9 +81,13 @@ export default class ExploreCard extends ConnectedElement {
 
     /** get first results */
     await this.getMoreFeed(10);
+    await this.getClipboardFeed();
     this.loading = false;
   }
 
+  async handleToggleSection(type: 'explore' | 'clipboard') {
+    this.selectedSection = type;
+  }
   async updated(cp) {
     if (cp.has('exploreState')) {
       if (this.exploreState > 0 && cp.get('exploreState') === 0) {
@@ -170,19 +185,27 @@ export default class ExploreCard extends ConnectedElement {
   renderHeader() {
     return html` <div class="header-tabs">
         <span
-          @click=${() => (this.selectedSection = 'explore')}
+          @click=${() => this.handleToggleSection('explore')}
           class=${`header-tab-item clickable ${
             this.selectedSection == 'explore' ? 'selected-section' : ''
           }`}
           >Explore</span
         >
         <span
-          @click=${() => (this.selectedSection = 'jotter')}
+          @click=${() => this.handleToggleSection('clipboard')}
           class=${`header-tab-item clickable ${
-            this.selectedSection === 'jotter' ? 'selected-section' : ''
+            this.selectedSection === 'clipboard' ? 'selected-section' : ''
           }`}
-          >Jotter</span
+          >Clipboard</span
         >
+        <div class="close-icon">
+          <uprtcl-icon-button
+            icon="close_purple"
+            button
+            skinny
+            @click=${() => this.closeExplore()}
+          ></uprtcl-icon-button>
+        </div>
       </div>
       <div class="header">
         <div class="search-cont">
@@ -202,12 +225,6 @@ export default class ExploreCard extends ConnectedElement {
           style="margin-right: 6px"
           @click=${() => this.refresh()}
         ></uprtcl-icon-button>
-        <uprtcl-icon-button
-          icon="clear"
-          button
-          skinny
-          @click=${() => this.closeExplore()}
-        ></uprtcl-icon-button>
       </div>`;
   }
 
@@ -219,7 +236,8 @@ export default class ExploreCard extends ConnectedElement {
     return html`
       ${this.loading
         ? html`<uprtcl-loading></uprtcl-loading>`
-        : this.blogFeedIds.map((docId) => {
+        : this.selectedSection === 'explore'
+        ? this.blogFeedIds.map((docId) => {
             return html`
               <app-explore-list-item
                 @click=${() => {
@@ -227,14 +245,23 @@ export default class ExploreCard extends ConnectedElement {
                 }}
                 uref=${docId}
               ></app-explore-list-item>
+              <app-intersection-observer
+                id="is-visible"
+                @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
+              >
+              </app-intersection-observer>
+            `;
+          })
+        : this.clipboardFeedIds.map((docId) => {
+            return html`
+              <app-explore-clipboard-list-item
+                @click=${() => {
+                  this.selectedBlogId = docId;
+                }}
+                uref=${docId}
+              ></app-explore-clipboard-list-item>
             `;
           })}
-
-      <app-intersection-observer
-        id="is-visible"
-        @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
-      >
-      </app-intersection-observer>
     `;
   }
 
@@ -312,8 +339,8 @@ export default class ExploreCard extends ConnectedElement {
         }
         .header-tab-item {
           color: var(--gray-text);
-          font-size: 1.2rem;
-          padding: 0.5rem 1rem;
+          font-size: 1rem;
+          padding: 0.5rem 0.7rem;
           border-radius: 5px;
         }
         .selected-section {
@@ -332,7 +359,10 @@ export default class ExploreCard extends ConnectedElement {
           height: 25px;
           padding: 5px;
         }
-
+        .close-icon {
+          right: 1rem;
+          position: absolute;
+        }
         /* ToolTip */
         .explore-navigation-tooltip {
           background: rgb(255, 255, 255);

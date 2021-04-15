@@ -10,6 +10,7 @@ import { DocumentPage } from './containers/DocPage/doc.page';
 import { ErrorPage } from './containers/ErrorPage/Error.page';
 import ExploreCard from './containers/ExploreCard/Explore.section';
 import SearchListItem from './components/SearchListItem/Search.ListItem';
+import ClipboardListItem from './components/SearchListItem/Clipboard.ListItem'
 import ReadOnlyPage from './containers/ReadOnlyPage/ReadOnly.page';
 import LTIntersectionObserver from './containers/IntersectionObserver/IntersectionObserver';
 import UserPage from './containers/UserBlog/User.page';
@@ -38,6 +39,7 @@ import { AppTestElement } from './containers/Test/app.e2e.test';
   customElements.define('app-error-page', ErrorPage);
   customElements.define('app-explore-card', ExploreCard);
   customElements.define('app-explore-list-item', SearchListItem);
+  customElements.define('app-explore-clipboard-list-item', ClipboardListItem);
   customElements.define('app-read-only-page', ReadOnlyPage);
   customElements.define('app-intersection-observer', LTIntersectionObserver);
   customElements.define('app-user-page', UserPage);

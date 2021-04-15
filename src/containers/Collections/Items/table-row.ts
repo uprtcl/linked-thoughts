@@ -16,7 +16,7 @@ const MAX_DESCRIPTION_LENGTH = 250;
 const MAX_TITLE_LENGTH = 50;
 
 export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
-export class ForkItem extends ConnectedElement {
+export class GridCardItem extends ConnectedElement {
   @property({ type: String })
   uref: string;
 

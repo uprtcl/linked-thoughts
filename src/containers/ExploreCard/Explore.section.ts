@@ -16,6 +16,7 @@ export default class ExploreCard extends ConnectedElement {
 
   @internalProperty()
   selectedSection: 'explore' | 'clipboard' = 'explore';
+
   @internalProperty()
   exploreState: number = 0;
 
@@ -24,6 +25,7 @@ export default class ExploreCard extends ConnectedElement {
 
   @internalProperty()
   clipboardFeedIds: string[] = []; // Clipboard
+
   @internalProperty()
   selectedBlogId: string;
 

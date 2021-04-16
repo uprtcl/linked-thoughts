@@ -24,8 +24,9 @@ import { BlockInfoPopper } from './containers/BlockInfo/block-info';
 import { ForksPage } from './containers/Collections/Implementations/Forks.section';
 import { AppTestElement } from './containers/Test/app.e2e.test';
 import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
-import { GridCardItem } from './containers/Collections/Items/grid-card';
-import { TableRowItem } from './containers/Collections/Items/table-row';
+import { GridCardItem } from './containers/Collections/Items/grid-card.item';
+import { TableRowItem } from './containers/Collections/Items/table-row.item';
+import { BlockItem } from './containers/Collections/Items/block.item';
 
 (async function () {
   await initUprtcl();
@@ -52,7 +53,9 @@ import { TableRowItem } from './containers/Collections/Items/table-row';
   );
   customElements.define('app-appbar-public', AppBarPublic);
   customElements.define('app-block-info', BlockInfoPopper);
+
   // Collections
+  customElements.define('app-block-item', BlockItem);
   customElements.define('app-item-grid-card', GridCardItem);
   customElements.define('app-item-table-row', TableRowItem);
 

@@ -17,7 +17,7 @@ export class GridCardItem extends ConnectedElement {
   @internalProperty()
   loading: boolean = true;
 
-  actionOptions: MenuOptions;
+  actionOptions: MenuOptions = new Map();
 
   title: string;
   previewLense: Lens;

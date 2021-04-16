@@ -15,6 +15,7 @@ import ListViewIcon from '../../assets/icons/list-view.svg';
 import GridViewIcon from '../../assets/icons/grid-view.svg';
 import ListViewIconSelected from '../../assets/icons/list-view-selected.svg';
 import GridViewIconSelected from '../../assets/icons/grid-view-selected.svg';
+import { MenuOptions } from '@uprtcl/common-ui';
 
 export enum BlockViewType {
   tableRow = 'table-row',
@@ -36,11 +37,12 @@ export class CollectionBaseElement extends ConnectedElement {
 
   /** a set block views are supported by default */
   @internalProperty()
-  viewType: BlockViewType;
+  viewType: BlockViewType = BlockViewType.gridCard;
 
   @query('#is-visible')
   isVisibleEl!: UprtclIsVisible;
 
+  protected actionOptions: MenuOptions = new Map();
   protected batchSize: number = 3;
 
   async firstUpdated() {
@@ -64,9 +66,19 @@ export class CollectionBaseElement extends ConnectedElement {
       await this.isVisibleEl.updateComplete;
     }
 
-    this.getMoreItems(this.itemIds.length, this.batchSize, {
-      text: { value: this.searchQuery },
-    });
+    const newItems = await this.getMoreItems(
+      this.itemIds.length,
+      this.batchSize,
+      {
+        text: { value: this.searchQuery },
+      }
+    );
+
+    if (newItems.length === 0) {
+      return;
+    }
+
+    this.itemIds = this.itemIds.concat(newItems);
 
     setTimeout(async () => {
       if (this.isVisibleEl) {
@@ -90,24 +102,21 @@ export class CollectionBaseElement extends ConnectedElement {
     }
   }
 
-  getMoreItems(start: number, first: number, options: SearchOptions) {
+  getMoreItems(
+    start: number,
+    first: number,
+    options: SearchOptions
+  ): Promise<string[]> {
     throw new Error(
       'getMoreItems not implemented. This class is designed to be extended'
     );
   }
 
   renderListActionsHeader() {
-    const sortMenuConfig = {
-      name: {
-        text: 'Name',
-      },
-      lastUpdated: {
-        text: 'Last Modified',
-      },
-      dateForked: {
-        text: 'Date Forked',
-      },
-    };
+    const sortMenuConfig: MenuOptions = new Map();
+    sortMenuConfig.set('name', { text: 'Name' });
+    sortMenuConfig.set('lastUpdated', { text: 'Last Modified' });
+    sortMenuConfig.set('dateForked', { text: 'Date Forked' });
 
     return html`
       <div class="list-actions-cont">
@@ -183,8 +192,9 @@ export class CollectionBaseElement extends ConnectedElement {
       return html`
         <app-block-item
           class="block-item"
-          viewType=${this.viewType}
+          view=${this.viewType}
           uref=${uref}
+          .actionOptions=${this.actionOptions}
         ></app-block-item>
       `;
     });

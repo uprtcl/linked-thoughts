@@ -1,10 +1,4 @@
-import {
-  html,
-  css,
-  internalProperty,
-  query,
-  TemplateResult,
-} from 'lit-element';
+import { html, css, internalProperty, query, property } from 'lit-element';
 import { Logger, SearchOptions } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
@@ -27,7 +21,11 @@ const LOGINFO = true;
 export class CollectionBaseElement extends ConnectedElement {
   logger = new Logger('ForksPage');
 
-  loading: boolean = true;
+  @property()
+  title: string;
+
+  @property({ type: String, attribute: 'view' })
+  viewType: BlockViewType;
 
   @internalProperty()
   itemIds: string[] = [];
@@ -36,8 +34,8 @@ export class CollectionBaseElement extends ConnectedElement {
   searchQuery: string = '';
 
   /** a set block views are supported by default */
-  @internalProperty()
-  viewType: BlockViewType = BlockViewType.gridCard;
+
+  loading: boolean = true;
 
   @query('#is-visible')
   isVisibleEl!: UprtclIsVisible;
@@ -46,6 +44,7 @@ export class CollectionBaseElement extends ConnectedElement {
   protected batchSize: number = 3;
 
   async firstUpdated() {
+    this.viewType = this.viewType || BlockViewType.gridCard;
     this.reset();
   }
 
@@ -120,7 +119,7 @@ export class CollectionBaseElement extends ConnectedElement {
 
     return html`
       <div class="list-actions-cont">
-        <div class="list-actions-heading">Forked Items</div>
+        <div class="list-actions-heading">Items</div>
         <div>
           <uprtcl-options-menu
             icon="orderby"
@@ -154,7 +153,7 @@ export class CollectionBaseElement extends ConnectedElement {
   renderHeader() {
     return html`
       <div class="header-cont">
-        <span class="section-heading">FORKS </span>
+        <span class="section-heading">${this.title}</span>
         <div class="search-cont">
           <input
             @input=${this.handleSearch}

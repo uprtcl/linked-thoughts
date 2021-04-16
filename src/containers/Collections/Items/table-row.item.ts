@@ -1,35 +1,29 @@
 import { html, css, property, internalProperty } from 'lit-element';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { Entity, Perspective, Secured } from '@uprtcl/evees';
+import { MenuOptions } from '@uprtcl/common-ui';
 
 import { ConnectedElement } from '../../../services/connected.element';
 import { sharedStyles, tableStyles } from '../../../styles';
-import MinusIcon from '../../../assets/icons/minus.svg';
-import MoveToIcon from '../../assets/icons/move-to.svg';
-import DuplicateIcon from '../../../assets/icons/duplicate.svg';
+
 import {
   GenerateDocumentRoute,
   GenerateUserRoute,
 } from '../../../utils/routes.helpers';
 import { TimestampToDate } from '../../../utils/date';
 
-const MAX_DESCRIPTION_LENGTH = 250;
-const MAX_TITLE_LENGTH = 50;
-
-export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
 export class TableRowItem extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
-  @property({ type: String })
-  viewType: 'list' | 'grid';
-
   @internalProperty()
   loading: boolean = true;
 
-  forkData;
-  perspectiveData;
+  actionOptions: MenuOptions = new Map();
 
-  type;
+  title: string;
+
+  data: Entity;
+  perspective: Secured<Perspective>;
 
   async firstUpdated() {
     await this.load();
@@ -38,142 +32,53 @@ export class TableRowItem extends ConnectedElement {
   async load() {
     this.loading = true;
 
-    const ForkData = await this.evees.getPerspectiveData(this.uref);
-    this.forkData = ForkData;
-
-    // const title = this.evees.behaviorFirst(ForkData.object, 'titleHtml');
-    // const previewLense = this.evees.behaviorFirst(ForkData.object, 'preview');
-
-    const perspectiveData = await this.appManager.draftsEvees.client.store.getEntity(
+    this.data = await this.appManager.draftsEvees.getPerspectiveData(this.uref);
+    this.perspective = await this.appManager.draftsEvees.client.store.getEntity(
       this.uref
     );
-    this.perspectiveData = perspectiveData;
 
-    switch (this.forkData.object.type) {
-      case 'Title':
-        this.type = 'title';
-        break;
-      case 'Paragraph':
-        this.type = 'paragraph';
-        break;
-    }
-    if (this.forkData.object.text.startsWith('<img')) {
-      this.type = 'image';
-      this.forkData.object.type = 'Image';
-    }
+    this.title = this.evees.behaviorFirst(this.data.object, 'title');
+
     this.loading = false;
   }
 
-  async handleAddToClipboard() {
-    const clipboardSection = await this.appManager.elements.get(
-      '/linkedThoughts/clipboardSection'
+  handleAction(option: string) {
+    this.dispatchEvent(
+      new CustomEvent('action-selected', {
+        composed: true,
+        bubbles: true,
+        detail: { uref: this.uref, option },
+      })
     );
-
-    await this.appManager.addToClipboard(this.uref, clipboardSection.id, true);
-
-    // const x = await this.evees.getPerspectiveData(clipboardSection.id);
-  }
-
-  derivedTitle() {
-    if (
-      this.forkData.object.text.startsWith('<img') &&
-      this.viewType === 'list'
-    )
-      return '<i>Image<i>';
-    return this.forkData.object.text.startsWith('<img')
-      ? ''
-      : this.forkData.object.text
-          .substring(0, MAX_TITLE_LENGTH)
-          .replace(/<[^>]*>?/gm, '');
-  }
-  deriveDescription() {
-    return this.forkData.object.text.length > MAX_DESCRIPTION_LENGTH
-      ? this.forkData.object.text.substring(0, MAX_DESCRIPTION_LENGTH) + '...'
-      : this.forkData.object.text;
-  }
-
-  renderLabel() {
-    let typeClass;
-    switch (this.type) {
-      case 'title':
-        typeClass = 'type-title';
-        break;
-      case 'image':
-        typeClass = 'type-image';
-        break;
-      case 'paragraph':
-        typeClass = 'type-paragraph';
-        break;
-    }
-
-    return html` <p class=${'type-label' + ' ' + typeClass}>
-      ${this.forkData.object.type.toUpperCase()}
-    </p>`;
   }
 
   render() {
     if (this.loading) {
       return html`<evees-loading></evees-loading>`;
     }
-    if (this.viewType === 'list') {
-      return html`
-        <div class="table_small">
-          <a href=${GenerateDocumentRoute(this.uref)} target="_blank">
-            <div class="table_cell">${unsafeHTML(this.derivedTitle())}</div>
+
+    return html`
+      <div class="table_small">
+        <a href=${GenerateDocumentRoute(this.uref)} target="_blank">
+          <div class="table_cell">${this.title}</div>
+        </a>
+      </div>
+      <div class="table_small">
+        <div class="table_cell">
+          ${TimestampToDate(this.perspective.object.payload.timestamp)}
+        </div>
+      </div>
+      <div class="table_small">
+        <div class="table_cell">
+          <a
+            href=${GenerateUserRoute(this.perspective.object.payload.creatorId)}
+            target="_blank"
+          >
+            ${this.perspective.object.payload.creatorId}
           </a>
         </div>
-        <div class="table_small">
-          <div class="table_cell">
-            ${TimestampToDate(this.perspectiveData.object.payload.timestamp)}
-          </div>
-        </div>
-        <div class="table_small">
-          <div class="table_cell">
-            <a
-              href=${GenerateUserRoute(
-                this.perspectiveData.object.payload.creatorId
-              )}
-              target="_blank"
-            >
-              ${this.perspectiveData.object.payload.creatorId}
-            </a>
-          </div>
-        </div>
-      `;
-    } else {
-      // <!-- ${this.type === 'title' ? this.titleHtml : null} -->
-      // <!-- ${this.preview.render({ uref: this.uref })}   -->
-      return html`
-        <div class="cont">
-          <div class="card-content">
-            ${this.type === 'title'
-              ? html`<h3>${unsafeHTML(this.derivedTitle())}</h3>`
-              : html`<p class="description">
-                  ${unsafeHTML(this.deriveDescription())}
-                </p>`}
-          </div>
-          <div class="card-footer">
-            <a
-              href=${GenerateUserRoute(
-                this.perspectiveData.object.payload.creatorId
-              )}
-              target="_blank"
-            >
-              <p class="author">
-                ${this.perspectiveData.object.payload.creatorId}
-              </p>
-            </a>
-            <div class="actions">
-              <div>${MinusIcon} <span>Remove</span></div>
-
-              <div class="clickable" @click=${this.handleAddToClipboard}>
-                ${DuplicateIcon} <span>Add To Clipboard</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
+      </div>
+    `;
   }
 
   static get styles() {

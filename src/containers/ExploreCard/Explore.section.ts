@@ -7,6 +7,7 @@ import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import { AppEvents } from '../../services/app.manager';
+import { HeaderViewType } from '../Collections/collection.base';
 
 type TabName = 'explore' | 'clipboard';
 
@@ -118,9 +119,11 @@ export default class ExploreSection extends ConnectedElement {
       ${this.renderHeader()}
       ${this.selectedSection === 'explore'
         ? html`<app-explore-collection
+            header-view=${HeaderViewType.feed}
             class=${resultsContainerClass}
           ></app-explore-collection>`
         : html`<app-evees-data-collection
+            header-view=${HeaderViewType.feed}
             class=${resultsContainerClass}
             uref=${this.clipboardSection.id}
           ></app-evees-data-collection>`}

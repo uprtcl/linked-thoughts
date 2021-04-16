@@ -1,3 +1,4 @@
+import lodash from 'lodash';
 import { html, css, internalProperty, query, property } from 'lit-element';
 import { Logger, SearchOptions } from '@uprtcl/evees';
 
@@ -9,11 +10,16 @@ import ListViewIcon from '../../assets/icons/list-view.svg';
 import GridViewIcon from '../../assets/icons/grid-view.svg';
 import ListViewIconSelected from '../../assets/icons/list-view-selected.svg';
 import GridViewIconSelected from '../../assets/icons/grid-view-selected.svg';
-import { MenuOptions } from '@uprtcl/common-ui';
+import { MenuOptions, UprtclTextField } from '@uprtcl/common-ui';
 
 export enum BlockViewType {
   tableRow = 'table-row',
   gridCard = 'grid-card',
+}
+
+export enum HeaderViewType {
+  section = 'section',
+  feed = 'feed',
 }
 
 const LOGINFO = true;
@@ -24,8 +30,11 @@ export class CollectionBaseElement extends ConnectedElement {
   @property()
   title: string;
 
-  @property({ type: String, attribute: 'view' })
-  viewType: BlockViewType;
+  @property({ type: String, attribute: 'block-view' })
+  blockViewType: BlockViewType;
+
+  @property({ type: String, attribute: 'header-view' })
+  headerViewType: HeaderViewType;
 
   @internalProperty()
   itemIds: string[] = [];
@@ -36,6 +45,9 @@ export class CollectionBaseElement extends ConnectedElement {
   loading: boolean = true;
   appendItems: (items: string[]) => {};
 
+  @query('#search-input')
+  searchInput: UprtclTextField;
+
   @query('#is-visible')
   isVisibleEl!: UprtclIsVisible;
 
@@ -43,18 +55,14 @@ export class CollectionBaseElement extends ConnectedElement {
   protected batchSize: number = 3;
 
   async firstUpdated() {
-    this.viewType = this.viewType || BlockViewType.gridCard;
+    this.blockViewType = this.blockViewType || BlockViewType.gridCard;
+    this.headerViewType = this.headerViewType || HeaderViewType.section;
     this.reset();
   }
 
   async reset() {
     this.itemIds = [];
     this.getMoreFeed();
-  }
-
-  handleSearch(e) {
-    this.searchQuery = e.target.value;
-    this.reset();
   }
 
   private async getMoreFeed() {
@@ -110,6 +118,16 @@ export class CollectionBaseElement extends ConnectedElement {
     );
   }
 
+  debouncedSearchByText = lodash.debounce(this.searchByText, 1000);
+
+  searchByText() {
+    this.searchQuery = this.searchInput.value.trim()
+      ? this.searchInput.value
+      : undefined;
+
+    this.reset();
+  }
+
   renderListActionsHeader() {
     const sortMenuConfig: MenuOptions = new Map();
     sortMenuConfig.set('name', { text: 'Name' });
@@ -131,17 +149,17 @@ export class CollectionBaseElement extends ConnectedElement {
         </div>
         <div
           class="clickable"
-          @click=${() => (this.viewType = BlockViewType.tableRow)}
+          @click=${() => (this.blockViewType = BlockViewType.tableRow)}
         >
-          ${this.viewType === BlockViewType.tableRow
+          ${this.blockViewType === BlockViewType.tableRow
             ? html`${ListViewIconSelected}`
             : html`${ListViewIcon}`}
         </div>
         <div
           class="clickable"
-          @click=${() => (this.viewType = BlockViewType.gridCard)}
+          @click=${() => (this.blockViewType = BlockViewType.gridCard)}
         >
-          ${this.viewType === BlockViewType.gridCard
+          ${this.blockViewType === BlockViewType.gridCard
             ? html`${GridViewIconSelected}`
             : html`${GridViewIcon}`}
         </div>
@@ -149,24 +167,45 @@ export class CollectionBaseElement extends ConnectedElement {
     `;
   }
 
-  renderHeader() {
+  renderSectionHeader() {
     return html`
       <div class="header-cont">
         <span class="section-heading">${this.title}</span>
-        <div class="search-cont">
-          <input
-            @input=${this.handleSearch}
-            class="search-field"
-            type="text"
-            placeholder="Find 🍴..."
-          /><span>${SearchIcon}</span>
-        </div>
+        ${this.renderSearchbox()}
       </div>
     `;
   }
 
+  renderSearchbox() {
+    return html`<div class="search-cont">
+      <div @click=${this.searchByText}>${SearchIcon}</div>
+      <uprtcl-textfield
+        id="search-input"
+        @input=${() => {
+          this.debouncedSearchByText();
+        }}
+        label="Search Intercreativity"
+      ></uprtcl-textfield>
+    </div>`;
+  }
+
+  renderFeedHeader() {
+    return this.renderSearchbox();
+  }
+
+  renderHeader() {
+    switch (this.headerViewType) {
+      case HeaderViewType.section:
+        return html`${this.renderSectionHeader()}
+        ${this.renderListActionsHeader()}`;
+
+      case HeaderViewType.feed:
+        return this.renderFeedHeader();
+    }
+  }
+
   renderItems() {
-    if (this.viewType === BlockViewType.tableRow) {
+    if (this.blockViewType === BlockViewType.tableRow) {
       return html`
         <div class="table">
           <div class="theader">
@@ -190,7 +229,7 @@ export class CollectionBaseElement extends ConnectedElement {
       return html`
         <app-block-item
           class="block-item"
-          view=${this.viewType}
+          view=${this.blockViewType}
           uref=${uref}
           .actionOptions=${this.actionOptions}
         ></app-block-item>
@@ -201,11 +240,8 @@ export class CollectionBaseElement extends ConnectedElement {
   render() {
     if (this.loading) return html``;
 
-    return html` <div class="static-header">
-        ${this.renderHeader()} ${this.renderListActionsHeader()}
-        <hr />
-      </div>
-      <div>
+    return html` ${this.renderHeader()}
+      <div class="items-container">
         ${this.renderItems()}
 
         <app-intersection-observer

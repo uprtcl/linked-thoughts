@@ -255,6 +255,7 @@ export default class ExploreCard extends ConnectedElement {
         : this.clipboardFeedIds.map((docId) => {
             return html`
               <app-explore-clipboard-list-item
+                
                 @click=${() => {
                   this.selectedBlogId = docId;
                 }}

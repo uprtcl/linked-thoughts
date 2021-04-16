@@ -55,7 +55,16 @@ export default class ClipboardListItem extends EveesBaseElement {
     if (this.loading) return null;
     if (this.hasError)
       return html`<app-error-block-not-found></app-error-block-not-found>`;
-    return html`<div class="cont clickable">
+    return html`<div
+        class="cont clickable"
+        draggable="true"
+        @dragstart=${(ev) => {
+          ev.dataTransfer.setData(
+            'text/plain',
+            JSON.stringify({ uref: this.uref })
+          );
+        }}
+      >
         <div class="header">
           ${this.renderTags()} <span> ${CloseIcon} </span>
         </div>

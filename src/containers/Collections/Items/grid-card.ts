@@ -1,7 +1,7 @@
 import { html, css, property, internalProperty } from 'lit-element';
 import { Lens } from '@uprtcl/evees-ui';
 import { Entity, Perspective, Secured } from '@uprtcl/evees';
-import { icons } from '@uprtcl/common-ui';
+import { icons, MenuOptions } from '@uprtcl/common-ui';
 
 import { ConnectedElement } from '../../../services/connected.element';
 import { sharedStyles, tableStyles } from '../../../styles';
@@ -79,7 +79,7 @@ export class GridCardItem extends ConnectedElement {
                   class="clickable"
                   @click=${() => this.handleAction(itemKey)}
                 >
-                  ${icons[item.icon]}<span>${item.name}</span>
+                  ${icons[item.icon]}<span>${item.text}</span>
                 </div>`;
               }
             )}

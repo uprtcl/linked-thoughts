@@ -1,22 +1,22 @@
 import { html, css, property, internalProperty } from 'lit-element';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 
-import { ConnectedElement } from '../../services/connected.element';
-import { sharedStyles, tableStyles } from '../../styles';
-import MinusIcon from '../../assets/icons/minus.svg';
+import { ConnectedElement } from '../../../services/connected.element';
+import { sharedStyles, tableStyles } from '../../../styles';
+import MinusIcon from '../../../assets/icons/minus.svg';
 import MoveToIcon from '../../assets/icons/move-to.svg';
-import DuplicateIcon from '../../assets/icons/duplicate.svg';
+import DuplicateIcon from '../../../assets/icons/duplicate.svg';
 import {
   GenerateDocumentRoute,
   GenerateUserRoute,
-} from '../../utils/routes.helpers';
-import { TimestampToDate } from '../../utils/date';
+} from '../../../utils/routes.helpers';
+import { TimestampToDate } from '../../../utils/date';
 
 const MAX_DESCRIPTION_LENGTH = 250;
 const MAX_TITLE_LENGTH = 50;
 
 export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
-export class GridCardItem extends ConnectedElement {
+export class TableRowItem extends ConnectedElement {
   @property({ type: String })
   uref: string;
 

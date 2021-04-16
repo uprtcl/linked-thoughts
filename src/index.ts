@@ -21,10 +21,11 @@ import AppBarPublic from './components/PublicAppBar/Appbar.public';
 import '@ui5/webcomponents/dist/Carousel';
 import { BlockInfoPopper } from './containers/BlockInfo/block-info';
 // Forks
-import { ForksPage } from './containers/ForksPage/Forks.page';
-import { ForkItem } from './containers/ForksPage/Forks.item';
+import { ForksPage } from './containers/Collections/Implementations/Forks.section';
 import { AppTestElement } from './containers/Test/app.e2e.test';
 import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
+import { GridCardItem } from './containers/Collections/Items/grid-card';
+import { TableRowItem } from './containers/Collections/Items/table-row';
 
 (async function () {
   await initUprtcl();
@@ -51,9 +52,12 @@ import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
   );
   customElements.define('app-appbar-public', AppBarPublic);
   customElements.define('app-block-info', BlockInfoPopper);
+  // Collections
+  customElements.define('app-item-grid-card', GridCardItem);
+  customElements.define('app-item-table-row', TableRowItem);
+
   // Forks
   customElements.define('app-forks-page', ForksPage);
-  customElements.define('app-forks-item', ForkItem);
 
   customElements.define('app-test', AppTestElement);
   customElements.define('app-error-block-not-found', BlockNotFound);

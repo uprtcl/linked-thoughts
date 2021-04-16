@@ -2,14 +2,14 @@ import lodash from 'lodash';
 import { html, css, internalProperty, query } from 'lit-element';
 import { Logger } from '@uprtcl/evees';
 
-import { ConnectedElement } from '../../services/connected.element';
-import { sharedStyles, tableStyles } from '../../styles';
-import SearchIcon from '../../assets/icons/search.svg';
-import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
-import ListViewIcon from '../../assets/icons/list-view.svg';
-import GridViewIcon from '../../assets/icons/grid-view.svg';
-import ListViewIconSelected from '../../assets/icons/list-view-selected.svg';
-import GridViewIconSelected from '../../assets/icons/grid-view-selected.svg';
+import { ConnectedElement } from '../../../services/connected.element';
+import { sharedStyles, tableStyles } from '../../../styles';
+import UprtclIsVisible from '../../IntersectionObserver/IntersectionObserver';
+import ListViewIcon from '../../../assets/icons/list-view.svg';
+import SearchIcon from '../../../assets/icons/search.svg';
+import GridViewIcon from '../../../assets/icons/grid-view.svg';
+import ListViewIconSelected from '../../../assets/icons/list-view-selected.svg';
+import GridViewIconSelected from '../../../assets/icons/grid-view-selected.svg';
 
 export class ForksPage extends ConnectedElement {
   logger = new Logger('ForksPage');

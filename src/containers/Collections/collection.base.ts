@@ -33,9 +33,8 @@ export class CollectionBaseElement extends ConnectedElement {
   @internalProperty()
   searchQuery: string = '';
 
-  /** a set block views are supported by default */
-
   loading: boolean = true;
+  appendItems: (items: string[]) => {};
 
   @query('#is-visible')
   isVisibleEl!: UprtclIsVisible;

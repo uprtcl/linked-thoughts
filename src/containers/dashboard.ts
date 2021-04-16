@@ -279,7 +279,7 @@ export class DashboardElement extends ConnectedElement {
           </div>
         </div>
       </div>
-      <app-explore-card ></app-explore-card>
+      <app-explore-section></app-explore-section>
     `;
   }
 
@@ -294,7 +294,7 @@ export class DashboardElement extends ConnectedElement {
           flex-direction: column;
           justify-content: center;
         }
-        app-explore-card {
+        app-explore-section {
           position: absolute;
           right: 0;
         }

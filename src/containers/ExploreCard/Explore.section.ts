@@ -1,165 +1,55 @@
-import lodash from 'lodash';
-import { html, css, internalProperty, query } from 'lit-element';
+import { html, css, internalProperty } from 'lit-element';
 
-import { UprtclTextField } from '@uprtcl/common-ui';
-import { Logger } from '@uprtcl/evees';
+import { Logger, Perspective, Secured } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
-import SearchIcon from '../../assets/icons/search.svg';
 import { AppEvents } from '../../services/app.manager';
-import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
-export default class ExploreCard extends ConnectedElement {
+
+type TabName = 'explore' | 'clipboard';
+
+export default class ExploreSection extends ConnectedElement {
   logger = new Logger('ExploreSection');
 
   @internalProperty()
-  selectedSection: 'explore' | 'clipboard' = 'explore';
+  selectedSection: TabName = 'explore';
 
   @internalProperty()
   exploreState: number = 0;
 
   @internalProperty()
-  blogFeedIds: string[] = []; // Explore Section
-
-  @internalProperty()
-  clipboardFeedIds: string[] = []; // Clipboard
-
-  @internalProperty()
-  selectedBlogId: string;
+  selectedDocId: string;
 
   @internalProperty()
   loading: boolean = true;
 
   @internalProperty()
-  isEnded: boolean = false;
-
-  @internalProperty()
   hovering = false;
 
-  @query('#search-input')
-  searchInput: UprtclTextField;
-
-  @query('#is-visible')
-  isVisibleEl!: UprtclIsVisible;
-
-  searchText: string;
   firstExpanded: boolean = false;
+  clipboardSection: Secured<Perspective>;
 
   async firstUpdated() {
-    this.appManager.events.on(
-      AppEvents.blogPostCreated,
-      (elements: string[]) => {
-        this.blogFeedIds.unshift(...elements);
-        this.blogFeedIds = [...this.blogFeedIds];
-      }
-    );
-
-    this.load();
-  }
-
-  async refresh() {
-    if (this.isVisibleEl) this.isVisibleEl.enable = false;
-    this.blogFeedIds = [];
-
-    this.load();
-  }
-  async getClipboardFeed() {
-    const clipboardSection = await this.appManager.elements.get(
+    this.clipboardSection = await this.appManager.elements.get(
       '/linkedThoughts/clipboardSection'
     );
 
-    this.clipboardFeedIds = (
-      await this.evees.getPerspectiveData(clipboardSection.id)
-    ).object.pages;
+    this.appManager.events.on(
+      AppEvents.blogPostCreated,
+      (elements: string[]) => {
+        // TODO: this.appendItemsToExplore(elements)
+      }
+    );
   }
 
-  async load() {
-    this.loading = true;
-    this.isEnded = false;
-
-    this.logger.log('load()');
-
-    /** get first results */
-    await this.getMoreFeed(10);
-    await this.getClipboardFeed();
-    this.loading = false;
-  }
-
-  async handleToggleSection(type: 'explore' | 'clipboard') {
+  async handleToggleSection(type: TabName) {
     this.selectedSection = type;
   }
-  async updated(cp) {
-    if (cp.has('exploreState')) {
-      if (this.exploreState > 0 && cp.get('exploreState') === 0) {
-        /** the first time the items list reapears we need to manually enable the isVisible component */
-        this.isVisibleEl.enable = true;
-      }
-      if (this.exploreState > 1 && cp.get('exploreState') === 1) {
-        /** if the explore state is fully expand refrest the isVisible check */
-        this.isVisibleEl.enable = false;
-        await this.isVisibleEl.updateComplete;
-        this.isVisibleEl.enable = true;
-      }
-    }
-  }
-
-  visibleChanged(value: boolean) {
-    this.logger.log('visibleChanged()', value);
-    if (value) {
-      this.getMoreFeed();
-    }
-  }
-
-  async getMoreFeed(first: number = 3) {
-    if (this.isEnded) return;
-
-    this.logger.log('getMoreFeed()- curren ids:', this.blogFeedIds);
-
-    if (this.isVisibleEl) {
-      this.isVisibleEl.enable = false;
-      await this.isVisibleEl.updateComplete;
-    }
-
-    const result = await this.appManager.getBlogFeed(
-      this.blogFeedIds.length,
-      first,
-      this.searchText
-    );
-
-    this.isEnded = result.ended;
-    this.blogFeedIds = this.blogFeedIds.concat(result.perspectiveIds);
-
-    this.logger.log('getMoreFeed()- new ids:', this.blogFeedIds);
-
-    await this.updateComplete;
-
-    if (this.isVisibleEl) {
-      this.isVisibleEl.enable = true;
-
-      await this.isVisibleEl.updateComplete;
-
-      if (this.isVisibleEl.isShown && !this.isEnded) {
-        this.logger.log('is still visible!');
-        await this.getMoreFeed();
-      }
-    }
-  }
-
-  searchByText() {
-    this.selectedBlogId = null;
-    this.blogFeedIds = [];
-    this.searchText = this.searchInput.value.trim()
-      ? this.searchInput.value
-      : undefined;
-    this.load();
-  }
-  debouncedSearchByText = lodash.debounce(this.searchByText, 1000);
 
   closeExplore() {
     this.exploreState = 0;
-    this.selectedBlogId = null;
   }
 
   handleNavigation(type: 'increment' | 'decrement') {
@@ -186,142 +76,99 @@ export default class ExploreCard extends ConnectedElement {
 
   renderHeader() {
     return html` <div class="header-tabs">
-        <span
-          @click=${() => this.handleToggleSection('explore')}
-          class=${`header-tab-item clickable ${
-            this.selectedSection == 'explore' ? 'selected-section' : ''
-          }`}
-          >Explore</span
-        >
-        <span
-          @click=${() => this.handleToggleSection('clipboard')}
-          class=${`header-tab-item clickable ${
-            this.selectedSection === 'clipboard' ? 'selected-section' : ''
-          }`}
-          >Clipboard</span
-        >
-        <div class="close-icon">
-          <uprtcl-icon-button
-            icon="close_purple"
-            button
-            skinny
-            @click=${() => this.closeExplore()}
-          ></uprtcl-icon-button>
-        </div>
-      </div>
-      <div class="header">
-        <div class="search-cont">
-          <div @click=${this.searchByText}>${SearchIcon}</div>
-          <uprtcl-textfield
-            id="search-input"
-            @input=${() => {
-              this.debouncedSearchByText();
-            }}
-            label="Search Intercreativity"
-          ></uprtcl-textfield>
-        </div>
+      <span
+        @click=${() => this.handleToggleSection('explore')}
+        class=${`header-tab-item clickable ${
+          this.selectedSection == 'explore' ? 'selected-section' : ''
+        }`}
+        >Explore</span
+      >
+      <span
+        @click=${() => this.handleToggleSection('clipboard')}
+        class=${`header-tab-item clickable ${
+          this.selectedSection === 'clipboard' ? 'selected-section' : ''
+        }`}
+        >Clipboard</span
+      >
+      <div class="close-icon">
         <uprtcl-icon-button
-          icon="refresh"
+          icon="close_purple"
           button
           skinny
-          style="margin-right: 6px"
-          @click=${() => this.refresh()}
+          @click=${() => this.closeExplore()}
         ></uprtcl-icon-button>
-      </div>`;
-  }
-
-  renderItems() {
-    if (this.selectedBlogId) {
-      return html`${this.renderReadPage()}`;
-    }
-
-    return html`
-      ${this.loading
-        ? html`<uprtcl-loading></uprtcl-loading>`
-        : this.selectedSection === 'explore'
-        ? this.blogFeedIds.map((docId) => {
-            return html`
-              <app-explore-list-item
-                @click=${() => {
-                  this.selectedBlogId = docId;
-                }}
-                uref=${docId}
-              ></app-explore-list-item>
-              <app-intersection-observer
-                id="is-visible"
-                @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
-              >
-              </app-intersection-observer>
-            `;
-          })
-        : this.clipboardFeedIds.map((docId) => {
-            return html`
-              <app-explore-clipboard-list-item
-                @click=${() => {
-                  this.selectedBlogId = docId;
-                }}
-                uref=${docId}
-              ></app-explore-clipboard-list-item>
-            `;
-          })}
-    `;
+      </div>
+    </div>`;
   }
 
   renderExploreState() {
+    let containerClass = '';
+    let resultsContainerClass = '';
+
     switch (this.exploreState) {
       case 1:
-        return html` <div class="explore-list">
-          ${this.renderHeader()}
-          <div class="explore-list-cont">${this.renderItems()}</div>
-        </div>`;
+        containerClass = 'explore explore-list';
+        break;
       case 2:
-        return html`<div class="explore-page">
-          ${this.renderHeader()}
-          <div class="explore-page-cont">${this.renderItems()}</div>
-        </div>`;
+        containerClass = 'explore explore-page';
+        break;
     }
+
+    return html` <div class=${containerClass}>
+      ${this.renderHeader()}
+      ${this.selectedSection === 'explore'
+        ? html`<app-explore-collection
+            class=${resultsContainerClass}
+          ></app-explore-collection>`
+        : html`<app-evees-data-collection
+            class=${resultsContainerClass}
+            uref=${this.clipboardSection.id}
+          ></app-evees-data-collection>`}
+    </div>`;
   }
 
   renderReadPage() {
     return html`<div class="readCont">
       <app-read-only-page
         containerType=${this.exploreState === 1 ? 'mobile' : 'desktop'}
-        uref=${this.selectedBlogId}
+        uref=${this.selectedDocId}
         show-back
-        @back=${() => (this.selectedBlogId = undefined)}
-      />
+        @back=${() => (this.selectedDocId = undefined)}
+      ></app-read-only-page>
     </div>`;
   }
-  render() {
-    return html`<div class="explore-navigation-tooltip">
-        <div
-          @click=${() => this.handleExploreClick()}
-          class=${'clickable explore-heading' +
-          (this.hovering ? 'light-grey' : '')}
-        >
-          EXPLORE
-        </div>
-        <div
-          class=${'explore-navigation' + (this.hovering ? 'light-grey' : '')}
-        >
-          <span
-            @mouseEnter=${() => (this.hovering = true)}
-            @mouseLeave=${() => (this.hovering = false)}
-            ?disabled=${this.exploreState == 2}
-            @click=${() => this.handleNavigation('increment')}
-            class="navigation-button clickable"
-            >${ChevronLeft}</span
-          >
-          <span
-            ?disabled=${this.exploreState == 0}
-            @click=${() => this.handleNavigation('decrement')}
-            class="navigation-button clickable"
-            >${ChevronRight}</span
-          >
-        </div>
-      </div>
 
-      ${this.renderExploreState()}`;
+  renderNail() {
+    return html`<div class="explore-navigation-tooltip">
+      <div
+        @click=${() => this.handleExploreClick()}
+        class=${'clickable explore-heading' +
+        (this.hovering ? 'light-grey' : '')}
+      >
+        EXPLORE
+      </div>
+      <div class=${'explore-navigation' + (this.hovering ? 'light-grey' : '')}>
+        <span
+          @mouseEnter=${() => (this.hovering = true)}
+          @mouseLeave=${() => (this.hovering = false)}
+          ?disabled=${this.exploreState == 2}
+          @click=${() => this.handleNavigation('increment')}
+          class="navigation-button clickable"
+          >${ChevronLeft}</span
+        >
+        <span
+          ?disabled=${this.exploreState == 0}
+          @click=${() => this.handleNavigation('decrement')}
+          class="navigation-button clickable"
+          >${ChevronRight}</span
+        >
+      </div>
+    </div>`;
+  }
+
+  render() {
+    return html`${this.renderNail()}
+    ${this.exploreState > 0 ? this.renderExploreState() : ''}`;
   }
 
   static get styles() {
@@ -405,23 +252,25 @@ export default class ExploreCard extends ConnectedElement {
           opacity: 0.3;
         }
         /* Explore List */
-        .explore-list {
+        .explore {
           background: rgb(255, 255, 255);
           box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
-
           /* Note: backdrop-filter has minimal browser support */
           border-radius: 20px 6px 6px 20px;
-
           width: 400px;
+          height: 95vh;
           animation: slideLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1);
           position: relative;
         }
-        .explore-list-cont {
-          overflow-y: scroll;
-          height: 85%;
-          max-height: 85vh;
-          min-height: 85vh;
+
+        .explore-list {
+          width: 400px;
         }
+
+        .explore-page {
+          width: 90vw;
+        }
+
         /* width */
         *::-webkit-scrollbar {
           width: 8px;
@@ -441,7 +290,8 @@ export default class ExploreCard extends ConnectedElement {
         *::-webkit-scrollbar-thumb:hover {
           background: #aaa;
         }
-        .header {
+
+        .selectedDocId {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -452,45 +302,6 @@ export default class ExploreCard extends ConnectedElement {
           background: transparent;
           padding: 1rem 3%;
           z-index: 10;
-        }
-
-        .search-cont {
-          flex: 1;
-          align-items: center;
-          display: flex;
-          margin: 0 1rem;
-          position: relative;
-          background: transparent;
-        }
-
-        /* Explore Page */
-
-        .explore-page {
-          background: rgb(255, 255, 255);
-          box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
-
-          /* Note: backdrop-filter has minimal browser support */
-
-          border-radius: 10px 3px 3px 10px;
-
-          margin-right: 3vw;
-          animation: slideLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-          width: 90vw;
-          position: relative;
-        }
-
-        .explore-page-cont {
-          overflow-y: auto;
-          height: 80vh;
-        }
-
-        .explore-page-cont > * {
-          display: block;
-          float: left;
-        }
-
-        app-explore-list-item {
-          height: 160px;
         }
 
         @keyframes slideLeft {
@@ -511,6 +322,7 @@ export default class ExploreCard extends ConnectedElement {
             width: 80vw;
           }
         }
+
         @media only screen and (max-width: 900px) {
           .explore-page-cont > app-explore-list-item {
             width: 50%;
@@ -519,6 +331,7 @@ export default class ExploreCard extends ConnectedElement {
             width: 80vw;
           }
         }
+
         @media only screen and (max-width: 680px) {
           .explore-page-cont > app-explore-list-item {
             width: 100%;
@@ -527,6 +340,7 @@ export default class ExploreCard extends ConnectedElement {
             width: 80vw;
           }
         }
+
         @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
           .explore-page {
             background: rgba(255, 255, 255, 0.7);

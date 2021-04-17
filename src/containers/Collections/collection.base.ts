@@ -15,6 +15,7 @@ import { MenuOptions, UprtclTextField } from '@uprtcl/common-ui';
 export enum BlockViewType {
   tableRow = 'table-row',
   gridCard = 'grid-card',
+  pageFeedItem = 'page-feed-item',
 }
 
 export enum HeaderViewType {

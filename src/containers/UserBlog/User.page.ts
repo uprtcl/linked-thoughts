@@ -16,7 +16,7 @@ import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver
 import { NavigateTo404 } from '../../utils/routes.helpers';
 import { GenerateUserRoute } from '../../utils/routes.helpers';
 
-import { PAGE_SELECTED_EVENT_NAME } from './User.BlogSection.Item';
+import { PAGE_SELECTED_EVENT_NAME } from '../Collections/Items/page-feed.Item';
 import { Logger } from '@uprtcl/evees';
 export default class ReadOnlyPage extends ConnectedElement {
   logger = new Logger('ReadOnlyPage');

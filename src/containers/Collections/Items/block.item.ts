@@ -49,6 +49,12 @@ export class BlockItem extends ConnectedElement {
           uref=${this.uref}
           .actionOptions=${this.actionOptions}
         ></app-item-table-row>`;
+
+      case BlockViewType.pageFeedItem:
+        return html`<app-item-page-feed
+          uref=${this.uref}
+          .actionOptions=${this.actionOptions}
+        ></app-item-page-feed>`;
     }
   }
 

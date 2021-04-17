@@ -10,6 +10,7 @@ import { AppManager } from '../../services/app.manager';
 
 import { Section } from '../types';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
+import { BlockViewType, HeaderViewType } from '../Collections/collection.base';
 
 export default class UserPublicBlogSection extends EveesBaseElement<Section> {
   logger = new Logger('UserPublicBlogSection');
@@ -111,19 +112,11 @@ export default class UserPublicBlogSection extends EveesBaseElement<Section> {
         </div>
         <div class="blogsCont">
           <div class="topSeperator"></div>
-          ${this.blogIds.map((pageId, pageIndex) => {
-            return html`
-              <app-user-page-blog-section-item
-                uref=${pageId}
-                userId=${this.userId}
-              ></app-user-page-blog-section-item>
-            `;
-          })}
-          <app-intersection-observer
-            id="is-visible"
-            @visible-changed="${(e) => this.visibleChanged(e.detail.value)}"
-          >
-          </app-intersection-observer>
+          <app-evees-data-collection
+            uref=${this.uref}
+            header-view=${HeaderViewType.feed}
+            block-view=${BlockViewType.pageFeedItem}
+          ></app-evees-data-collection>
         </div>
       </div>
     </div>`;

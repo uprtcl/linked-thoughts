@@ -1,21 +1,21 @@
-import { Commit, Signed } from '@uprtcl/evees';
-import { html, css, property } from 'lit-element';
-import { ConnectedElement } from '../../services/connected.element';
-import { sharedStyles } from '../../styles';
+import { html, css, property, internalProperty } from 'lit-element';
+import { Commit, Secured, Signed } from '@uprtcl/evees';
 
-import { TimestampToDate } from '../../utils/date';
+import { ConnectedElement } from '../../../services/connected.element';
+import { sharedStyles } from '../../../styles';
+
+import { TimestampToDate } from '../../../utils/date';
+
 const MAX_HEIGHT = 400;
 
 export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
-export default class ReadOnlyPage extends ConnectedElement {
+
+export class PageFeedItem extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
-  @property({ type: String })
-  userId: string;
-
-  @property()
-  head = null;
+  @internalProperty()
+  head: Secured<Commit>;
 
   @property({ type: Boolean })
   loading: boolean = true;
@@ -28,14 +28,12 @@ export default class ReadOnlyPage extends ConnectedElement {
     this.loading = true;
     const { details } = await this.evees.client.getPerspective(this.uref);
 
-    let head = undefined;
     if (details.headId) {
-      head = await this.evees.client.store.getEntity<Signed<Commit>>(
+      this.head = await this.evees.client.store.getEntity<Signed<Commit>>(
         details.headId
       );
     }
 
-    this.head = head;
     this.loading = false;
   }
 

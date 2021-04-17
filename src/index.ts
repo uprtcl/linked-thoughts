@@ -9,13 +9,10 @@ import { VisitorElement } from './containers/visitor';
 import { DocumentPage } from './containers/DocPage/doc.page';
 import { ErrorPage } from './containers/ErrorPage/Error.page';
 import ExploreSection from './containers/ExploreCard/Explore.section';
-import SearchListItem from './components/SearchListItem/Search.ListItem';
-import ClipboardListItem from './components/SearchListItem/Clipboard.ListItem';
 import ReadOnlyPage from './containers/ReadOnlyPage/ReadOnly.page';
 import LTIntersectionObserver from './containers/IntersectionObserver/IntersectionObserver';
 import UserPage from './containers/UserBlog/User.page';
 import UserPageBlogSection from './containers/UserBlog/User.BlogSection';
-import UserPageBlogSectionItem from './containers/UserBlog/User.BlogSection.Item';
 import AppBarPublic from './components/PublicAppBar/Appbar.public';
 // 3rd Party Components
 import '@ui5/webcomponents/dist/Carousel';
@@ -28,6 +25,7 @@ import { TableRowItem } from './containers/Collections/Items/table-row.item';
 import { BlockItem } from './containers/Collections/Items/block.item';
 import { EveesDataCollection } from './containers/Collections/Implementations/evees.data.collection';
 import { ExploreCollection } from './containers/Collections/Implementations/explore.collection';
+import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';
 
 (async function () {
   await initUprtcl();
@@ -52,10 +50,6 @@ import { ExploreCollection } from './containers/Collections/Implementations/expl
   customElements.define('app-user-page', UserPage);
   customElements.define('app-user-page-blog-section', UserPageBlogSection);
 
-  customElements.define(
-    'app-user-page-blog-section-item',
-    UserPageBlogSectionItem
-  );
   customElements.define('app-appbar-public', AppBarPublic);
   customElements.define('app-block-info', BlockInfoPopper);
 
@@ -63,6 +57,7 @@ import { ExploreCollection } from './containers/Collections/Implementations/expl
   customElements.define('app-block-item', BlockItem);
   customElements.define('app-item-grid-card', GridCardItem);
   customElements.define('app-item-table-row', TableRowItem);
+  customElements.define('app-item-page-feed', PageFeedItem);
 
   customElements.define('app-evees-data-collection', EveesDataCollection);
   customElements.define('app-explore-collection', ExploreCollection);

@@ -36,7 +36,7 @@ export class BlockItem extends ConnectedElement {
     }
   }
 
-  render() {
+  renderItem() {
     switch (this.viewType) {
       case BlockViewType.gridCard:
         return html`<app-item-grid-card
@@ -56,6 +56,20 @@ export class BlockItem extends ConnectedElement {
           .actionOptions=${this.actionOptions}
         ></app-item-page-feed>`;
     }
+  }
+
+  render() {
+    return html`<div
+      draggable="true"
+      @dragstart=${(ev) => {
+        ev.dataTransfer.setData(
+          'text/plain',
+          JSON.stringify({ uref: this.uref })
+        );
+      }}
+    >
+      ${this.renderItem()}
+    </div>`;
   }
 
   static get styles() {

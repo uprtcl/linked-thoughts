@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import moment from 'moment';
 import { Router } from '@vaadin/router';
 
-import { MenuConfig, styles } from '@uprtcl/common-ui';
+import { MenuOptions, styles } from '@uprtcl/common-ui';
 import {
   Secured,
   Commit,
@@ -237,17 +237,17 @@ export class SectionPage extends EveesBaseElement<Section> {
     `;
   }
   renderListActionsHeader() {
-    const sortMenuConfig: MenuConfig = {
-      dateCreated: {
-        text: 'Date Created',
-      },
-      lastUpdated: {
-        text: 'Last Updated',
-      },
-      title: {
-        text: 'Title',
-      },
-    };
+    const sortMenuConfig: MenuOptions = new Map();
+    sortMenuConfig.set('dateCreated', {
+      text: 'Date Created',
+    });
+    sortMenuConfig.set('lastUpdated', {
+      text: 'Last Updated',
+    });
+    sortMenuConfig.set('title', {
+      text: 'Title',
+    });
+
     return html`
       <div class="list-actions-cont">
         <div class="list-actions-heading">${this.title} Pages</div>

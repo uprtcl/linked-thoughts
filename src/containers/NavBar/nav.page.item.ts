@@ -1,7 +1,7 @@
 import { html, css, internalProperty, property } from 'lit-element';
 import { Router } from '@vaadin/router';
 
-import { MenuConfig, styles } from '@uprtcl/common-ui';
+import { MenuOptions, styles } from '@uprtcl/common-ui';
 import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { TextNode } from '@uprtcl/documents';
 
@@ -68,13 +68,12 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   }
 
   render() {
-    const menuConfig: MenuConfig = {
-      remove: {
-        disabled: false,
-        text: 'delete',
-        icon: 'delete',
-      },
-    };
+    const menuConfig: MenuOptions = new Map();
+    menuConfig.set('remove', {
+      disabled: false,
+      text: 'delete',
+      icon: 'delete',
+    });
 
     let classes: string[] = [];
 

@@ -51,3 +51,10 @@ npm run dev
 ```
 
 You can now gead to http://localhost:8002!
+
+
+
+
+-> doc/docID?forkID=forkId
+
+Readonly  loggedIn

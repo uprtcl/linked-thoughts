@@ -20,6 +20,7 @@ import {
   RouteName,
   NavigateTo404,
 } from '../utils/routes.helpers';
+import { BlockViewType } from './Collections/collection.base';
 
 interface SectionData {
   id: string;
@@ -46,6 +47,8 @@ export class DashboardElement extends ConnectedElement {
   selectedSectionId: string | undefined;
 
   dashboardPerspective: Secured<Perspective>;
+  forksSection: Secured<Perspective>;
+
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
 
@@ -67,6 +70,10 @@ export class DashboardElement extends ConnectedElement {
 
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
+      );
+
+      this.forksSection = await this.appManager.elements.get(
+        '/linkedThoughts/forksSection'
       );
 
       await this.decodeUrl();
@@ -97,7 +104,6 @@ export class DashboardElement extends ConnectedElement {
     // /getting-started
 
     this.routeName = LTRouter.Router.location.route.name as RouteName;
-
     const routeParams = LTRouter.Router.location.params as any;
 
     if (this.routeName === RouteName.section) {
@@ -183,9 +189,6 @@ export class DashboardElement extends ConnectedElement {
   renderHome() {
     return html``;
   }
-  renderForkContnet() {
-    return html`<app-forks-page />`;
-  }
 
   renderNavbar() {
     if (!this.dashboardData) return html` <uprtcl-loading></uprtcl-loading> `;
@@ -228,15 +231,19 @@ export class DashboardElement extends ConnectedElement {
       </div> `;
   }
 
+  renderForkContent() {
+    return html`<app-evees-data-collection
+      title="Forks"
+      uref=${this.forksSection.id}
+    />`;
+  }
+
   renderSectionContent() {
-    return html` ${this.selectedSectionId !== undefined
-      ? html`
-          <app-section-page
-            uref=${this.selectedSectionId}
-            .localEvees=${this.appManager.draftsEvees}
-          ></app-section-page>
-        `
-      : null}`;
+    return html`<app-evees-data-collection
+      title="Section"
+      uref=${this.selectedSectionId}
+      view=${BlockViewType.tableRow}
+    />`;
   }
 
   render() {
@@ -256,13 +263,13 @@ export class DashboardElement extends ConnectedElement {
                 : this.routeName === RouteName.section
                 ? this.renderSectionContent()
                 : this.routeName === RouteName.fork
-                ? this.renderForkContnet()
+                ? this.renderForkContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }
           </div>
         </div>
       </div>
-      <app-explore-card ></app-explore-card>
+      <app-explore-section></app-explore-section>
     `;
   }
 
@@ -277,7 +284,7 @@ export class DashboardElement extends ConnectedElement {
           flex-direction: column;
           justify-content: center;
         }
-        app-explore-card {
+        app-explore-section {
           position: absolute;
           right: 0;
         }

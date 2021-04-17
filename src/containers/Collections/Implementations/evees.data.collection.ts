@@ -20,14 +20,12 @@ export class EveesDataCollection extends CollectionBaseElement {
   }
 
   async load() {
-    this.loading = true;
     const data = await this.evees.getPerspectiveData(this.uref);
     const children = this.evees.behaviorConcat(
       data.object,
       LinkingBehaviorNames.CHILDREN
     );
     this.allItemsIds = children;
-    this.loading = false;
   }
 
   async getMoreItems(): Promise<string[]> {

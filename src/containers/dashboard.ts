@@ -232,27 +232,17 @@ export class DashboardElement extends ConnectedElement {
   }
 
   renderForkContent() {
-    const actionOptions = new Map();
-    actionOptions.set('remove', { text: 'remove' });
-    actionOptions.set('copyToClipboard', { text: 'Add to Clipboard' });
-
     return html`<app-evees-data-collection
       title="Forks"
       uref=${this.forksSection.id}
-      .actionOptions=${actionOptions}
     />`;
   }
 
   renderSectionContent() {
-    const actionOptions = new Map();
-    actionOptions.set('remove', { text: 'remove' });
-    actionOptions.set('copyToClipboard', { text: 'Add to Clipboard' });
-
     return html`<app-evees-data-collection
       title="Section"
       uref=${this.selectedSectionId}
       view=${BlockViewType.tableRow}
-      .actionOptions=${actionOptions}
     />`;
   }
 

@@ -1,12 +1,19 @@
 import { html, css, internalProperty } from 'lit-element';
 
-import { Logger, Perspective, Secured } from '@uprtcl/evees';
+import {
+  getHome,
+  GetPerspectiveOptions,
+  Logger,
+  Perspective,
+  SearchOptions,
+  Secured,
+} from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
-import { AppEvents } from '../../services/app.manager';
+import { AppEvents, ConceptId } from '../../services/app.manager';
 import { HeaderViewType } from '../Collections/collection.base';
 
 type TabName = 'explore' | 'clipboard';
@@ -31,11 +38,18 @@ export default class ExploreSection extends ConnectedElement {
 
   firstExpanded: boolean = false;
   clipboardSection: Secured<Perspective>;
+  exploreOptions: SearchOptions;
 
   async firstUpdated() {
     this.clipboardSection = await this.appManager.elements.get(
       '/linkedThoughts/clipboardSection'
     );
+
+    const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
+
+    this.exploreOptions = {
+      linksTo: { elements: [{ id: blogConcept.id }] },
+    };
 
     this.appManager.events.on(
       AppEvents.blogPostCreated,
@@ -121,6 +135,7 @@ export default class ExploreSection extends ConnectedElement {
         ? html`<app-explore-collection
             header-view=${HeaderViewType.feed}
             class=${resultsContainerClass}
+            .exploreOptions=${this.exploreOptions}
           ></app-explore-collection>`
         : html`<app-evees-data-collection
             header-view=${HeaderViewType.feed}

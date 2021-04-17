@@ -42,7 +42,6 @@ export class CollectionBaseElement extends ConnectedElement {
   @internalProperty()
   searchQuery: string = '';
 
-  loading: boolean = true;
   appendItems: (items: string[]) => {};
 
   @query('#search-input')
@@ -238,8 +237,6 @@ export class CollectionBaseElement extends ConnectedElement {
   }
 
   render() {
-    if (this.loading) return html``;
-
     return html` ${this.renderHeader()}
       <div class="items-container">
         ${this.renderItems()}

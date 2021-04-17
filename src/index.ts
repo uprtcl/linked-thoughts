@@ -27,6 +27,7 @@ import { GridCardItem } from './containers/Collections/Items/grid-card.item';
 import { TableRowItem } from './containers/Collections/Items/table-row.item';
 import { BlockItem } from './containers/Collections/Items/block.item';
 import { EveesDataCollection } from './containers/Collections/Implementations/evees.data.collection';
+import { ExploreCollection } from './containers/Collections/Implementations/explore.collection';
 
 (async function () {
   await initUprtcl();
@@ -63,8 +64,8 @@ import { EveesDataCollection } from './containers/Collections/Implementations/ev
   customElements.define('app-item-grid-card', GridCardItem);
   customElements.define('app-item-table-row', TableRowItem);
 
-  // Forks
   customElements.define('app-evees-data-collection', EveesDataCollection);
+  customElements.define('app-explore-collection', ExploreCollection);
 
   customElements.define('app-test', AppTestElement);
   customElements.define('app-error-block-not-found', BlockNotFound);

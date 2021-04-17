@@ -211,41 +211,6 @@ export class AppManager {
     return forkId;
   }
 
-  async getBlogFeed(
-    offset: number,
-    first: number,
-    text?: string,
-    userId?: string
-  ): Promise<SearchResult> {
-    const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
-    const userHome = userId
-      ? await getHome(this.evees.getRemote(), userId)
-      : undefined;
-
-    const result = await this.evees.client.searchEngine.explore(
-      {
-        under: userHome ? { elements: [{ id: userHome.id }] } : undefined,
-        linksTo: { elements: [{ id: blogConcept.id }] },
-        pagination: {
-          offset,
-          first,
-        },
-        text: text
-          ? {
-              value: text,
-              levels: -1,
-            }
-          : undefined,
-      },
-      {
-        details: true,
-        entities: true,
-        levels: 0,
-      }
-    );
-    return result;
-  }
-
   // TODO: TEST: find another user's blogs to simulate follows
   async getBlogIdOf(userId: string): Promise<string | undefined> {
     const userHome = await getHome(this.evees.getRemote(), userId);

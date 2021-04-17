@@ -530,6 +530,9 @@ export class DocumentPage extends ConnectedElement {
           scrollbar-width: none; /* Firefox */
           padding-bottom: 30vmin;
         }
+        .page-container {
+          width: 100%;
+        }
         .pending {
           --fill: var(--gray-light, black);
           color: var(--gray-light, black);

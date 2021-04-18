@@ -91,18 +91,15 @@ export class DocumentPage extends ConnectedElement {
   originId: string;
 
   async firstUpdated() {
-    if (this.appManager.draftsEvees.client.events) {
-      this.appManager.draftsEvees.client.events.on(
+    if (this.evees.client.events) {
+      this.evees.client.events.on(
         ClientEvents.ecosystemUpdated,
         (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
       );
 
-      this.appManager.draftsEvees.events.on(
-        EveesEvents.pending,
-        (pending: boolean) => {
-          this.eveesPending = pending;
-        }
-      );
+      this.evees.events.on(EveesEvents.pending, (pending: boolean) => {
+        this.eveesPending = pending;
+      });
     }
 
     this.load();
@@ -165,9 +162,7 @@ export class DocumentPage extends ConnectedElement {
         )
     );
 
-    const { details } = await this.appManager.draftsEvees.client.getPerspective(
-      this.pageId
-    );
+    const { details } = await this.evees.client.getPerspective(this.pageId);
 
     this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
@@ -186,9 +181,7 @@ export class DocumentPage extends ConnectedElement {
 
     this.readOnly = details.guardianId !== this.privateSection.id;
 
-    const perspective = await this.appManager.draftsEvees.client.store.getEntity(
-      this.pageId
-    );
+    const perspective = await this.evees.client.store.getEntity(this.pageId);
 
     if (
       perspective.object.payload.meta &&
@@ -501,7 +494,7 @@ export class DocumentPage extends ConnectedElement {
           uref=${this.pageId}
           emit-updates
           ?read-only=${this.readOnly}
-          .localEvees=${this.appManager.draftsEvees}
+          .localEvees=${this.evees}
           .getEveeInfo=${(uref) =>
             html`<app-block-info uref=${uref}></app-block-info>`}
           show-info

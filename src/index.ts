@@ -22,7 +22,7 @@ import { AppTestElement } from './containers/Test/app.e2e.test';
 import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
 import { GridCardItem } from './containers/Collections/Items/grid-card.item';
 import { TableRowItem } from './containers/Collections/Items/table-row.item';
-import { BlockItem } from './containers/Collections/Items/block.item';
+import { BlockItemRouter } from './containers/Collections/Items/block.item.router';
 import { EveesDataCollection } from './containers/Collections/Implementations/evees.data.collection';
 import { ExploreCollection } from './containers/Collections/Implementations/explore.collection';
 import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';
@@ -54,7 +54,7 @@ import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';
   customElements.define('app-block-info', BlockInfoPopper);
 
   // Collections
-  customElements.define('app-block-item', BlockItem);
+  customElements.define('app-block-item', BlockItemRouter);
   customElements.define('app-item-grid-card', GridCardItem);
   customElements.define('app-item-table-row', TableRowItem);
   customElements.define('app-item-page-feed', PageFeedItem);

@@ -1,5 +1,6 @@
-import { MenuOptions } from '@uprtcl/common-ui';
 import { html, css, property } from 'lit-element';
+
+import { MenuOptions } from '@uprtcl/common-ui';
 
 import { ConnectedElement } from '../../../services/connected.element';
 import { BlockViewType } from '../collection.base';
@@ -9,7 +10,8 @@ export enum BlockActions {
   addToClipboard = 'addToClipboard',
 }
 
-export class BlockItem extends ConnectedElement {
+/** a component that dynamically renders a block component based on the BlockViewType */
+export class BlockItemRouter extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
@@ -21,38 +23,26 @@ export class BlockItem extends ConnectedElement {
 
   actionOptions: MenuOptions = new Map();
 
-  async remove() {
-    const ix = await this.appManager.draftsEvees.getChildIndex(
-      this.uiParent,
-      this.uref
-    );
-    this.appManager.draftsEvees.removeChild(this.uiParent, ix);
-  }
-
-  action(action: string) {
-    switch (action) {
-      case BlockActions.remove:
-        this.remove();
-    }
-  }
-
   renderItem() {
     switch (this.viewType) {
       case BlockViewType.gridCard:
         return html`<app-item-grid-card
           uref=${this.uref}
+          ui-parent=${this.uiParent}
           .actionOptions=${this.actionOptions}
         ></app-item-grid-card>`;
 
       case BlockViewType.tableRow:
         return html`<app-item-table-row
           uref=${this.uref}
+          ui-parent=${this.uiParent}
           .actionOptions=${this.actionOptions}
         ></app-item-table-row>`;
 
       case BlockViewType.pageFeedItem:
         return html`<app-item-page-feed
           uref=${this.uref}
+          ui-parent=${this.uiParent}
           .actionOptions=${this.actionOptions}
         ></app-item-page-feed>`;
     }

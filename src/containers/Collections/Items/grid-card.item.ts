@@ -3,14 +3,12 @@ import { Lens } from '@uprtcl/evees-ui';
 import { Entity, Perspective, Secured } from '@uprtcl/evees';
 import { icons, MenuOptions } from '@uprtcl/common-ui';
 
-import { ConnectedElement } from '../../../services/connected.element';
 import { sharedStyles, tableStyles } from '../../../styles';
-
 import { GenerateUserRoute } from '../../../utils/routes.helpers';
 
-export const PAGE_SELECTED_EVENT_NAME = 'page-selected';
+import { BlockAction, BlockItemBase } from './block.item.base';
 
-export class GridCardItem extends ConnectedElement {
+export class GridCardItem extends BlockItemBase {
   @property({ type: String })
   uref: string;
 
@@ -32,25 +30,13 @@ export class GridCardItem extends ConnectedElement {
   async load() {
     this.loading = true;
 
-    this.data = await this.appManager.draftsEvees.getPerspectiveData(this.uref);
-    this.perspective = await this.appManager.draftsEvees.client.store.getEntity(
-      this.uref
-    );
+    this.data = await this.evees.getPerspectiveData(this.uref);
+    this.perspective = await this.evees.client.store.getEntity(this.uref);
 
     this.title = this.evees.behaviorFirst(this.data.object, 'title');
     this.previewLense = this.evees.behaviorFirst(this.data.object, 'preview');
 
     this.loading = false;
-  }
-
-  handleAction(option: string) {
-    this.dispatchEvent(
-      new CustomEvent('action-selected', {
-        composed: true,
-        bubbles: true,
-        detail: { uref: this.uref, option },
-      })
-    );
   }
 
   render() {
@@ -77,7 +63,7 @@ export class GridCardItem extends ConnectedElement {
               ([itemKey, item]) => {
                 return html`<div
                   class="clickable"
-                  @click=${() => this.handleAction(itemKey)}
+                  @click=${() => this.handleAction(itemKey as BlockAction)}
                 >
                   ${icons[item.icon]}<span>${item.text}</span>
                 </div>`;

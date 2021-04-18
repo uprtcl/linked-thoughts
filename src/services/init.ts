@@ -8,7 +8,7 @@ import {
 } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
-import { EveesContentModule } from '@uprtcl/evees';
+import { EveesConfig, EveesContentModule } from '@uprtcl/evees';
 import { init, MultiContainer } from '@uprtcl/evees-ui';
 
 import { appElementsInit } from './app.elements.init';
@@ -75,7 +75,13 @@ export const initUprtcl = async () => {
     new ThoughtsTextNodePattern(),
   ];
 
-  const evees = init(remotes, [httpStore], modules, appPatterns);
+  const config: EveesConfig = {
+    flush: {
+      autoflush: false,
+      debounce: 1000,
+    },
+  };
+  const evees = init(remotes, [httpStore], modules, appPatterns, config);
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

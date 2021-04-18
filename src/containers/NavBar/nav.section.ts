@@ -127,7 +127,6 @@ export class NavSectionElement extends EveesBaseElement<Section> {
               ui-parent=${this.uref}
               idx=${pageIndex}
               @delete-element=${() => this.deletePage(pageIndex)}
-              .localEvees=${this.appManager.draftsEvees}
             ></app-nav-page-item>`;
           })}
         </uprtcl-list>

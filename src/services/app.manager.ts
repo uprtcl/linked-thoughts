@@ -11,7 +11,6 @@ import {
   Secured,
   Perspective,
   getHome,
-  SearchResult,
   ClientCachedLocal,
   UpdatePerspectiveData,
   Logger,
@@ -41,24 +40,10 @@ export class AppManager {
   events: EventEmitter;
   elements: AppElements;
   appError: AppError;
-  draftsEvees: Evees;
 
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
     this.appError = new AppError();
-    const draftsClient = new ClientCachedLocal(
-      undefined,
-      this.evees.client,
-      false,
-      'local-drafts'
-    );
-    const config = { ...this.evees.config };
-    config.flush = {
-      autoflush: false,
-      debounce: 1000,
-    };
-
-    this.draftsEvees = this.evees.clone('local-drafts', draftsClient, config);
 
     this.events = new EventEmitter();
     this.events.setMaxListeners(1000);
@@ -145,7 +130,7 @@ export class AppManager {
 
   /** persist all changes in the drafEvees of a given page to the backend */
   async commitPage(pageId: string) {
-    await this.draftsEvees.client.flush({
+    await this.evees.client.flush({
       under: { elements: [{ id: pageId }] },
     });
   }
@@ -158,7 +143,7 @@ export class AppManager {
     /** moves the page draft changes to the evees client */
     /** and creates a fork */
 
-    await this.draftsEvees.flushPendingUpdates();
+    await this.evees.flushPendingUpdates();
     await this.commitPage(pageId);
 
     const forkId = await this.evees.forkPerspective(
@@ -266,7 +251,7 @@ export class AppManager {
     };
 
     // Create a temporary workspaces to compute the merge
-    const evees = this.draftsEvees.clone('compare-client');
+    const evees = this.evees.clone('compare-client');
     const merger = new RecursiveContextMergeStrategy(evees);
     await merger.mergePerspectivesExternal(to, from, config);
 

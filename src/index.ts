@@ -18,7 +18,7 @@ import AppBarPublic from './components/PublicAppBar/Appbar.public';
 import '@ui5/webcomponents/dist/Carousel';
 import { BlockInfoPopper } from './containers/BlockInfo/block-info';
 // Forks
-import { AppTestElement } from './containers/Test/app.e2e.test';
+import { AppTestElement } from './containers/Test/run.e2e.test';
 import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
 import { GridCardItem } from './containers/Collections/Items/grid-card.item';
 import { TableRowItem } from './containers/Collections/Items/table-row.item';

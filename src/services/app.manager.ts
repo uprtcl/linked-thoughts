@@ -108,7 +108,7 @@ export class AppManager {
         perspectiveId: blogSection.id,
         object: blogDataNew,
       });
-      await this.evees.client.flush();
+      await this.evees.flush();
     }
   }
 
@@ -123,14 +123,14 @@ export class AppManager {
       },
     };
     const childId = await this.evees.addNewChild(onSectionId, page);
-    await this.evees.client.flush();
+    await this.evees.flush();
 
     return childId;
   }
 
   /** persist all changes in the drafEvees of a given page to the backend */
   async commitPage(pageId: string) {
-    await this.evees.client.flush({
+    await this.evees.flush({
       under: { elements: [{ id: pageId }] },
     });
   }
@@ -143,7 +143,7 @@ export class AppManager {
     /** moves the page draft changes to the evees client */
     /** and creates a fork */
 
-    await this.evees.flushPendingUpdates();
+    await this.evees.awaitPending();
     await this.commitPage(pageId);
 
     const forkId = await this.evees.forkPerspective(
@@ -154,7 +154,7 @@ export class AppManager {
     await this.evees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.evees.client.flush();
+      await this.evees.flush();
     }
 
     return forkId;
@@ -168,7 +168,7 @@ export class AppManager {
     await this.evees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.evees.client.flush();
+      await this.evees.flush();
     }
   }
 
@@ -201,7 +201,7 @@ export class AppManager {
     const userHome = await getHome(this.evees.getRemote(), userId);
     const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
 
-    const result = await this.evees.client.searchEngine.explore({
+    const result = await this.evees.explore({
       under: { elements: [{ id: userHome.id }] },
       linksTo: { elements: [{ id: blogHomeConcept.id }] },
     });
@@ -227,7 +227,7 @@ export class AppManager {
   /** find all the sections where other perspectives of a page have been
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
-    const forks = await this.evees.client.searchEngine.explore({
+    const forks = await this.evees.explore({
       under: { elements: [{ id: pageId }], levels: 0 },
       forks: {
         include: true,
@@ -237,7 +237,7 @@ export class AppManager {
 
     const locations = await Promise.all(
       forks.perspectiveIds.map(async (forkId) => {
-        return this.evees.client.searchEngine.locate(forkId, false);
+        return [];
       })
     );
 

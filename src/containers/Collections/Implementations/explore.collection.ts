@@ -14,7 +14,7 @@ export class ExploreCollection extends CollectionBaseElement {
   fetchOptions: GetPerspectiveOptions;
 
   async getMoreItems(): Promise<string[]> {
-    const result = await this.evees.client.searchEngine.explore(
+    const result = await this.evees.explore(
       {
         ...this.exploreOptions,
         pagination: {

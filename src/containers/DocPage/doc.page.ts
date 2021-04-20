@@ -91,11 +91,12 @@ export class DocumentPage extends ConnectedElement {
   originId: string;
 
   async firstUpdated() {
-    if (this.evees.client.events) {
-      this.evees.client.events.on(
-        ClientEvents.ecosystemUpdated,
-        (perspectiveIds: string[]) => this.ecosystemUpdated(perspectiveIds)
-      );
+    if (this.evees.getClient().events) {
+      this.evees
+        .getClient()
+        .events.on(ClientEvents.ecosystemUpdated, (perspectiveIds: string[]) =>
+          this.ecosystemUpdated(perspectiveIds)
+        );
 
       this.evees.events.on(EveesEvents.pending, (pending: boolean) => {
         this.eveesPending = pending;
@@ -162,7 +163,7 @@ export class DocumentPage extends ConnectedElement {
         )
     );
 
-    const { details } = await this.evees.client.getPerspective(this.pageId);
+    const { details } = await this.evees.getPerspective(this.pageId);
 
     this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
@@ -181,7 +182,7 @@ export class DocumentPage extends ConnectedElement {
 
     this.readOnly = details.guardianId !== this.privateSection.id;
 
-    const perspective = await this.evees.client.store.getEntity(this.pageId);
+    const perspective = await this.evees.getEntity(this.pageId);
 
     if (
       perspective.object.payload.meta &&
@@ -216,11 +217,11 @@ export class DocumentPage extends ConnectedElement {
       );
 
       /** brute force add onEcosystem to all indexData of the changes in the push client */
-      await (this.eveesPush.client as ClientOnMemory).addOnEcosystem([
+      await (this.eveesPush.getClient() as ClientOnMemory).addOnEcosystem([
         this.fork.childId,
       ]);
 
-      this.pushDiff = await this.eveesPush.client.diff();
+      this.pushDiff = await this.eveesPush.diff();
       if (LOGINFO)
         this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
     } else {
@@ -262,7 +263,7 @@ export class DocumentPage extends ConnectedElement {
       this.fork.childId
     );
     await this.evees.deleteChild(this.fork.parentId, index);
-    await this.evees.client.flush();
+    await this.evees.flush();
     await this.loadForks();
     this.addingPage = false;
   }
@@ -285,12 +286,9 @@ export class DocumentPage extends ConnectedElement {
     this.pushing = true;
 
     /** flush from onmemory to local */
-    await this.eveesPush.client.flush(
-      {
-        under: { elements: [{ id: this.fork.childId }] },
-      },
-      true
-    );
+    await this.eveesPush.flush({
+      under: { elements: [{ id: this.fork.childId }] },
+    });
 
     this.pushing = false;
     this.loadForks();
@@ -301,7 +299,7 @@ export class DocumentPage extends ConnectedElement {
       this.pageId,
       this.originId
     );
-    const diff = await this.eveesPull.client.diff();
+    const diff = await this.eveesPull.diff();
     this.hasPull = diff.updates.length > 0;
 
     // To show the snackbar
@@ -311,7 +309,7 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async pull() {
-    await this.eveesPull.client.flush();
+    await this.eveesPull.flush();
     this.checkOrigin();
     this.documentEditor.reload();
   }

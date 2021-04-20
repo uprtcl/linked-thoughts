@@ -39,7 +39,7 @@ export class VisitorElement extends ConnectedElement {
       try {
         const {
           object: { payload: { creatorId = null } = {} } = {},
-        } = await this.evees.client.store.getEntity(docId);
+        } = await this.evees.getEntity(docId);
 
         authorId = creatorId;
       } catch (e) {

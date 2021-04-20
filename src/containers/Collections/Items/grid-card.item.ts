@@ -31,7 +31,7 @@ export class GridCardItem extends BlockItemBase {
     this.loading = true;
 
     this.data = await this.evees.getPerspectiveData(this.uref);
-    this.perspective = await this.evees.client.store.getEntity(this.uref);
+    this.perspective = await this.evees.getEntity(this.uref);
 
     this.title = this.evees.behaviorFirst(this.data.object, 'title');
     this.previewLense = this.evees.behaviorFirst(this.data.object, 'preview');

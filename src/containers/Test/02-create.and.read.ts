@@ -59,7 +59,7 @@ export class CreateAndRead extends InitializeElements {
       pageData.object.links.map(async (par, ix) => {
         const parData = await this.evees.getPerspectiveData<TextNode>(par);
 
-        if (parData.object.text !== PARS[ix]) {
+        if (parData.object.text !== PARS.reverse()[ix]) {
           throw new Error(`unexpected`);
         }
       })

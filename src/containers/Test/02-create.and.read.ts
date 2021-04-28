@@ -12,7 +12,7 @@ export class CreateAndRead extends InitializeElements {
     this.logger.log('updatePage()');
 
     const privateSectionData = await this.evees.getPerspectiveData<Section>(
-      this.privateSection.id
+      this.privateSection.hash
     );
 
     this.pageId = privateSectionData.object.pages[0];

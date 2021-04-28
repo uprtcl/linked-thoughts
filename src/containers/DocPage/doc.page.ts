@@ -10,7 +10,6 @@ import {
   ParentAndChild,
   EveesMutation,
   Entity,
-  ClientOnMemory,
 } from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
 import { Router } from '@vaadin/router';
@@ -172,7 +171,7 @@ export class DocumentPage extends ConnectedElement {
       '/linkedThoughts/blogSection'
     );
 
-    if (details.guardianId && details.guardianId != this.privateSection.id) {
+    if (details.guardianId && details.guardianId != this.privateSection.hash) {
       this.isPagePrivate = false;
     } else {
       this.isPagePrivate = true;
@@ -180,7 +179,7 @@ export class DocumentPage extends ConnectedElement {
 
     this.loading = false;
 
-    this.readOnly = details.guardianId !== this.privateSection.id;
+    this.readOnly = details.guardianId !== this.privateSection.hash;
 
     const perspective = await this.evees.getEntity(this.pageId);
 
@@ -216,11 +215,6 @@ export class DocumentPage extends ConnectedElement {
         this.pageId
       );
 
-      /** brute force add onEcosystem to all indexData of the changes in the push client */
-      await (this.eveesPush.getClient() as ClientOnMemory).addOnEcosystem([
-        this.fork.childId,
-      ]);
-
       this.pushDiff = await this.eveesPush.diff();
       if (LOGINFO)
         this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
@@ -246,9 +240,9 @@ export class DocumentPage extends ConnectedElement {
 
   toggleBlogVersion() {
     if (this.fork) {
-      this.deleteFrom(this.blogSection.id);
+      this.deleteFrom(this.blogSection.hash);
     } else {
-      this.shareTo(this.blogSection.id);
+      this.shareTo(this.blogSection.hash);
     }
   }
 

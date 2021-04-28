@@ -86,7 +86,7 @@ export class SectionPage extends EveesBaseElement<Section> {
     const privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
-    this.canCreate = privateSection.id === this.uref;
+    this.canCreate = privateSection.hash === this.uref;
 
     this.pageList = await Promise.all(
       this.data.object.pages.map(async (pageId) => {
@@ -291,7 +291,7 @@ export class SectionPage extends EveesBaseElement<Section> {
                 <td
                   class="clickable"
                   @click=${() =>
-                    this.navigateToDoc(pageData.meta.perspective.id)}
+                    this.navigateToDoc(pageData.meta.perspective.hash)}
                 >
                   ${pageData.data.object.text
                     ? html`<b>${pageData.data.object.text}</b>`

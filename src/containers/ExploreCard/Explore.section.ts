@@ -48,7 +48,7 @@ export default class ExploreSection extends ConnectedElement {
     const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
 
     this.exploreOptions = {
-      linksTo: { elements: [{ id: blogConcept.id }] },
+      linksTo: { elements: [{ id: blogConcept.hash }] },
     };
 
     this.appManager.events.on(
@@ -140,7 +140,7 @@ export default class ExploreSection extends ConnectedElement {
         : html`<app-evees-data-collection
             header-view=${HeaderViewType.feed}
             class=${resultsContainerClass}
-            uref=${this.clipboardSection.id}
+            uref=${this.clipboardSection.hash}
           ></app-evees-data-collection>`}
     </div>`;
   }

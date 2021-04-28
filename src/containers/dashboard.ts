@@ -124,7 +124,7 @@ export class DashboardElement extends ConnectedElement {
         '/linkedThoughts/privateSection'
       );
       const privateSectionData = await this.evees.getPerspectiveData<Section>(
-        privateSection.id
+        privateSection.hash
       );
 
       if (privateSectionData && privateSectionData.object.pages.length > 0) {
@@ -150,7 +150,7 @@ export class DashboardElement extends ConnectedElement {
   async load() {
     this.loading = true;
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
-      this.dashboardPerspective.id
+      this.dashboardPerspective.hash
     );
     if (!this.dashboardData) {
       throw new Error('dashboard data not defined');
@@ -238,7 +238,7 @@ export class DashboardElement extends ConnectedElement {
 
     return html`<app-evees-data-collection
       title="Forks"
-      uref=${this.forksSection.id}
+      uref=${this.forksSection.hash}
       .actionOptions=${actionOptions}
     />`;
   }

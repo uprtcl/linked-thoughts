@@ -6,13 +6,13 @@ import { Dashboard } from '../containers/types';
 export const appElementsInit: AppElement = {
   path: '/',
   getInitData: (children: AppElement[]) => {
-    return { linkedThoughts: children[0].perspective.id };
+    return { linkedThoughts: children[0].perspective.hash };
   },
   children: [
     {
       path: '/linkedThoughts',
       getInitData: (children: AppElement[]): Dashboard => {
-        return { sections: children.map((child) => child.perspective.id) };
+        return { sections: children.map((child) => child.perspective.hash) };
       },
       children: [
         {
@@ -20,7 +20,7 @@ export const appElementsInit: AppElement = {
           getInitData: (children: AppElement[]) => {
             return {
               title: 'Private',
-              pages: children.map((child) => child.perspective.id),
+              pages: children.map((child) => child.perspective.hash),
             };
           },
           children: [

@@ -19,10 +19,12 @@ export class LTRouter {
     router.setRoutes([
       {
         path: Routes.Test,
+        name: RouteName.test,
         component: 'app-test',
       },
       {
         path: Routes.GettingStarted,
+        name: RouteName.gettingStarted,
         component: 'app-getting-started',
       },
       {

@@ -220,10 +220,9 @@ export class DocumentPage extends ConnectedElement {
         this.logger.log('loadChanges() - done', { pushDiff: this.pushDiff });
     } else {
       this.pushDiff = {
-        deletedPerspectives: [],
-        entities: [],
         newPerspectives: [],
         updates: [],
+        deletedPerspectives: [],
       };
     }
   }

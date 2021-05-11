@@ -62,8 +62,8 @@ export const initUprtcl = async () => {
   );
 
   const httpEvees = new EveesHttp(httpConnection);
+  const clientRemotes = [httpEvees];
 
-  const remotes = [httpEvees];
   const modules = new Map<string, EveesContentModule>();
   modules.set(DocumentsModule.id, new DocumentsModule());
 
@@ -81,7 +81,7 @@ export const initUprtcl = async () => {
       debounce: 1000,
     },
   };
-  const evees = init(remotes, modules, appPatterns, config);
+  const evees = init(clientRemotes, modules, appPatterns, config);
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

@@ -84,8 +84,6 @@ export class DashboardElement extends ConnectedElement {
     } else {
       Router.go(GettingStarted);
     }
-
-    this.loading = false;
   }
 
   async login() {
@@ -120,15 +118,17 @@ export class DashboardElement extends ConnectedElement {
       }
     } else if (this.routeName === RouteName.dashboard) {
       // go to the first private page if nothing is selected.
-      const privateSection = await this.appManager.elements.get(
-        '/linkedThoughts/privateSection'
-      );
-      const privateSectionData = await this.evees.getPerspectiveData<Section>(
-        privateSection.id
-      );
+      if (this.isLogged) {
+        const privateSection = await this.appManager.elements.get(
+          '/linkedThoughts/privateSection'
+        );
+        const privateSectionData = await this.evees.getPerspectiveData<Section>(
+          privateSection.hash
+        );
 
-      if (privateSectionData && privateSectionData.object.pages.length > 0) {
-        Router.go(GenerateDocumentRoute(privateSectionData.object.pages[0]));
+        if (privateSectionData && privateSectionData.object.pages.length > 0) {
+          Router.go(GenerateDocumentRoute(privateSectionData.object.pages[0]));
+        }
       }
     }
   }
@@ -150,7 +150,7 @@ export class DashboardElement extends ConnectedElement {
   async load() {
     this.loading = true;
     this.dashboardData = await this.evees.getPerspectiveData<Dashboard>(
-      this.dashboardPerspective.id
+      this.dashboardPerspective.hash
     );
     if (!this.dashboardData) {
       throw new Error('dashboard data not defined');
@@ -238,7 +238,7 @@ export class DashboardElement extends ConnectedElement {
 
     return html`<app-evees-data-collection
       title="Forks"
-      uref=${this.forksSection.id}
+      uref=${this.forksSection.hash}
       .actionOptions=${actionOptions}
     />`;
   }

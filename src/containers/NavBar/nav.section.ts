@@ -45,7 +45,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     const privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
-    this.canCreate = privateSection.id === this.uref;
+    this.canCreate = privateSection.hash === this.uref;
     this.decodeUrl();
   }
 
@@ -82,7 +82,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       }
 
       await this.evees.deleteChild(this.uref, pageIx);
-      await this.evees.client.flush();
+      await this.evees.flush();
 
       if (wasSelected) {
         Router.go(GenerateSectionRoute(this.uref));

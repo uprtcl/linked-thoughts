@@ -32,7 +32,7 @@ export class BlockInfoPopper extends ConnectedElement {
   }
 
   async forkBlock() {
-    await this.appManager.forkPage(this.uref, this.forksSection.id, true);
+    await this.appManager.forkPage(this.uref, this.forksSection.hash, true);
   }
 
   render() {

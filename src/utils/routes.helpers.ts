@@ -12,6 +12,8 @@ export enum RouteName {
   page = 'page',
   section = 'section',
   fork = 'forks',
+  gettingStarted = 'getting-started',
+  test = 'test',
 }
 
 export const GenerateDocumentRoute = (docId: string = ':docId') =>

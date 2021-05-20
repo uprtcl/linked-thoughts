@@ -11,7 +11,6 @@ import {
   Secured,
   Perspective,
   getHome,
-  ClientCachedLocal,
   UpdatePerspectiveData,
   Logger,
 } from '@uprtcl/evees';
@@ -70,9 +69,9 @@ export class AppManager {
     const blogSection = await this.elements.get('/linkedThoughts/blogSection');
 
     const remote = this.evees.getRemote() as EveesHttp;
-    await remote.accessControl.toggleDelegate(blogSection.id, false);
+    await remote.accessControl.toggleDelegate(blogSection.hash, false);
     await remote.accessControl.setPublicPermissions(
-      blogSection.id,
+      blogSection.hash,
       PermissionType.Read,
       true
     );
@@ -82,19 +81,19 @@ export class AppManager {
 
     // get the current Section data of the blog section
     const blogSectionData = await this.evees.getPerspectiveData<Section>(
-      blogSection.id
+      blogSection.hash
     );
 
     if (
       blogSectionData.object.meta === undefined ||
       blogSectionData.object.meta.isA === undefined ||
-      !blogSectionData.object.meta.isA.includes(blogHomeConcept.id)
+      !blogSectionData.object.meta.isA.includes(blogHomeConcept.hash)
     ) {
       // append the bloghome concept
       const isAOrg = blogSectionData.object.meta
         ? blogSectionData.object.meta.isA
         : [];
-      const isANew = isAOrg.concat([blogHomeConcept.id]);
+      const isANew = isAOrg.concat([blogHomeConcept.hash]);
 
       const blogDataNew: Section = {
         ...blogSectionData.object,
@@ -105,10 +104,10 @@ export class AppManager {
 
       /** update the section data (adding the link) */
       await this.evees.updatePerspectiveData({
-        perspectiveId: blogSection.id,
+        perspectiveId: blogSection.hash,
         object: blogDataNew,
       });
-      await this.evees.client.flush();
+      await this.evees.flush();
     }
   }
 
@@ -119,18 +118,18 @@ export class AppManager {
       type: TextType.Title,
       links: [],
       meta: {
-        isA: [pageConcept.id],
+        isA: [pageConcept.hash],
       },
     };
     const childId = await this.evees.addNewChild(onSectionId, page);
-    await this.evees.client.flush();
+    await this.evees.flush();
 
     return childId;
   }
 
   /** persist all changes in the drafEvees of a given page to the backend */
   async commitPage(pageId: string) {
-    await this.evees.client.flush({
+    await this.evees.flush({
       under: { elements: [{ id: pageId }] },
     });
   }
@@ -143,7 +142,7 @@ export class AppManager {
     /** moves the page draft changes to the evees client */
     /** and creates a fork */
 
-    await this.evees.flushPendingUpdates();
+    await this.evees.awaitPending();
     await this.commitPage(pageId);
 
     const forkId = await this.evees.forkPerspective(
@@ -154,7 +153,7 @@ export class AppManager {
     await this.evees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.evees.client.flush();
+      await this.evees.flush();
     }
 
     return forkId;
@@ -168,7 +167,7 @@ export class AppManager {
     await this.evees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.evees.client.flush();
+      await this.evees.flush();
     }
   }
 
@@ -177,7 +176,7 @@ export class AppManager {
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
 
     /** keep the the entire object and append the blogConcept to the isA array. */
-    const newObject = MetaHelper.addIsA(data.object, [blogConcept.id]);
+    const newObject = MetaHelper.addIsA(data.object, [blogConcept.hash]);
 
     const updateData: UpdatePerspectiveData = {
       perspectiveId: postId,
@@ -201,9 +200,9 @@ export class AppManager {
     const userHome = await getHome(this.evees.getRemote(), userId);
     const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
 
-    const result = await this.evees.client.searchEngine.explore({
-      under: { elements: [{ id: userHome.id }] },
-      linksTo: { elements: [{ id: blogHomeConcept.id }] },
+    const result = await this.evees.explore({
+      under: { elements: [{ id: userHome.hash }] },
+      linksTo: { elements: [{ id: blogHomeConcept.hash }] },
     });
 
     if (result.perspectiveIds.length > 1) {
@@ -219,7 +218,7 @@ export class AppManager {
   async getSections(): Promise<string[]> {
     const dashboardPerspective = await this.elements.get('/linkedThoughts');
     const dashboardData = await this.evees.getPerspectiveData<Dashboard>(
-      dashboardPerspective.id
+      dashboardPerspective.hash
     );
     return dashboardData.object.sections;
   }
@@ -227,19 +226,12 @@ export class AppManager {
   /** find all the sections where other perspectives of a page have been
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
-    const forks = await this.evees.client.searchEngine.explore({
-      under: { elements: [{ id: pageId }], levels: 0 },
+    const locations = await this.evees.explore({
+      above: { elements: [{ id: pageId }], levels: 1 },
       forks: {
-        include: true,
         independent: true,
       },
     });
-
-    const locations = await Promise.all(
-      forks.perspectiveIds.map(async (forkId) => {
-        return this.evees.client.searchEngine.locate(forkId, false);
-      })
-    );
 
     return Array.prototype.concat.apply([], locations);
   }

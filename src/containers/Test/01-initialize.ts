@@ -14,7 +14,7 @@ export class InitializeElements extends TestBaseElement {
     );
 
     const privateSectionData = await this.evees.getPerspectiveData<Section>(
-      this.privateSection.id
+      this.privateSection.hash
     );
 
     if (privateSectionData.object.pages.length !== 1) {

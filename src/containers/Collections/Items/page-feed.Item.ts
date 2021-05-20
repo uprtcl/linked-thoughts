@@ -26,12 +26,10 @@ export class PageFeedItem extends ConnectedElement {
 
   async load() {
     this.loading = true;
-    const { details } = await this.evees.client.getPerspective(this.uref);
+    const { details } = await this.evees.getPerspective(this.uref);
 
     if (details.headId) {
-      this.head = await this.evees.client.store.getEntity<Signed<Commit>>(
-        details.headId
-      );
+      this.head = await this.evees.getEntity<Signed<Commit>>(details.headId);
     }
 
     this.loading = false;

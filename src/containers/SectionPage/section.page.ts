@@ -86,13 +86,13 @@ export class SectionPage extends EveesBaseElement<Section> {
     const privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );
-    this.canCreate = privateSection.id === this.uref;
+    this.canCreate = privateSection.hash === this.uref;
 
     this.pageList = await Promise.all(
       this.data.object.pages.map(async (pageId) => {
-        const { details } = await this.localEvees.client.getPerspective(pageId);
+        const { details } = await this.localEvees.getPerspective(pageId);
 
-        const perspective = await this.localEvees.client.store.getEntity<
+        const perspective = await this.localEvees.getEntity<
           Signed<Perspective>
         >(pageId);
 
@@ -100,11 +100,11 @@ export class SectionPage extends EveesBaseElement<Section> {
         let data = undefined;
 
         if (details.headId) {
-          head = await this.localEvees.client.store.getEntity<Signed<Commit>>(
+          head = await this.localEvees.getEntity<Signed<Commit>>(
             details.headId
           );
 
-          data = await this.localEvees.client.store.getEntity<TextNode>(
+          data = await this.localEvees.getEntity<TextNode>(
             head.object.payload.dataId
           );
         }
@@ -291,7 +291,7 @@ export class SectionPage extends EveesBaseElement<Section> {
                 <td
                   class="clickable"
                   @click=${() =>
-                    this.navigateToDoc(pageData.meta.perspective.id)}
+                    this.navigateToDoc(pageData.meta.perspective.hash)}
                 >
                   ${pageData.data.object.text
                     ? html`<b>${pageData.data.object.text}</b>`

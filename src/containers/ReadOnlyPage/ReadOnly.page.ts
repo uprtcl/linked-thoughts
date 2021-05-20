@@ -24,8 +24,8 @@ export default class ReadOnlyPage extends ConnectedElement {
   async load() {
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
-    this.userId = await (await this.evees.client.store.getEntity(this.uref))
-      .object.payload.creatorId;
+    this.userId = await (await this.evees.getEntity(this.uref)).object.payload
+      .creatorId;
   }
 
   render() {

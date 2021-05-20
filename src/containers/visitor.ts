@@ -1,15 +1,13 @@
 import { html, css, internalProperty } from 'lit-element';
-import { Router } from '@vaadin/router';
+
 import { styles } from '@uprtcl/common-ui';
 import { Logger } from '@uprtcl/evees';
-
 import { EveesHttp } from '@uprtcl/evees-http';
-import { LTRouter } from '../router';
 
+import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
-import IntercreativityLogo from '../assets/intercreativity.svg';
-import { ORIGIN } from '../utils/routes.generator';
 import { NavigateTo404 } from '../utils/routes.helpers';
+
 export class VisitorElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
@@ -39,7 +37,7 @@ export class VisitorElement extends ConnectedElement {
       try {
         const {
           object: { payload: { creatorId = null } = {} } = {},
-        } = await this.evees.client.store.getEntity(docId);
+        } = await this.evees.getEntity(docId);
 
         authorId = creatorId;
       } catch (e) {
@@ -56,7 +54,7 @@ export class VisitorElement extends ConnectedElement {
 
     return html`
       <app-appbar-public></app-appbar-public>
-      <app-read-only-page uref=${this.pageId} />
+      <app-read-only-page uref=${this.pageId}></app-read-only-page>
     `;
   }
 

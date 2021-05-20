@@ -7,7 +7,7 @@ export class PublishToBlog extends CreateAndRead {
     this.logger.log('publishToBlog()');
 
     const privateSectionData = await this.evees.getPerspectiveData<Section>(
-      this.privateSection.id
+      this.privateSection.hash
     );
 
     const pageId = privateSectionData.object.pages[0];
@@ -15,7 +15,7 @@ export class PublishToBlog extends CreateAndRead {
     const pageData = await this.evees.getPerspectiveData<TextNode>(pageId);
 
     // fork of page
-    await this.appManager.createForkOn(pageId, this.blogSection.id);
+    await this.appManager.createForkOn(pageId, this.blogSection.hash);
 
     // assert
     const forks = await this.appManager.getForkedIn(pageId);

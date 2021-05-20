@@ -1,6 +1,6 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
-import { EveesHttp, HttpStore } from '@uprtcl/evees-http';
+import { EveesHttp } from '@uprtcl/evees-http';
 import {
   HttpMultiConnection,
   HttpAuth0Connection,
@@ -61,10 +61,9 @@ export const initUprtcl = async () => {
     connectionId
   );
 
-  const httpStore = new HttpStore(httpConnection, httpCidConfig);
-  const httpEvees = new EveesHttp(httpConnection, httpStore.casID);
+  const httpEvees = new EveesHttp(httpConnection);
+  const clientRemotes = [httpEvees];
 
-  const remotes = [httpEvees];
   const modules = new Map<string, EveesContentModule>();
   modules.set(DocumentsModule.id, new DocumentsModule());
 
@@ -77,11 +76,12 @@ export const initUprtcl = async () => {
 
   const config: EveesConfig = {
     flush: {
-      autoflush: false,
+      autoflush: true,
+      recurse: false,
       debounce: 1000,
     },
   };
-  const evees = init(remotes, [httpStore], modules, appPatterns, config);
+  const evees = init(clientRemotes, modules, appPatterns, config);
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

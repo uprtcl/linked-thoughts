@@ -226,19 +226,12 @@ export class AppManager {
   /** find all the sections where other perspectives of a page have been
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
-    const forks = await this.evees.explore({
-      under: { elements: [{ id: pageId }], levels: 0 },
+    const locations = await this.evees.explore({
+      above: { elements: [{ id: pageId }], levels: 1 },
       forks: {
-        include: true,
         independent: true,
       },
     });
-
-    const locations = await Promise.all(
-      forks.perspectiveIds.map(async (forkId) => {
-        return [];
-      })
-    );
 
     return Array.prototype.concat.apply([], locations);
   }

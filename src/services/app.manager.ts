@@ -171,7 +171,7 @@ export class AppManager {
     }
   }
 
-  async addBlogPost(postId: string) {
+  async addBlogPost(postId: string, flush: boolean = true) {
     const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(postId);
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
 
@@ -184,14 +184,16 @@ export class AppManager {
     };
 
     await this.evees.updatePerspectiveData(updateData);
-    await this.evees.flush();
+    if (flush) {
+      await this.evees.flush();
+    }
     this.events.emit(AppEvents.blogPostCreated, [postId]);
   }
 
   async createForkOn(pageId: string, onSectionId: string): Promise<string> {
-    const forkId = await this.forkPage(pageId, onSectionId, true);
+    const forkId = await this.forkPage(pageId, onSectionId, false);
     if (LOGINFO) this.logger.log('createForkOn', { forkId, uref: pageId });
-    await this.addBlogPost(forkId);
+    await this.addBlogPost(forkId, true);
     return forkId;
   }
 
@@ -227,7 +229,7 @@ export class AppManager {
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
     const locations = await this.evees.explore({
-      above: { elements: [{ id: pageId }], levels: 1 },
+      above: { elements: [{ id: pageId }] },
       forks: {
         independent: true,
       },

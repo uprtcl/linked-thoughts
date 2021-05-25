@@ -151,15 +151,13 @@ export class DocumentPage extends ConnectedElement {
     this.sections = await Promise.all(
       sectionIds
         .filter((id) => id !== this.fromParentId)
-        .map(
-          async (id): Promise<SectionData> => {
-            const data = await this.evees.getPerspectiveData(id);
-            return {
-              id,
-              data,
-            };
-          }
-        )
+        .map(async (id): Promise<SectionData> => {
+          const data = await this.evees.getPerspectiveData(id);
+          return {
+            id,
+            data,
+          };
+        })
     );
 
     const { details } = await this.evees.getPerspective(this.pageId);
@@ -488,6 +486,11 @@ export class DocumentPage extends ConnectedElement {
           .localEvees=${this.evees}
           .getEveeInfo=${(uref) =>
             html`<app-block-info uref=${uref}></app-block-info>`}
+          .flushConfig=${{
+            debounce: 2000,
+            autoflush: true,
+            levels: 1,
+          }}
           show-info
         >
         </documents-editor>

@@ -74,14 +74,7 @@ export const initUprtcl = async () => {
     new ThoughtsTextNodePattern(),
   ];
 
-  const config: EveesConfig = {
-    flush: {
-      autoflush: true,
-      recurse: false,
-      debounce: 1000,
-    },
-  };
-  const evees = init(clientRemotes, modules, appPatterns, config);
+  const evees = init(clientRemotes, modules, appPatterns);
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

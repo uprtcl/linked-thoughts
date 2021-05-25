@@ -1,27 +1,34 @@
+import lodash from 'lodash';
 import { ThoughtsTextNode } from '../containers/types';
 
 export class MetaHelper {
-  static addIsA(to: ThoughtsTextNode, isA: string[]): ThoughtsTextNode {
-    if (!to.meta) {
+  static addIsA(
+    to: ThoughtsTextNode,
+    isA: string[],
+    clone: boolean = false
+  ): ThoughtsTextNode {
+    const toEf = clone ? lodash.cloneDeep(to) : to;
+
+    if (!toEf.meta) {
       return {
-        ...to,
+        ...toEf,
         meta: {
           isA,
         },
       };
     }
 
-    if (!to.meta.isA) {
+    if (!toEf.meta.isA) {
       return {
-        ...to,
+        ...toEf,
         meta: {
-          ...to.meta,
+          ...toEf.meta,
           isA,
         },
       };
     }
 
-    to.meta.isA.push(...isA);
-    return to;
+    toEf.meta.isA.push(...isA);
+    return toEf;
   }
 }

@@ -128,10 +128,13 @@ export class AppManager {
   }
 
   /** persist all changes in the drafEvees of a given page to the backend */
-  async commitPage(pageId: string) {
-    await this.evees.flush({
-      under: { elements: [{ id: pageId }] },
-    });
+  async commitUnder(elementId: string) {
+    await this.evees.flush(
+      {
+        under: { elements: [{ id: elementId }] },
+      },
+      -1
+    );
   }
 
   async forkPage(
@@ -139,11 +142,8 @@ export class AppManager {
     onSectionId: string,
     flush: boolean = true
   ): Promise<string> {
-    /** moves the page draft changes to the evees client */
-    /** and creates a fork */
-
-    await this.evees.awaitPending();
-    await this.commitPage(pageId);
+    /** condensate and commit all current local changes to the backend */
+    await this.commitUnder(pageId);
 
     const forkId = await this.evees.forkPerspective(
       pageId,
@@ -153,7 +153,7 @@ export class AppManager {
     await this.evees.addExistingChild(forkId, onSectionId);
 
     if (flush) {
-      await this.evees.flush();
+      await this.commitUnder(forkId);
     }
 
     return forkId;
@@ -174,9 +174,8 @@ export class AppManager {
   async addBlogPost(postId: string, flush: boolean = true) {
     const data = await this.evees.getPerspectiveData<ThoughtsTextNode>(postId);
     const blogConcept = await this.getConcept(ConceptId.BLOGPOST);
-
     /** keep the the entire object and append the blogConcept to the isA array. */
-    const newObject = MetaHelper.addIsA(data.object, [blogConcept.hash]);
+    const newObject = MetaHelper.addIsA(data.object, [blogConcept.hash], true);
 
     const updateData: UpdatePerspectiveData = {
       perspectiveId: postId,

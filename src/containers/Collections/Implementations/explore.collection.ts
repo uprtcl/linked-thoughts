@@ -24,7 +24,7 @@ export class ExploreCollection extends CollectionBaseElement {
         text: this.searchQuery
           ? {
               value: this.searchQuery,
-              levels: -1,
+              textLevels: -1,
             }
           : undefined,
       },

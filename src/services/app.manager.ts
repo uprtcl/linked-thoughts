@@ -131,7 +131,7 @@ export class AppManager {
   async commitUnder(elementId: string) {
     await this.evees.flush(
       {
-        under: { elements: [{ id: elementId }] },
+        start: { elements: [{ id: elementId }] },
       },
       -1
     );
@@ -202,8 +202,8 @@ export class AppManager {
     const blogHomeConcept = await this.getConcept(ConceptId.BLOGHOME);
 
     const result = await this.evees.explore({
-      under: { elements: [{ id: userHome.hash }] },
-      linksTo: { elements: [{ id: blogHomeConcept.hash }] },
+      start: { elements: [{ id: userHome.hash }] },
+      linksTo: { elements: [blogHomeConcept.hash] },
     });
 
     if (result.perspectiveIds.length > 1) {
@@ -228,9 +228,15 @@ export class AppManager {
    * created */
   async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
     const locations = await this.evees.explore({
-      above: { elements: [{ id: pageId }] },
-      forks: {
-        independent: true,
+      start: {
+        elements: [
+          {
+            id: pageId,
+            direction: 'above',
+            levels: 1,
+            forks: { independent: true },
+          },
+        ],
       },
     });
 

@@ -48,7 +48,7 @@ export default class ExploreSection extends ConnectedElement {
     const blogConcept = await this.appManager.getConcept(ConceptId.BLOGPOST);
 
     this.exploreOptions = {
-      linksTo: { elements: [{ id: blogConcept.hash }] },
+      linksTo: { elements: [blogConcept.hash] },
     };
 
     this.appManager.events.on(

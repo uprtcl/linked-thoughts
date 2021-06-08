@@ -8,8 +8,8 @@ import {
 } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
-import { EveesConfig, EveesContentModule } from '@uprtcl/evees';
-import { init, MultiContainer } from '@uprtcl/evees-ui';
+import { EveesContentModule } from '@uprtcl/evees';
+import { initDefault, MultiContainer } from '@uprtcl/evees-ui';
 
 import { appElementsInit } from './app.elements.init';
 import {
@@ -74,7 +74,7 @@ export const initUprtcl = async () => {
     new ThoughtsTextNodePattern(),
   ];
 
-  const evees = init(clientRemotes, modules, appPatterns);
+  const evees = initDefault(clientRemotes, undefined, modules, appPatterns);
 
   const services = new Map<string, any>();
   const appManager = new AppManager(evees, appElementsInit);

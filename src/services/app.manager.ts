@@ -225,6 +225,16 @@ export class AppManager {
     return dashboardData.object.sections;
   }
 
+  async getParentsOf(perspectiveId: string) {
+    const result = await this.evees.explore({
+      start: {
+        elements: [{ id: perspectiveId, direction: 'above', levels: 1 }],
+      },
+    });
+
+    return result.perspectiveIds.filter((pid) => pid !== perspectiveId);
+  }
+
   /** find all the sections where other perspectives of a page have been
    * created */
   async getForkedInMine(pageId: string): Promise<ParentAndChild[]> {
@@ -248,19 +258,15 @@ export class AppManager {
 
     const forksLocations = await Promise.all(
       forks.perspectiveIds.map(async (forkId) => {
-        const result = await this.evees.explore({
-          start: { elements: [{ id: forkId, direction: 'above', levels: 1 }] },
-        });
-        const parentsAndChildren = result.perspectiveIds.map(
-          (pid): ParentAndChild => {
-            if (pid !== pageId) {
-              return {
-                parentId: pid,
-                childId: forkId,
-              };
-            }
+        const parents = await this.getParentsOf(forkId);
+        const parentsAndChildren = parents.map((pid): ParentAndChild => {
+          if (pid !== pageId) {
+            return {
+              parentId: pid,
+              childId: forkId,
+            };
           }
-        );
+        });
 
         // remove undefined
         return parentsAndChildren.filter((el) => !!el);

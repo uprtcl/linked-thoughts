@@ -27,7 +27,7 @@ export class BlockInfoPopper extends ConnectedElement {
   }
 
   async load() {
-    const forkedIn = await this.appManager.getForkedIn(this.uref);
+    const forkedIn = await this.appManager.getForkedInMine(this.uref);
     this.forks = forkedIn.filter((e) => e.childId !== this.uref);
   }
 

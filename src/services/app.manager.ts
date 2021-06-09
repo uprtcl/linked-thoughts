@@ -13,6 +13,7 @@ import {
   getHome,
   UpdatePerspectiveData,
   Logger,
+  Join,
 } from '@uprtcl/evees';
 import { EveesHttp, PermissionType } from '@uprtcl/evees-http';
 import { AppError } from './app.error';
@@ -226,21 +227,47 @@ export class AppManager {
 
   /** find all the sections where other perspectives of a page have been
    * created */
-  async getForkedIn(pageId: string): Promise<ParentAndChild[]> {
-    const locations = await this.evees.explore({
+  async getForkedInMine(pageId: string): Promise<ParentAndChild[]> {
+    const linkedThoughts = await this.elements.get('/linkedThoughts');
+
+    const forks = await this.evees.explore({
       start: {
+        joinType: Join.inner,
         elements: [
           {
             id: pageId,
-            direction: 'above',
-            levels: 1,
-            forks: { independent: true },
+            levels: 0,
+            forks: {},
+          },
+          {
+            id: linkedThoughts.hash,
           },
         ],
       },
     });
 
-    return Array.prototype.concat.apply([], locations);
+    const forksLocations = await Promise.all(
+      forks.perspectiveIds.map(async (forkId) => {
+        const result = await this.evees.explore({
+          start: { elements: [{ id: forkId, direction: 'above', levels: 1 }] },
+        });
+        const parentsAndChildren = result.perspectiveIds.map(
+          (pid): ParentAndChild => {
+            if (pid !== pageId) {
+              return {
+                parentId: pid,
+                childId: pageId,
+              };
+            }
+          }
+        );
+
+        // remove undefined
+        return parentsAndChildren.filter((el) => !!el);
+      })
+    );
+
+    return Array.prototype.concat.apply([], forksLocations);
   }
 
   /** returns an Evees service with its state modified with the effect of the merge */

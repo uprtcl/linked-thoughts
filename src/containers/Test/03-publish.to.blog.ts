@@ -18,7 +18,7 @@ export class PublishToBlog extends CreateAndRead {
     await this.appManager.createForkOn(pageId, this.blogSection.hash);
 
     // assert
-    const forks = await this.appManager.getForkedIn(pageId);
+    const forks = await this.appManager.getForkedInMine(pageId);
     if (forks.length !== 1) {
       this.logger.error(`fork of ${pageId} not correct`, { forks });
     }
@@ -26,7 +26,7 @@ export class PublishToBlog extends CreateAndRead {
     // forks of paragraphs
     await Promise.all(
       pageData.object.links.map(async (par) => {
-        const parForks = await this.appManager.getForkedIn(par);
+        const parForks = await this.appManager.getForkedInMine(par);
         if (parForks.length !== 1) {
           this.logger.error(`fork of ${par} not correct`, { parForks });
         }

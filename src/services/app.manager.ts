@@ -256,7 +256,7 @@ export class AppManager {
             if (pid !== pageId) {
               return {
                 parentId: pid,
-                childId: pageId,
+                childId: forkId,
               };
             }
           }

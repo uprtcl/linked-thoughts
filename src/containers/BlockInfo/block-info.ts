@@ -77,7 +77,7 @@ export class BlockInfoPopper extends ConnectedElement {
 
         .forks {
           position: absolute;
-          margin-left: -46styledpx;
+          margin-left: -46px;
           --svg-fill: #7d7d9250;
           --svg-height: 18px;
           color: #7d7d9250;

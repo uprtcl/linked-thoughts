@@ -517,6 +517,10 @@ export class DocumentPage extends ConnectedElement {
           scrollbar-width: none; /* Firefox */
           padding-bottom: 30vmin;
         }
+        #doc-editor {
+          max-width: 800px;
+          margin: 0 auto;
+        }
         .page-container {
           width: 100%;
         }

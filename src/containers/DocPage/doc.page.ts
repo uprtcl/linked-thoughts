@@ -484,8 +484,11 @@ export class DocumentPage extends ConnectedElement {
           emit-updates
           ?read-only=${this.readOnly}
           .localEvees=${this.evees}
-          .getEveeInfo=${(uref) =>
-            html`<app-block-info uref=${uref}></app-block-info>`}
+          .getEveeInfo=${(block) =>
+            html`<app-block-info
+              uref=${block.uref}
+              parentId=${block.parentId}
+            ></app-block-info>`}
           .flushConfig=${{
             debounce: 2000,
             autoflush: true,
@@ -522,7 +525,7 @@ export class DocumentPage extends ConnectedElement {
           margin: 0 auto;
         }
         .page-container {
-          width: 100%;
+          padding: 0rem 1rem 0rem 4rem;
         }
         .pending {
           --fill: var(--gray-light, black);
@@ -539,7 +542,7 @@ export class DocumentPage extends ConnectedElement {
           align-items: center;
           font-weight: 400;
           font-size: 1.1rem;
-          padding: 1rem 1rem;
+          padding: 1rem 0rem 1rem 0rem;
         }
         .share-card-cont {
           width: 400px;

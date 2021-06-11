@@ -237,7 +237,10 @@ export class AppManager {
 
   /** find all the sections where other perspectives of a page have been
    * created */
-  async getForkedInMine(pageId: string): Promise<ParentAndChild[]> {
+  async getForkedInMine(
+    pageId: string,
+    parentId?: string
+  ): Promise<ParentAndChild[]> {
     const linkedThoughts = await this.elements.get('/linkedThoughts');
 
     const forks = await this.evees.explore({
@@ -247,7 +250,10 @@ export class AppManager {
           {
             id: pageId,
             levels: 0,
-            forks: {},
+            forks: {
+              independent: true,
+              independentOf: parentId,
+            },
           },
           {
             id: linkedThoughts.hash,

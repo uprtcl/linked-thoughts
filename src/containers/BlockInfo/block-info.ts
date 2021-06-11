@@ -27,7 +27,10 @@ export class BlockInfoPopper extends ConnectedElement {
   }
 
   async load() {
-    const forkedIn = await this.appManager.getForkedInMine(this.uref);
+    const forkedIn = await this.appManager.getForkedInMine(
+      this.uref,
+      this.parentId
+    );
     this.forks = forkedIn.filter((e) => e.childId !== this.uref);
   }
 
@@ -37,26 +40,26 @@ export class BlockInfoPopper extends ConnectedElement {
 
   render() {
     return html`
-      ${
-        this.forks && this.forks.length > 0
-          ? html`<div class="forks">
-              <div class="number">8</div>
-              <uprtcl-popper skinny position="bottom-left">
-                <uprtcl-icon-button icon="fork" slot="icon" button skinny>
-                </uprtcl-icon-button>
-                <uprtcl-card
-                  >Fork ids:
-                  ${this.forks.map(
-                    (e) => html`<li>${e.childId} on ${e.parentId}</li>`
-                  )}
-                </uprtcl-card>
-              </uprtcl-popper>
-            </div> `
-          : ``
-      }
+      ${this.forks && this.forks.length > 0
+        ? html`<div class="forks">
+            <div class="number">${this.forks.length}</div>
+            <uprtcl-popper skinny position="bottom-left">
+              <uprtcl-icon-button icon="fork" slot="icon" button skinny>
+              </uprtcl-icon-button>
+              <uprtcl-card
+                >Fork ids:
+                ${this.forks.map(
+                  (e) => html`<li>${e.childId} on ${e.parentId}</li>`
+                )}
+              </uprtcl-card>
+            </uprtcl-popper>
+          </div> `
+        : ``}
       <uprtcl-popper skinny icon="two_dots" position="bottom-left">
-        <uprtcl-card><uprtcl-button @click=${() =>
-          this.forkBlock()}>Fork</uprtcl-button></uprtcl-button></uprtcl-card>
+        <uprtcl-card>
+          <uprtcl-button @click=${() => this.forkBlock()}>Fork</uprtcl-button>
+          <evees-info-debug uref=${this.uref}></evees-info-debug
+        ></uprtcl-card>
       </uprtcl-popper>
     `;
   }

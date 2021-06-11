@@ -278,7 +278,7 @@ export class DocumentPage extends ConnectedElement {
 
     /** flush from onmemory to local */
     await this.eveesPush.flush({
-      start: { elements: [{ id: this.fork.childId }] },
+      start: { elements: [{ id: this.pageId }] },
     });
 
     this.pushing = false;
@@ -522,7 +522,7 @@ export class DocumentPage extends ConnectedElement {
         }
         #doc-editor {
           max-width: 800px;
-          margin: 0 auto;
+          margin: 4vw auto;
         }
         .page-container {
           padding: 0rem 1rem 0rem 4rem;

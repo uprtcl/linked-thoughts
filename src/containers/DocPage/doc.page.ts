@@ -175,12 +175,12 @@ export class DocumentPage extends ConnectedElement {
       this.isPagePrivate = true;
     }
 
-    this.loading = false;
-
     this.readOnly = details.guardianId !== this.privateSection.hash;
 
-    const perspective = await this.evees.getEntity(this.pageId);
+    this.loading = false;
 
+    /** check changes is done after loading is set to false to speedup rendering the document */
+    const perspective = await this.evees.getEntity(this.pageId);
     if (
       perspective.object.payload.meta &&
       perspective.object.payload.meta.forking
@@ -474,29 +474,32 @@ export class DocumentPage extends ConnectedElement {
     </div>`;
   }
 
+  renderDocument() {
+    return html`<documents-editor
+      id="doc-editor"
+      uref=${this.pageId}
+      emit-updates
+      ?read-only=${this.readOnly}
+      .localEvees=${this.evees}
+      .getEveeInfo=${(block) =>
+        html`<app-block-info
+          uref=${block.uref}
+          parentId=${block.parentId}
+        ></app-block-info>`}
+      .flushConfig=${{
+        debounce: 2000,
+        autoflush: true,
+        levels: 1,
+      }}
+      show-info
+    >
+    </documents-editor>`;
+  }
+
   render() {
     return html`
       <div class="page-container">
-        ${this.renderTopNav()}
-        <documents-editor
-          id="doc-editor"
-          uref=${this.pageId}
-          emit-updates
-          ?read-only=${this.readOnly}
-          .localEvees=${this.evees}
-          .getEveeInfo=${(block) =>
-            html`<app-block-info
-              uref=${block.uref}
-              parentId=${block.parentId}
-            ></app-block-info>`}
-          .flushConfig=${{
-            debounce: 2000,
-            autoflush: true,
-            levels: 1,
-          }}
-          show-info
-        >
-        </documents-editor>
+        ${this.renderTopNav()} ${this.loading ? html`` : this.renderDocument()}
         ${this.hasPull && this.showSnackBar
           ? this.renderSnackBar('pullchanges')
           : null}

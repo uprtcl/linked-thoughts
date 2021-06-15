@@ -278,7 +278,7 @@ export class DocumentPage extends ConnectedElement {
 
     /** flush from onmemory to local */
     await this.eveesPush.flush({
-      start: { elements: [{ id: this.pageId }] },
+      start: { elements: [{ id: this.fork.childId }] },
     });
 
     this.pushing = false;

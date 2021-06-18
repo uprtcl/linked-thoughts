@@ -72,7 +72,7 @@ export class SectionPage extends servicesConnect(LitElement) {
     this.config = {
       title: this.title,
       itemsTitle: this.itemsTitle,
-      blockView: BlockViewType.gridCard,
+      blockView: BlockViewType.tableRow,
       headerView: HeaderViewType.section,
       itemConfig: {
         showActions: true,

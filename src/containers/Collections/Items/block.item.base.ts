@@ -25,7 +25,7 @@ export class BlockItemBase extends ConnectedElement {
   uiParent: string;
 
   @property({ type: Object })
-  config: CollectionConfig;
+  config: ItemConfig;
 
   actionOptions: MenuOptions = new Map();
 

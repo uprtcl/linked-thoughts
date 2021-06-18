@@ -46,6 +46,9 @@ export class CollectionBaseElement extends ConnectedElement {
   @internalProperty()
   searchQuery: string = '';
 
+  @internalProperty()
+  blockView: BlockViewType;
+
   appendItems: (items: string[]) => {};
 
   @query('#search-input')
@@ -73,6 +76,7 @@ export class CollectionBaseElement extends ConnectedElement {
 
   async reset() {
     this.itemIds = [];
+    this.blockView = this.config.blockView;
     this.getMoreFeed();
   }
 
@@ -160,7 +164,7 @@ export class CollectionBaseElement extends ConnectedElement {
         </div>
         <div
           class="clickable"
-          @click=${() => (this.config.blockView = BlockViewType.tableRow)}
+          @click=${() => (this.blockView = BlockViewType.tableRow)}
         >
           ${this.config.blockView === BlockViewType.tableRow
             ? html`${ListViewIconSelected}`
@@ -168,9 +172,9 @@ export class CollectionBaseElement extends ConnectedElement {
         </div>
         <div
           class="clickable"
-          @click=${() => (this.config.blockView = BlockViewType.gridCard)}
+          @click=${() => (this.blockView = BlockViewType.gridCard)}
         >
-          ${this.config.blockView === BlockViewType.gridCard
+          ${this.blockView === BlockViewType.gridCard
             ? html`${GridViewIconSelected}`
             : html`${GridViewIcon}`}
         </div>
@@ -182,7 +186,7 @@ export class CollectionBaseElement extends ConnectedElement {
   renderSectionHeader() {
     return html`
       <div class="header-cont">
-        <span class="section-heading">${this.config.title}</span>
+        <span class="section-heading">${this.title}</span>
         ${this.renderSearchbox()}
       </div>
     `;
@@ -234,7 +238,7 @@ export class CollectionBaseElement extends ConnectedElement {
   }
 
   renderItems() {
-    if (this.config.blockView === BlockViewType.tableRow) {
+    if (this.blockView === BlockViewType.tableRow) {
       return html`
         <div class="table">
           <div class="theader">
@@ -259,6 +263,7 @@ export class CollectionBaseElement extends ConnectedElement {
         <app-block-item-router
           class="block-item"
           .config=${this.config}
+          block-view=${this.blockView}
           uref=${uref}
           .actionOptions=${this.actionOptions}
         ></app-block-item-router>

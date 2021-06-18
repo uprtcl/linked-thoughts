@@ -4,6 +4,7 @@ import { MenuOptions } from '@uprtcl/common-ui';
 
 import { ConnectedElement } from '../../../services/connected.element';
 import { BlockViewType, CollectionConfig } from '../collection.base';
+import { ItemConfig } from './block.item.base';
 
 export enum BlockActions {
   remove = 'remove',
@@ -18,13 +19,16 @@ export class BlockItemRouter extends ConnectedElement {
   @property({ type: String, attribute: 'ui-parent' })
   uiParent: string;
 
+  @property({ type: String, attribute: 'block-view' })
+  blockView: BlockViewType;
+
   @property({ type: Object })
-  config: CollectionConfig;
+  config: ItemConfig;
 
   actionOptions: MenuOptions = new Map();
 
   renderItem() {
-    switch (this.config.blockView) {
+    switch (this.blockView) {
       case BlockViewType.gridCard:
         return html`<app-item-grid-card
           uref=${this.uref}
@@ -53,7 +57,7 @@ export class BlockItemRouter extends ConnectedElement {
 
   /** height must be fixed to keep infinite scroll under control */
   getHeight() {
-    switch (this.config.blockView) {
+    switch (this.blockView) {
       case BlockViewType.gridCard:
         return '140px';
 

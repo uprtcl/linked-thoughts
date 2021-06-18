@@ -49,17 +49,11 @@ export class GridCardItem extends BlockItemBase {
     const remote = this.perspective.object.payload.remote;
 
     const showActions =
-      this.config.itemConfig.showActions !== undefined
-        ? this.config.itemConfig.showActions
-        : false;
+      this.config.showActions !== undefined ? this.config.showActions : false;
     const showDate =
-      this.config.itemConfig.showDate !== undefined
-        ? this.config.itemConfig.showDate
-        : false;
+      this.config.showDate !== undefined ? this.config.showDate : false;
     const showAuthor =
-      this.config.itemConfig.showAuthor !== undefined
-        ? this.config.itemConfig.showAuthor
-        : true;
+      this.config.showAuthor !== undefined ? this.config.showAuthor : true;
 
     return html`
       <div class="cont">

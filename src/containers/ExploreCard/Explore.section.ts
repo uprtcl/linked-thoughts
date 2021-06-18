@@ -110,9 +110,9 @@ export default class ExploreSection extends ConnectedElement {
       >
       <div class="close-icon">
         <uprtcl-icon-button
-          icon="close_purple"
+          class="close-button"
+          icon="clear"
           button
-          skinny
           @click=${() => this.closeExplore()}
         ></uprtcl-icon-button>
       </div>
@@ -220,6 +220,9 @@ export default class ExploreSection extends ConnectedElement {
           align-items: center;
           background-color: #fafafa;
           border-radius: 1rem 0rem 0rem 0rem;
+        }
+        .close-button {
+          --svg-fill: ;
         }
         .collection-container {
           padding: 0rem 1.5rem;

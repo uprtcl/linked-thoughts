@@ -41,9 +41,6 @@ export class CollectionBaseElement extends ConnectedElement {
   @property({ type: Object })
   config: CollectionConfig;
 
-  @property({ type: String, attribute: 'header-view' })
-  headerViewType: HeaderViewType;
-
   @internalProperty()
   itemIds: string[] = [];
 
@@ -192,7 +189,7 @@ export class CollectionBaseElement extends ConnectedElement {
   renderSearchbox() {
     return html`<div
       class=${`search-cont ${
-        this.headerViewType === HeaderViewType.section
+        this.config.headerView === HeaderViewType.section
           ? `search-cont-border`
           : ''
       }`}
@@ -213,7 +210,7 @@ export class CollectionBaseElement extends ConnectedElement {
   }
 
   renderHeader() {
-    switch (this.headerViewType) {
+    switch (this.config.headerView) {
       case HeaderViewType.section:
         return html`${this.renderSectionHeader()}
         ${this.renderListActionsHeader()}`;

@@ -20,7 +20,11 @@ import {
   RouteName,
   NavigateTo404,
 } from '../utils/routes.helpers';
-import { BlockViewType } from './Collections/collection.base';
+import {
+  BlockViewType,
+  CollectionConfig,
+  HeaderViewType,
+} from './Collections/collection.base';
 
 interface SectionData {
   id: string;
@@ -155,28 +159,7 @@ export class DashboardElement extends ConnectedElement {
     if (!this.dashboardData) {
       throw new Error('dashboard data not defined');
     }
-    await this.loadSections();
     this.loading = false;
-  }
-
-  async loadSections() {
-    await Promise.all(
-      this.dashboardData.object.sections.map(
-        async (sectionId): Promise<SectionData> => {
-          const sectionData = await this.evees.getPerspectiveData(sectionId);
-
-          if (!sectionData)
-            throw new Error(`data not found for section ${sectionId}`);
-          const title = this.evees.behaviorFirst(sectionData.object, 'title');
-
-          return {
-            id: sectionId,
-            title,
-            draggingOver: false,
-          };
-        }
-      )
-    );
   }
 
   async newPage(onSection: number = 0) {
@@ -233,7 +216,7 @@ export class DashboardElement extends ConnectedElement {
 
   renderForkContent() {
     const actionOptions = new Map();
-    actionOptions.set('remove', { text: 'remove' });
+    actionOptions.set('remove', { text: 'Remove' });
     actionOptions.set('copyToClipboard', { text: 'Add to Clipboard' });
 
     return html`<app-evees-data-collection
@@ -243,18 +226,7 @@ export class DashboardElement extends ConnectedElement {
     />`;
   }
 
-  renderSectionContent() {
-    const actionOptions = new Map();
-    actionOptions.set('remove', { text: 'remove' });
-    actionOptions.set('copyToClipboard', { text: 'Add to Clipboard' });
-
-    return html`<app-evees-data-collection
-      title="Section"
-      uref=${this.selectedSectionId}
-      view=${BlockViewType.tableRow}
-      .actionOptions=${actionOptions}
-    />`;
-  }
+  renderSectionContent() {}
 
   render() {
     if (this.loading) return html` <uprtcl-loading></uprtcl-loading> `;
@@ -271,7 +243,9 @@ export class DashboardElement extends ConnectedElement {
               this.routeName === RouteName.page
                 ? html`<app-document-page page-id=${this.selectedPageId} />`
                 : this.routeName === RouteName.section
-                ? this.renderSectionContent()
+                ? html`<app-section-page
+                    uref=${this.selectedSectionId}
+                  ></app-section-page>`
                 : this.routeName === RouteName.fork
                 ? this.renderForkContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
@@ -367,6 +341,7 @@ export class DashboardElement extends ConnectedElement {
           flex-direction: column;
           position: relative;
           max-height: 100vh;
+          padding: 3rem 2rem 0 2.5rem;
         }
         .empty-pages-loader {
           margin-top: 22px;

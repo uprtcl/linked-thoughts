@@ -48,16 +48,29 @@ export class GridCardItem extends BlockItemBase {
     const creatorId = this.perspective.object.payload.creatorId;
     const remote = this.perspective.object.payload.remote;
 
+    const showActions =
+      this.config.itemConfig.showActions !== undefined
+        ? this.config.itemConfig.showActions
+        : false;
+    const showDate =
+      this.config.itemConfig.showDate !== undefined
+        ? this.config.itemConfig.showDate
+        : false;
+    const showAuthor =
+      this.config.itemConfig.showAuthor !== undefined
+        ? this.config.itemConfig.showAuthor
+        : true;
+
     return html`
       <div class="cont">
         <div class="card-top-row">
-          <a href=${GenerateUserRoute(creatorId)} target="_blank">
-            <app-user-profile
-              user-id=${creatorId}
-              remote-id=${remote}
-              show-name
-            ></app-user-profile>
-          </a>
+          ${showAuthor
+            ? html`<app-user-profile
+                user-id=${creatorId}
+                remote-id=${remote}
+                show-name
+              ></app-user-profile>`
+            : ' '}
         </div>
         <div class="card-content">
           ${this.previewLense
@@ -65,7 +78,7 @@ export class GridCardItem extends BlockItemBase {
             : html`<h3>${this.title}</h3>`}
         </div>
         <div class="card-footer">
-          ${this.config.itemConfig.showActions
+          ${showActions
             ? html`<div class="actions">
                 ${Array.from(this.actionOptions.entries()).map(
                   ([itemKey, item]) => {
@@ -79,7 +92,7 @@ export class GridCardItem extends BlockItemBase {
                 )}
               </div>`
             : ''}
-          ${this.config.itemConfig.showDate
+          ${showDate
             ? html`<div class="date">
                 ${TimestampToDate(this.perspective.object.payload.timestamp)}
               </div>`
@@ -95,8 +108,8 @@ export class GridCardItem extends BlockItemBase {
       tableStyles,
       css`
         :host {
-          font-family: 'Inter';
           height: 100%;
+          width: 100%;
           display: table-row;
         }
 

@@ -82,6 +82,12 @@ export class BlockItemRouter extends ConnectedElement {
   }
 
   static get styles() {
-    return [css``];
+    return [
+      css`
+        .item-wrapper {
+          overflow: hidden;
+        }
+      `,
+    ];
   }
 }

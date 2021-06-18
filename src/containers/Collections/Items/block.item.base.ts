@@ -11,8 +11,9 @@ export enum BlockAction {
 }
 
 export interface ItemConfig {
-  showDate: boolean;
-  showActions: boolean;
+  showAuthor?: boolean;
+  showDate?: boolean;
+  showActions?: boolean;
 }
 
 /** a base component with common functions for all bloolck item components */

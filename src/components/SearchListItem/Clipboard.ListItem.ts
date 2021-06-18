@@ -114,7 +114,6 @@ export default class ClipboardListItem extends EveesBaseElement {
         .publish-date {
           font-size: 0.8rem;
           color: #0007;
-          font-family: 'Poppins';
         }
         .tag-cont {
           display: inline-block;

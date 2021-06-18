@@ -27,16 +27,15 @@ export enum HeaderViewType {
 const LOGINFO = true;
 
 export interface CollectionConfig {
-  blockView: BlockViewType;
-  headerView: HeaderViewType;
-  itemConfig: ItemConfig;
+  title?: string;
+  itemsTitle?: string;
+  blockView?: BlockViewType;
+  headerView?: HeaderViewType;
+  itemConfig?: ItemConfig;
 }
 
 export class CollectionBaseElement extends ConnectedElement {
   logger = new Logger('ForksPage');
-
-  @property()
-  title: string;
 
   @property({ type: Object })
   config: CollectionConfig;
@@ -59,7 +58,9 @@ export class CollectionBaseElement extends ConnectedElement {
   protected batchSize: number = 3;
 
   async firstUpdated() {
-    this.config = {
+    this.config = this.config || {
+      title: '',
+      itemsTitle: '',
       blockView: this.config.blockView || BlockViewType.gridCard,
       headerView: this.config.headerView || HeaderViewType.section,
       itemConfig: this.config.itemConfig || {
@@ -146,7 +147,7 @@ export class CollectionBaseElement extends ConnectedElement {
 
     return html`
       <div class="list-actions-cont">
-        <div class="list-actions-heading">Items</div>
+        <div class="list-actions-heading">${this.config.itemsTitle}</div>
         <div>
           <uprtcl-options-menu
             icon="orderby"
@@ -174,34 +175,46 @@ export class CollectionBaseElement extends ConnectedElement {
             : html`${GridViewIcon}`}
         </div>
       </div>
+      <div class="hr"></div>
     `;
   }
 
   renderSectionHeader() {
     return html`
       <div class="header-cont">
-        <span class="section-heading">${this.title}</span>
+        <span class="section-heading">${this.config.title}</span>
         ${this.renderSearchbox()}
       </div>
     `;
   }
 
   renderSearchbox() {
-    return html`<div
-      class=${`search-cont ${
-        this.config.headerView === HeaderViewType.section
-          ? `search-cont-border`
-          : ''
-      }`}
-    >
-      <div @click=${this.searchByText}>${SearchIcon}</div>
+    const iconLeft = this.config.headerView === HeaderViewType.feed;
+    const containerClasses = `search-cont ${
+      this.config.headerView === HeaderViewType.section
+        ? `search-cont-border`
+        : ''
+    }`;
+
+    return html`<div class=${containerClasses}>
+      ${iconLeft ? this.renderIcon() : ''}
       <uprtcl-textfield
         id="search-input"
         @input=${() => {
           this.debouncedSearchByText();
         }}
-        label=""
+        label="Find pages..."
       ></uprtcl-textfield>
+      ${!iconLeft ? this.renderIcon() : ''}
+    </div>`;
+  }
+
+  renderIcon() {
+    const iconClasses =
+      this.config.headerView === HeaderViewType.section ? `icon-padded` : '';
+
+    return html`<div class=${iconClasses} @click=${this.searchByText}>
+      ${SearchIcon}
     </div>`;
   }
 
@@ -279,20 +292,23 @@ export class CollectionBaseElement extends ConnectedElement {
         .section-heading {
           flex: 1;
           font-size: 1.5rem;
-          font-weight: bold;
           text-transform: uppercase;
+          font-weight: 500;
         }
         uprtcl-textfield {
           --font-size: 20px;
+        }
+        .icon-padded {
+          padding: 0 1rem;
         }
         .search-cont {
           display: flex;
           align-items: center;
         }
         .search-cont-border {
-          border: 2px solid grey;
+          border: 2px solid #828282;
           border-radius: 5px;
-          border-width: 1.1px;
+          border-width: 2px;
         }
         .search-field {
           border: none;
@@ -304,14 +320,17 @@ export class CollectionBaseElement extends ConnectedElement {
           align-items: center;
           margin-top: 2rem;
         }
+        .hr {
+          margin: 1.5rem 0rem 0.5rem 0rem;
+          border-bottom: 0.6px solid #bdbdbd;
+        }
         .list-actions-cont > * {
           margin: 0.5rem 2rem 0 0;
         }
         .list-actions-heading {
           flex: 1;
-          font-weight: bold;
-          font-size: 1.2rem;
-          color: grey;
+          font-weight: 500;
+          font-size: 20px;
         }
         .grid-view-container {
           display: grid;

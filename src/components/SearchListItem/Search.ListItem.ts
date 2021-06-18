@@ -27,8 +27,9 @@ export default class SearchListItem extends EveesBaseElement {
     await super.load();
     const data = await this.evees.getPerspectiveData(this.uref);
     this.title = this.evees.behaviorFirst(data.object, 'title');
-    this.userId = await (await this.evees.getEntity(this.uref)).object.payload
-      .creatorId;
+    this.userId = await (
+      await this.evees.getEntity(this.uref)
+    ).object.payload.creatorId;
 
     this.loading = false;
   }
@@ -92,7 +93,6 @@ export default class SearchListItem extends EveesBaseElement {
         .publish-date {
           font-size: 0.8rem;
           color: #0007;
-          font-family: 'Poppins';
         }
       `,
     ];

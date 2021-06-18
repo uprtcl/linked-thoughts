@@ -95,7 +95,6 @@ export class PageFeedItem extends ConnectedElement {
         }
         .timestamp {
           margin-left: 1.5rem;
-          font-family: 'Poppins';
           color: #0007;
         }
         .overlay {

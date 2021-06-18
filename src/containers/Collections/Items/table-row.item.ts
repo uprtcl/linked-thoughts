@@ -85,7 +85,6 @@ export class TableRowItem extends ConnectedElement {
       tableStyles,
       css`
         :host {
-          font-family: 'Inter';
           height: 100%;
           display: table-row;
         }
@@ -126,7 +125,6 @@ export class TableRowItem extends ConnectedElement {
           max-height: 100px;
         }
         .author {
-          font-family: Poppins;
           font-style: normal;
           font-weight: 500;
           font-size: 13px;

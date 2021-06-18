@@ -55,7 +55,7 @@ export class BlockItemRouter extends ConnectedElement {
   getHeight() {
     switch (this.config.blockView) {
       case BlockViewType.gridCard:
-        return '160px';
+        return '140px';
 
       case BlockViewType.tableRow:
         return '40px';

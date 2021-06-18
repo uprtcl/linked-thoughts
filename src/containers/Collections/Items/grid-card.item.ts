@@ -63,15 +63,16 @@ export class GridCardItem extends BlockItemBase {
 
     return html`
       <div class="cont">
-        <div class="card-top-row">
-          ${showAuthor
-            ? html`<app-user-profile
+        ${showAuthor
+          ? html` <div class="card-top-row">
+              <app-user-profile
                 user-id=${creatorId}
                 remote-id=${remote}
                 show-name
-              ></app-user-profile>`
-            : ' '}
-        </div>
+              ></app-user-profile>
+            </div>`
+          : ''}
+
         <div class="card-content">
           ${this.previewLense
             ? this.previewLense.render(this.uref)
@@ -110,13 +111,16 @@ export class GridCardItem extends BlockItemBase {
         :host {
           height: 100%;
           width: 100%;
-          display: table-row;
+          display: block;
         }
 
         .cont {
           padding-top: 0rem;
           padding-bottom: 0.75rem;
           position: relative;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
         }
         .card-top-row {
           margin-bottom: 1rem;
@@ -124,6 +128,7 @@ export class GridCardItem extends BlockItemBase {
         .card-content {
           min-height: var(--content-min-height, 40px);
           margin-bottom: 1rem;
+          flex: 1 0 auto;
         }
         .card-footer {
           font-size: 13px;
@@ -144,7 +149,7 @@ export class GridCardItem extends BlockItemBase {
           font-size: 0.9rem;
         }
         .actions span {
-          margin-left: 0.25rem;
+          margin-right: 0.25rem;
         }
         .list-row {
           display: flex;

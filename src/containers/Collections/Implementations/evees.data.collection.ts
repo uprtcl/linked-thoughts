@@ -19,6 +19,13 @@ export class EveesDataCollection extends CollectionBaseElement {
     await super.firstUpdated();
   }
 
+  async updated(cp) {
+    if (cp.has('uref')) {
+      await this.load();
+      await this.reset();
+    }
+  }
+
   async load() {
     const data = await this.evees.getPerspectiveData(this.uref);
     const children = this.evees.behaviorConcat(

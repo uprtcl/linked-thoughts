@@ -32,6 +32,16 @@ export class SectionPage extends servicesConnect(LitElement) {
   }
 
   async firstUpdated() {
+    this.load();
+  }
+
+  updated(cp) {
+    if (cp.has('uref')) {
+      this.load();
+    }
+  }
+
+  async load() {
     const privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );

@@ -35,6 +35,9 @@ export default class ExploreSection extends ConnectedElement {
   selectedDocId: string;
 
   @internalProperty()
+  clickedOutside: number = 0;
+
+  @internalProperty()
   loading: boolean = true;
 
   @internalProperty()
@@ -63,11 +66,33 @@ export default class ExploreSection extends ConnectedElement {
     );
 
     this.loading = false;
+
+    document.addEventListener('click', this.handleDocClick);
   }
 
   async handleToggleSection(type: TabName) {
     this.selectedSection = type;
   }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('click', this.handleDocClick);
+  }
+
+  handleDocClick = (event) => {
+    const ix = event
+      .composedPath()
+      .findIndex((el: any) => el.id === 'explorer-container');
+
+    if (ix === -1) {
+      if (this.clickedOutside === 1) {
+        this.closeExplore();
+      } else {
+        this.clickedOutside = 1;
+        setTimeout(() => (this.clickedOutside = 0), 500);
+      }
+    }
+  };
 
   closeExplore() {
     this.exploreState = 0;
@@ -201,15 +226,17 @@ export default class ExploreSection extends ConnectedElement {
   }
 
   render() {
-    return html`${this.renderNail()}
-    ${this.exploreState > 0 ? this.renderExploreState() : ''}`;
+    return html`<div class="explorer-container" id="explorer-container">
+      ${this.renderNail()}
+      ${this.exploreState > 0 ? this.renderExploreState() : ''}
+    </div>`;
   }
 
   static get styles() {
     return [
       sharedStyles,
       css`
-        :host {
+        .explorer-container {
           display: flex;
           align-items: center;
           z-index: 5;

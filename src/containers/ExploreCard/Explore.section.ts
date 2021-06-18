@@ -14,7 +14,11 @@ import { sharedStyles } from '../../styles';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import ChevronRight from '../../assets/icons/chevron-right.svg';
 import { AppEvents, ConceptId } from '../../services/app.manager';
-import { HeaderViewType } from '../Collections/collection.base';
+import {
+  BlockViewType,
+  CollectionConfig,
+  HeaderViewType,
+} from '../Collections/collection.base';
 
 type TabName = 'explore' | 'clipboard';
 
@@ -25,7 +29,7 @@ export default class ExploreSection extends ConnectedElement {
   selectedSection: TabName = 'explore';
 
   @internalProperty()
-  exploreState: number = 0;
+  exploreState: number = 1;
 
   @internalProperty()
   selectedDocId: string;
@@ -91,19 +95,16 @@ export default class ExploreSection extends ConnectedElement {
 
   renderHeader() {
     return html` <div class="header-tabs">
-      <span
+      <uprtcl-button
         @click=${() => this.handleToggleSection('explore')}
-        class=${`header-tab-item clickable ${
-          this.selectedSection == 'explore' ? 'selected-section' : ''
-        }`}
-        >Explore</span
+        ?skinny=${this.selectedSection !== 'explore'}
+        >Explore</uprtcl-button
       >
-      <span
+      <uprtcl-button
+        class="margin-left"
         @click=${() => this.handleToggleSection('clipboard')}
-        class=${`header-tab-item clickable ${
-          this.selectedSection === 'clipboard' ? 'selected-section' : ''
-        }`}
-        >Clipboard</span
+        ?skinny=${this.selectedSection !== 'clipboard'}
+        >Clipboard</uprtcl-button
       >
       <div class="close-icon">
         <uprtcl-icon-button
@@ -129,19 +130,30 @@ export default class ExploreSection extends ConnectedElement {
         break;
     }
 
+    const config: CollectionConfig = {
+      headerView: HeaderViewType.feed,
+      blockView: BlockViewType.gridCard,
+      itemConfig: {
+        showActions: false,
+        showDate: true,
+      },
+    };
+
     return html` <div class=${containerClass}>
       ${this.renderHeader()}
-      ${this.selectedSection === 'explore'
-        ? html`<app-explore-collection
-            header-view=${HeaderViewType.feed}
-            class=${resultsContainerClass}
-            .exploreOptions=${this.exploreOptions}
-          ></app-explore-collection>`
-        : html`<app-evees-data-collection
-            header-view=${HeaderViewType.feed}
-            class=${resultsContainerClass}
-            uref=${this.clipboardSection.hash}
-          ></app-evees-data-collection>`}
+      <div class="collection-container">
+        ${this.selectedSection === 'explore'
+          ? html`<app-explore-collection
+              class=${resultsContainerClass}
+              .exploreOptions=${this.exploreOptions}
+              .config=${config}
+            ></app-explore-collection>`
+          : html`<app-evees-data-collection
+              class=${resultsContainerClass}
+              uref=${this.clipboardSection.hash}
+              .config=${config}
+            ></app-evees-data-collection>`}
+      </div>
     </div>`;
   }
 
@@ -199,24 +211,15 @@ export default class ExploreSection extends ConnectedElement {
           z-index: 5;
         }
         .header-tabs {
-          margin-top: 1rem;
-          padding: 0 1.5rem;
+          padding: 1rem 1rem;
           display: flex;
           align-items: center;
+          background-color: #fafafa;
+          border-radius: 1rem 0rem 0rem 0rem;
         }
-        .header-tab-item {
-          color: var(--gray-text);
-          font-size: 1rem;
-          padding: 0.5rem 0.7rem;
-          border-radius: 5px;
+        .collection-container {
+          padding: 0rem 1.5rem;
         }
-        .selected-section {
-          background: var(--primary);
-
-          color: var(--white);
-          box-shadow: 0px 10px 55px -10px var(--primary);
-        }
-
         .readCont {
           flex: 1;
           width: 100%;
@@ -274,7 +277,7 @@ export default class ExploreSection extends ConnectedElement {
           background: rgb(255, 255, 255);
           box-shadow: -2px 0px 100px rgba(0, 0, 0, 0.15);
           /* Note: backdrop-filter has minimal browser support */
-          border-radius: 20px 6px 6px 20px;
+          border-radius: 1rem 0rem 0rem 1rem;
           width: 400px;
           height: 95vh;
           animation: slideLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1);

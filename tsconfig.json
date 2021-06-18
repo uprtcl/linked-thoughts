@@ -14,7 +14,11 @@
     "alwaysStrict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "lit-html": ["node_modules/lit-html"],
+      "lit-html/*": ["node_modules/lit-html/*"]
+    }
   },
   "include": ["src", "src/svg.d.ts"],
   "exclude": ["node_modules"]

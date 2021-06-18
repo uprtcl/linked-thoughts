@@ -11,6 +11,7 @@ import GridViewIcon from '../../assets/icons/grid-view.svg';
 import ListViewIconSelected from '../../assets/icons/list-view-selected.svg';
 import GridViewIconSelected from '../../assets/icons/grid-view-selected.svg';
 import { MenuOptions, UprtclTextField } from '@uprtcl/common-ui';
+import { ItemConfig } from './Items/block.item.base';
 
 export enum BlockViewType {
   tableRow = 'table-row',
@@ -25,14 +26,20 @@ export enum HeaderViewType {
 
 const LOGINFO = true;
 
+export interface CollectionConfig {
+  blockView: BlockViewType;
+  headerView: HeaderViewType;
+  itemConfig: ItemConfig;
+}
+
 export class CollectionBaseElement extends ConnectedElement {
   logger = new Logger('ForksPage');
 
   @property()
   title: string;
 
-  @property({ type: String, attribute: 'block-view' })
-  blockViewType: BlockViewType;
+  @property({ type: Object })
+  config: CollectionConfig;
 
   @property({ type: String, attribute: 'header-view' })
   headerViewType: HeaderViewType;
@@ -55,8 +62,14 @@ export class CollectionBaseElement extends ConnectedElement {
   protected batchSize: number = 3;
 
   async firstUpdated() {
-    this.blockViewType = this.blockViewType || BlockViewType.gridCard;
-    this.headerViewType = this.headerViewType || HeaderViewType.section;
+    this.config = {
+      blockView: this.config.blockView || BlockViewType.gridCard,
+      headerView: this.config.headerView || HeaderViewType.section,
+      itemConfig: this.config.itemConfig || {
+        showDate: true,
+        showActions: false,
+      },
+    };
     this.reset();
   }
 
@@ -149,17 +162,17 @@ export class CollectionBaseElement extends ConnectedElement {
         </div>
         <div
           class="clickable"
-          @click=${() => (this.blockViewType = BlockViewType.tableRow)}
+          @click=${() => (this.config.blockView = BlockViewType.tableRow)}
         >
-          ${this.blockViewType === BlockViewType.tableRow
+          ${this.config.blockView === BlockViewType.tableRow
             ? html`${ListViewIconSelected}`
             : html`${ListViewIcon}`}
         </div>
         <div
           class="clickable"
-          @click=${() => (this.blockViewType = BlockViewType.gridCard)}
+          @click=${() => (this.config.blockView = BlockViewType.gridCard)}
         >
-          ${this.blockViewType === BlockViewType.gridCard
+          ${this.config.blockView === BlockViewType.gridCard
             ? html`${GridViewIconSelected}`
             : html`${GridViewIcon}`}
         </div>
@@ -177,14 +190,20 @@ export class CollectionBaseElement extends ConnectedElement {
   }
 
   renderSearchbox() {
-    return html`<div class="search-cont">
+    return html`<div
+      class=${`search-cont ${
+        this.headerViewType === HeaderViewType.section
+          ? `search-cont-border`
+          : ''
+      }`}
+    >
       <div @click=${this.searchByText}>${SearchIcon}</div>
       <uprtcl-textfield
         id="search-input"
         @input=${() => {
           this.debouncedSearchByText();
         }}
-        label="Search Intercreativity"
+        label=""
       ></uprtcl-textfield>
     </div>`;
   }
@@ -205,7 +224,7 @@ export class CollectionBaseElement extends ConnectedElement {
   }
 
   renderItems() {
-    if (this.blockViewType === BlockViewType.tableRow) {
+    if (this.config.blockView === BlockViewType.tableRow) {
       return html`
         <div class="table">
           <div class="theader">
@@ -227,12 +246,12 @@ export class CollectionBaseElement extends ConnectedElement {
   renderBlockItems() {
     return this.itemIds.map((uref) => {
       return html`
-        <app-block-item
+        <app-block-item-router
           class="block-item"
-          view=${this.blockViewType}
+          .config=${this.config}
           uref=${uref}
           .actionOptions=${this.actionOptions}
-        ></app-block-item>
+        ></app-block-item-router>
       `;
     });
   }
@@ -266,12 +285,17 @@ export class CollectionBaseElement extends ConnectedElement {
           font-weight: bold;
           text-transform: uppercase;
         }
+        uprtcl-textfield {
+          --font-size: 20px;
+        }
         .search-cont {
-          padding: 0.5rem 1.2rem;
+          display: flex;
+          align-items: center;
+        }
+        .search-cont-border {
           border: 2px solid grey;
           border-radius: 5px;
           border-width: 1.1px;
-          display: flex;
         }
         .search-field {
           border: none;
@@ -293,8 +317,10 @@ export class CollectionBaseElement extends ConnectedElement {
           color: grey;
         }
         .grid-view-container {
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1rem;
+          padding: 1rem 0rem;
         }
       `,
     ];

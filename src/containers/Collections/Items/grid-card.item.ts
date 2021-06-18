@@ -1,17 +1,15 @@
-import { html, css, property, internalProperty } from 'lit-element';
+import { html, css, internalProperty } from 'lit-element';
 import { Lens } from '@uprtcl/evees-ui';
 import { Entity, Perspective, Secured } from '@uprtcl/evees';
 import { icons, MenuOptions } from '@uprtcl/common-ui';
 
 import { sharedStyles, tableStyles } from '../../../styles';
 import { GenerateUserRoute } from '../../../utils/routes.helpers';
+import { TimestampToDate } from '../../../utils/date';
 
 import { BlockAction, BlockItemBase } from './block.item.base';
 
 export class GridCardItem extends BlockItemBase {
-  @property({ type: String })
-  uref: string;
-
   @internalProperty()
   loading: boolean = true;
 
@@ -44,32 +42,45 @@ export class GridCardItem extends BlockItemBase {
       return html`<evees-loading></evees-loading>`;
     }
 
+    const creatorId = this.perspective.object.payload.creatorId;
+    const remote = this.perspective.object.payload.remote;
+
     return html`
       <div class="cont">
+        <div class="card-top-row">
+          <a href=${GenerateUserRoute(creatorId)} target="_blank">
+            <app-user-profile
+              user-id=${creatorId}
+              remote-id=${remote}
+              show-name
+            ></app-user-profile>
+          </a>
+        </div>
         <div class="card-content">
           ${this.previewLense
             ? this.previewLense.render(this.uref)
             : html`<h3>${this.title}</h3>`}
         </div>
         <div class="card-footer">
-          <a
-            href=${GenerateUserRoute(this.perspective.object.payload.creatorId)}
-            target="_blank"
-          >
-            <p class="author">${this.perspective.object.payload.creatorId}</p>
-          </a>
-          <div class="actions">
-            ${Array.from(this.actionOptions.entries()).map(
-              ([itemKey, item]) => {
-                return html`<div
-                  class="clickable"
-                  @click=${() => this.handleAction(itemKey as BlockAction)}
-                >
-                  ${icons[item.icon]}<span>${item.text}</span>
-                </div>`;
-              }
-            )}
-          </div>
+          ${this.config.itemConfig.showActions
+            ? html`<div class="actions">
+                ${Array.from(this.actionOptions.entries()).map(
+                  ([itemKey, item]) => {
+                    return html`<div
+                      class="clickable"
+                      @click=${() => this.handleAction(itemKey as BlockAction)}
+                    >
+                      ${icons[item.icon]}<span>${item.text}</span>
+                    </div>`;
+                  }
+                )}
+              </div>`
+            : ''}
+          ${this.config.itemConfig.showDate
+            ? html`<div class="date">
+                ${TimestampToDate(this.perspective.object.payload.timestamp)}
+              </div>`
+            : ''}
         </div>
       </div>
     `;
@@ -87,48 +98,21 @@ export class GridCardItem extends BlockItemBase {
         }
 
         .cont {
-          padding-top: 1rem;
-          padding-bottom: 1.5rem;
+          padding-top: 0rem;
+          padding-bottom: 0.75rem;
           position: relative;
         }
-        .type-label {
-          background: #a37c17aa;
-          width: fit-content;
-          padding: 2px 5px;
-          font-size: 0.8rem;
-          font-weight: 600;
-
-          color: #fafafa;
-        }
-        .type-image {
-          background: #a37c17aa;
-        }
-        .type-title {
-          background: #576cce;
-        }
-        .type-paragraph {
-          background: #822699;
-        }
-        .description {
-          color: #828282;
-          font-size: 1rem;
+        .card-top-row {
+          margin-bottom: 1rem;
         }
         .card-content {
-          min-height: 120px;
+          min-height: var(--content-min-height, 40px);
+          margin-bottom: 1rem;
         }
         .card-footer {
-        }
-        .description img {
-          max-height: 100px;
-        }
-        .author {
-          font-family: Poppins;
-          font-style: normal;
-          font-weight: 500;
           font-size: 13px;
-          line-height: 19px;
-          /* identical to box height */
-          color: #de5163;
+          color: #0000005e;
+          font-weight: 500;
         }
         .actions {
           margin-top: 0.25rem;

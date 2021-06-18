@@ -8,8 +8,12 @@ import {
 } from '@uprtcl/http-provider';
 
 import { DocumentsModule } from '@uprtcl/documents';
-import { EveesContentModule, RemoteExploreCachedOnMemory } from '@uprtcl/evees';
-import { initDefault, MultiContainer } from '@uprtcl/evees-ui';
+import { EveesContentModule } from '@uprtcl/evees';
+import {
+  initDefault,
+  MultiContainer,
+  RemoteExploreCachedOnMemoryWithUI,
+} from '@uprtcl/evees-ui';
 
 import { appElementsInit } from './app.elements.init';
 import {
@@ -61,7 +65,7 @@ export const initUprtcl = async () => {
     connectionId
   );
 
-  const httpEvees = new RemoteExploreCachedOnMemory(
+  const httpEvees = new RemoteExploreCachedOnMemoryWithUI(
     new EveesHttp(httpConnection)
   );
   const clientRemotes = [httpEvees];

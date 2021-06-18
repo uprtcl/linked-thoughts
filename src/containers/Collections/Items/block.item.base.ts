@@ -3,20 +3,28 @@ import { html, css, property } from 'lit-element';
 import { MenuOptions } from '@uprtcl/common-ui';
 
 import { ConnectedElement } from '../../../services/connected.element';
-import { BlockViewType } from '../collection.base';
+import { BlockViewType, CollectionConfig } from '../collection.base';
 
 export enum BlockAction {
   remove = 'remove',
   addToClipboard = 'addToClipboard',
 }
 
-/** a base component with common functions for all block item components */
+export interface ItemConfig {
+  showDate: boolean;
+  showActions: boolean;
+}
+
+/** a base component with common functions for all bloolck item components */
 export class BlockItemBase extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
   @property({ type: String, attribute: 'ui-parent' })
   uiParent: string;
+
+  @property({ type: Object })
+  config: CollectionConfig;
 
   actionOptions: MenuOptions = new Map();
 

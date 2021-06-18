@@ -18,6 +18,7 @@ export const sharedStyles = css`
     text-decoration: none;
     color: inherit;
   }
+
   .row {
     display: flex;
     flex-direction: row;
@@ -36,16 +37,20 @@ export const sharedStyles = css`
   .cursor-pointer {
     cursor: pointer;
   }
+
   .clickable {
     cursor: pointer;
     user-select: none;
   }
+
   .selected-item {
     background-color: #0002;
   }
+
   .selected-item:hover {
     background-color: #0003;
   }
+
   .list-overlay {
     position: absolute;
     height: 100%;
@@ -59,6 +64,10 @@ export const sharedStyles = css`
       rgba(255, 255, 255, 0),
       rgba(255, 255, 255, 0)
     );
+  }
+
+  .margin-left {
+    margin-left: 1rem;
   }
 `;
 

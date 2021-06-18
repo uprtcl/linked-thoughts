@@ -26,6 +26,7 @@ import { BlockItemRouter } from './containers/Collections/Items/block.item.route
 import { EveesDataCollection } from './containers/Collections/Implementations/evees.data.collection';
 import { ExploreCollection } from './containers/Collections/Implementations/explore.collection';
 import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';
+import UserProfile from './containers/User/User.profile';
 
 (async function () {
   await initUprtcl();
@@ -43,6 +44,8 @@ import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';
   customElements.define('app-document-page', DocumentPage);
   customElements.define('app-error-page', ErrorPage);
 
+  customElements.define('app-user-profile', UserProfile);
+
   customElements.define('app-explore-section', ExploreSection);
   customElements.define('app-read-only-page', ReadOnlyPage);
   customElements.define('app-intersection-observer', LTIntersectionObserver);
@@ -54,7 +57,7 @@ import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';
   customElements.define('app-block-info', BlockInfoPopper);
 
   // Collections
-  customElements.define('app-block-item', BlockItemRouter);
+  customElements.define('app-block-item-router', BlockItemRouter);
   customElements.define('app-item-grid-card', GridCardItem);
   customElements.define('app-item-table-row', TableRowItem);
   customElements.define('app-item-page-feed', PageFeedItem);

@@ -48,7 +48,7 @@ export class GettingStartedElement extends ConnectedElement {
 
   async firstUpdated() {
     this.hasWeb3 = window['ethereum'] !== undefined;
-    this.remote = this.evees.getRemote() as EveesHttp;
+    this.remote = (this.evees.getRemote() as any).base as EveesHttp;
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {

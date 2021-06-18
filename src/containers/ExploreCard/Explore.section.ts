@@ -29,7 +29,7 @@ export default class ExploreSection extends ConnectedElement {
   selectedSection: TabName = 'explore';
 
   @internalProperty()
-  exploreState: number = 1;
+  exploreState: number = 0;
 
   @internalProperty()
   selectedDocId: string;
@@ -61,6 +61,8 @@ export default class ExploreSection extends ConnectedElement {
         // TODO: this.appendItemsToExplore(elements)
       }
     );
+
+    this.loading = false;
   }
 
   async handleToggleSection(type: TabName) {
@@ -141,19 +143,21 @@ export default class ExploreSection extends ConnectedElement {
 
     return html` <div class=${containerClass}>
       ${this.renderHeader()}
-      <div class="collection-container">
-        ${this.selectedSection === 'explore'
-          ? html`<app-explore-collection
-              class=${resultsContainerClass}
-              .exploreOptions=${this.exploreOptions}
-              .config=${config}
-            ></app-explore-collection>`
-          : html`<app-evees-data-collection
-              class=${resultsContainerClass}
-              uref=${this.clipboardSection.hash}
-              .config=${config}
-            ></app-evees-data-collection>`}
-      </div>
+      ${!this.loading
+        ? html`<div class="collection-container">
+            ${this.selectedSection === 'explore'
+              ? html`<app-explore-collection
+                  class=${resultsContainerClass}
+                  .exploreOptions=${this.exploreOptions}
+                  .config=${config}
+                ></app-explore-collection>`
+              : html`<app-evees-data-collection
+                  class=${resultsContainerClass}
+                  uref=${this.clipboardSection.hash}
+                  .config=${config}
+                ></app-evees-data-collection>`}
+          </div>`
+        : ''}
     </div>`;
   }
 

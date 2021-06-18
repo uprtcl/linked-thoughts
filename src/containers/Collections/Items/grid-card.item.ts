@@ -15,8 +15,8 @@ export class GridCardItem extends BlockItemBase {
 
   actionOptions: MenuOptions = new Map();
 
-  title: string;
-  previewLense: Lens;
+  title: string | undefined;
+  previewLense: Lens | undefined;
 
   data: Entity;
   perspective: Secured<Perspective>;
@@ -31,8 +31,11 @@ export class GridCardItem extends BlockItemBase {
     this.data = await this.evees.getPerspectiveData(this.uref);
     this.perspective = await this.evees.getEntity(this.uref);
 
-    this.title = this.evees.behaviorFirst(this.data.object, 'title');
-    this.previewLense = this.evees.behaviorFirst(this.data.object, 'preview');
+    this.title = this.evees.tryBehaviorFirst(this.data.object, 'title');
+    this.previewLense = this.evees.tryBehaviorFirst(
+      this.data.object,
+      'preview'
+    );
 
     this.loading = false;
   }

@@ -205,13 +205,13 @@ export default class ExploreSection extends ConnectedElement {
           ?disabled=${this.exploreState == 2}
           @click=${() => this.handleNavigation('increment')}
           class="navigation-button clickable"
-          >${icons.arrow_left}</span
+          >${icons.chevron_left}</span
         >
         <span
           ?disabled=${this.exploreState == 0}
           @click=${() => this.handleNavigation('decrement')}
           class="navigation-button clickable"
-          >${icons.arrow_right}</span
+          >${icons.chevron_right}</span
         >
       </div>
     </div>`;

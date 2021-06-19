@@ -67,7 +67,6 @@ export class CollectionBaseElement extends ConnectedElement {
 
   constructor() {
     super();
-    this.updateHeight();
   }
 
   async firstUpdated() {
@@ -81,12 +80,14 @@ export class CollectionBaseElement extends ConnectedElement {
         showActions: false,
       },
     };
+
     this.reset();
   }
 
   async reset() {
     this.itemIds = [];
     this.blockView = this.config.blockView;
+    this.updateHeight();
     this.getMoreFeed();
   }
 
@@ -202,12 +203,15 @@ export class CollectionBaseElement extends ConnectedElement {
     switch (this.blockView) {
       case BlockViewType.gridCard:
         this.itemHeight = '140px';
+        break;
 
       case BlockViewType.tableRow:
-        this.itemHeight = '140px';
+        this.itemHeight = '45px';
+        break;
 
       case BlockViewType.pageFeedItem:
-        this.itemHeight = '140px';
+        this.itemHeight = '300px';
+        break;
     }
   }
 
@@ -267,11 +271,16 @@ export class CollectionBaseElement extends ConnectedElement {
 
   renderItemsTable() {
     return html`
+      <!-- WARNING 
+          THIS MUST BE CONSISTEN WITH THE 
+            table-row.item.ts component
+            and table.styles.ts -->
       <div class="table">
         <div class="table-row header">
           <div class="table-cell title">Title</div>
           <div class="table-cell date">Date Created</div>
           <div class="table-cell location">Location</div>
+          <div class="table-cell actions">Actions</div>
         </div>
 
         ${this.renderBlockItems()}
@@ -295,6 +304,7 @@ export class CollectionBaseElement extends ConnectedElement {
     switch (this.blockView) {
       case BlockViewType.gridCard:
         return html`<app-item-grid-card
+          style=${`height: ${this.itemHeight}`}
           uref=${uref}
           ui-parent=${uiParentId}
           .config=${this.config.itemConfig}
@@ -303,7 +313,8 @@ export class CollectionBaseElement extends ConnectedElement {
 
       case BlockViewType.tableRow:
         return html`<app-item-table-row
-          class="table-row"
+          class="table-row table-row-item"
+          style=${`height: ${this.itemHeight}`}
           uref=${uref}
           ui-parent=${uiParentId}
           .config=${this.config.itemConfig}
@@ -312,6 +323,7 @@ export class CollectionBaseElement extends ConnectedElement {
 
       case BlockViewType.pageFeedItem:
         return html`<app-item-page-feed
+          style=${`height: ${this.itemHeight}`}
           uref=${uref}
           ui-parent=${uiParentId}
           .config=${this.config.itemConfig}

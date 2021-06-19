@@ -14,6 +14,12 @@ export class BlockInfoPopper extends ConnectedElement {
   @property({ type: String })
   parentId: string;
 
+  @property({ type: String })
+  position = 'bottom-left';
+
+  @property({ type: Boolean, attribute: 'show-forks' })
+  showForks: boolean = false;
+
   @internalProperty()
   forks: ParentAndChild[];
 
@@ -40,7 +46,7 @@ export class BlockInfoPopper extends ConnectedElement {
 
   render() {
     return html`
-      ${this.forks && this.forks.length > 0
+      ${this.showForks && this.forks && this.forks.length > 0
         ? html`<div class="forks">
             <div class="number">${this.forks.length}</div>
             <uprtcl-popper skinny position="bottom-left">
@@ -55,7 +61,7 @@ export class BlockInfoPopper extends ConnectedElement {
             </uprtcl-popper>
           </div> `
         : ``}
-      <uprtcl-popper skinny icon="two_dots" position="bottom-left">
+      <uprtcl-popper skinny icon="two_dots" position=${this.position}>
         <uprtcl-card>
           <uprtcl-button @click=${() => this.forkBlock()}>Fork</uprtcl-button>
           <evees-info-debug uref=${this.uref}></evees-info-debug

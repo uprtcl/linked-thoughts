@@ -32,6 +32,7 @@ export class App extends LitElement {
           --gray-dark: #333333;
           --gray-light: #828282;
           --gray-text: #9797aa;
+          --gray-hover: #c4c4c478;
           --border-radius-complete: 0.5rem;
           --background-color: #fffffb;
         }

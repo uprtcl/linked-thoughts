@@ -16,6 +16,9 @@ export class TableRowItem extends ConnectedElement {
   @property({ type: String })
   uref: string;
 
+  @property({ type: String })
+  uiParentId: string;
+
   @internalProperty()
   loading: boolean = true;
 
@@ -37,7 +40,6 @@ export class TableRowItem extends ConnectedElement {
     this.perspective = await this.evees.getEntity(this.uref);
 
     this.title = this.evees.behaviorFirst(this.data.object, 'title');
-
     this.loading = false;
   }
 
@@ -65,13 +67,13 @@ export class TableRowItem extends ConnectedElement {
       <div class="table-cell date">
         ${TimestampToDate(this.perspective.object.payload.timestamp)}
       </div>
-      <div class="table-cell location">
-        <a
-          href=${GenerateUserRoute(this.perspective.object.payload.creatorId)}
-          target="_blank"
-        >
-          ${this.perspective.object.payload.creatorId}
-        </a>
+      <div class="table-cell location"></div>
+      <div class="table-cell actions">
+        <app-block-info
+          uref=${this.uref}
+          parentId=${this.uiParentId}
+          position="bottom-right"
+        ></app-block-info>
       </div>
     `;
   }
@@ -81,8 +83,11 @@ export class TableRowItem extends ConnectedElement {
       sharedStyles,
       tableStyles,
       css`
-        :host {
+        a {
+          width: 100%;
+          height: 100%;
           display: flex;
+          align-items: center;
         }
       `,
     ];

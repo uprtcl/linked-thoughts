@@ -9,7 +9,6 @@ import {
   CollectionConfig,
   HeaderViewType,
 } from '../Collections/collection.base';
-import { ThoughtsTextNodeType } from 'src/services/app.elements.patterns';
 
 export class SectionPage extends servicesConnect(LitElement) {
   @property({ type: String })

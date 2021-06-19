@@ -1,13 +1,12 @@
 import { html, css, internalProperty, property } from 'lit-element';
 import { Router } from '@vaadin/router';
 
-import { MenuOptions, styles } from '@uprtcl/common-ui';
+import { icons, MenuOptions, styles } from '@uprtcl/common-ui';
 import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { TextNode } from '@uprtcl/documents';
 
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 
-import ShortcutIcon from '../../assets/icons/shortcut.svg';
 import { sharedStyles } from '../../styles';
 
 export class PageItemElement extends EveesBaseElement<TextNode> {
@@ -90,7 +89,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
         title=${titleStr}
       >
         ${this.isShortcut
-          ? html`<div class="item-icon-container">${ShortcutIcon}</div>`
+          ? html`<div class="item-icon-container">${icons.link}</div>`
           : ''}
         <span class="text-container">${this.deriveTitle(titleStr)}</span>
 

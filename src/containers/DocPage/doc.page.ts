@@ -1,5 +1,5 @@
 import { html, css, internalProperty, property, query } from 'lit-element';
-import { styles } from '@uprtcl/common-ui';
+import { icons, styles } from '@uprtcl/common-ui';
 import {
   Secured,
   Perspective,
@@ -17,8 +17,6 @@ import { Router } from '@vaadin/router';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 
-import RestrictedIcon from '../../assets/icons/left.svg';
-import CloseIcon from '../../assets/icons/x.svg';
 import { GenerateDocumentRoute } from '../../utils/routes.helpers';
 import { GenearateReadURL } from '../../utils/routes.generator';
 import { LTRouter } from '../../router';
@@ -427,7 +425,7 @@ export class DocumentPage extends ConnectedElement {
   renderSnackBar(type: 'unpushed' | 'pullchanges') {
     const self = this;
     function unpushedChanges() {
-      return html`${RestrictedIcon}
+      return html`${icons.clear}
         <div>
           You have not pushed, Only pushed content are shared to the blog.
         </div>
@@ -468,7 +466,7 @@ export class DocumentPage extends ConnectedElement {
             this.showSnackBar = false;
           }}
         >
-          ${CloseIcon}
+          ${icons.clear}
         </div>
       </div>
     </div>`;

@@ -23,6 +23,11 @@ export class LTRouter {
         component: 'app-test',
       },
       {
+        path: Routes.Icons,
+        name: RouteName.icons,
+        component: 'uprtcl-icons-gallery',
+      },
+      {
         path: Routes.GettingStarted,
         name: RouteName.gettingStarted,
         component: 'app-getting-started',

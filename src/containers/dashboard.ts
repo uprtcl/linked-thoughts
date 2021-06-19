@@ -1,7 +1,7 @@
 import { html, css, internalProperty, query } from 'lit-element';
 import { Router } from '@vaadin/router';
 import { EveesHttp } from '@uprtcl/evees-http';
-import { styles } from '@uprtcl/common-ui';
+import { icons, styles } from '@uprtcl/common-ui';
 import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
 import { LTRouter } from '../router';
@@ -11,8 +11,6 @@ import { GettingStarted } from '../constants/routeNames';
 import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
-import ForkIcon from '../assets/icons/fork.svg';
-import RecentIcon from '../assets/icons/clock.svg';
 import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
@@ -20,17 +18,6 @@ import {
   RouteName,
   NavigateTo404,
 } from '../utils/routes.helpers';
-import {
-  BlockViewType,
-  CollectionConfig,
-  HeaderViewType,
-} from './Collections/collection.base';
-
-interface SectionData {
-  id: string;
-  title: string;
-  draggingOver: boolean;
-}
 
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
@@ -188,13 +175,13 @@ export class DashboardElement extends ConnectedElement {
         </uprtcl-button>
         <br />
         <div class="actions-item clickable">
-          ${RecentIcon} <span class="actions-label">Recents</span>
+          ${icons.clock} <span class="actions-label">Recents</span>
         </div>
         <div
           class="actions-item clickable"
           @click=${() => Router.go(GenerateForksRoute())}
         >
-          ${ForkIcon} <span class="actions-label">Fork</span>
+          ${icons.fork} <span class="actions-label">Fork</span>
         </div>
       </div>
 

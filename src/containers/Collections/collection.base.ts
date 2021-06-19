@@ -4,13 +4,8 @@ import { Logger, SearchOptions } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
-import SearchIcon from '../../assets/icons/search.svg';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
-import ListViewIcon from '../../assets/icons/list-view.svg';
-import GridViewIcon from '../../assets/icons/grid-view.svg';
-import ListViewIconSelected from '../../assets/icons/list-view-selected.svg';
-import GridViewIconSelected from '../../assets/icons/grid-view-selected.svg';
-import { MenuOptions, UprtclTextField } from '@uprtcl/common-ui';
+import { icons, MenuOptions, UprtclTextField } from '@uprtcl/common-ui';
 import { ItemConfig } from './Items/block.item.base';
 import { tableStyles } from './table.styles';
 
@@ -177,17 +172,13 @@ export class CollectionBaseElement extends ConnectedElement {
           class="clickable"
           @click=${() => this.setView(BlockViewType.tableRow)}
         >
-          ${this.config.blockView === BlockViewType.tableRow
-            ? html`${ListViewIconSelected}`
-            : html`${ListViewIcon}`}
+          ${icons.list_view}
         </div>
         <div
           class="clickable"
           @click=${() => this.setView(BlockViewType.gridCard)}
         >
-          ${this.blockView === BlockViewType.gridCard
-            ? html`${GridViewIconSelected}`
-            : html`${GridViewIcon}`}
+          ${icons.grid_view}
         </div>
       </div>
       <div class="hr"></div>
@@ -228,7 +219,7 @@ export class CollectionBaseElement extends ConnectedElement {
     const iconLeft = this.config.headerView === HeaderViewType.feed;
     const containerClasses = `search-cont ${
       this.config.headerView === HeaderViewType.section
-        ? `search-cont-border`
+        ? `search-cont-border search-cont-small`
         : ''
     }`;
 
@@ -250,7 +241,7 @@ export class CollectionBaseElement extends ConnectedElement {
       this.config.headerView === HeaderViewType.section ? `icon-padded` : '';
 
     return html`<div class=${iconClasses} @click=${this.searchByText}>
-      ${SearchIcon}
+      ${icons.search_lense}
     </div>`;
   }
 
@@ -363,9 +354,6 @@ export class CollectionBaseElement extends ConnectedElement {
           text-transform: uppercase;
           font-weight: 500;
         }
-        uprtcl-textfield {
-          --font-size: 20px;
-        }
         .icon-padded {
           padding: 0 1rem;
         }
@@ -377,6 +365,9 @@ export class CollectionBaseElement extends ConnectedElement {
           border: 2px solid var(--gray-light);
           border-radius: 5px;
           border-width: 2px;
+        }
+        .search-cont-small {
+          --font-size: 16px;
         }
         .search-field {
           border: none;

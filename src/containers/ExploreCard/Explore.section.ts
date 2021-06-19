@@ -1,18 +1,10 @@
 import { html, css, internalProperty } from 'lit-element';
 
-import {
-  getHome,
-  GetPerspectiveOptions,
-  Logger,
-  Perspective,
-  SearchOptions,
-  Secured,
-} from '@uprtcl/evees';
+import { Logger, Perspective, SearchOptions, Secured } from '@uprtcl/evees';
+import { icons } from '@uprtcl/common-ui';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
-import ChevronLeft from '../../assets/icons/chevron-left.svg';
-import ChevronRight from '../../assets/icons/chevron-right.svg';
 import { AppEvents, ConceptId } from '../../services/app.manager';
 import {
   BlockViewType,
@@ -213,13 +205,13 @@ export default class ExploreSection extends ConnectedElement {
           ?disabled=${this.exploreState == 2}
           @click=${() => this.handleNavigation('increment')}
           class="navigation-button clickable"
-          >${ChevronLeft}</span
+          >${icons.arrow_left}</span
         >
         <span
           ?disabled=${this.exploreState == 0}
           @click=${() => this.handleNavigation('decrement')}
           class="navigation-button clickable"
-          >${ChevronRight}</span
+          >${icons.arrow_right}</span
         >
       </div>
     </div>`;

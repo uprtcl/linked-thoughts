@@ -7,5 +7,6 @@ export const PageVisitorRoute = '/read';
 export const UserProfileRoute = '/user';
 
 export const Test = '/test';
+export const Icons = '/icons';
 
 export const ForksRoute = '/forks';

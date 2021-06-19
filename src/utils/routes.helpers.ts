@@ -14,6 +14,7 @@ export enum RouteName {
   fork = 'forks',
   gettingStarted = 'getting-started',
   test = 'test',
+  icons = 'icons',
 }
 
 export const GenerateDocumentRoute = (docId: string = ':docId') =>

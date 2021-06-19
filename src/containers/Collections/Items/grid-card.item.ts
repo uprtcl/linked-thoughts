@@ -3,8 +3,7 @@ import { Lens } from '@uprtcl/evees-ui';
 import { Entity, Perspective, Secured } from '@uprtcl/evees';
 import { icons, MenuOptions } from '@uprtcl/common-ui';
 
-import { sharedStyles, tableStyles } from '../../../styles';
-import { GenerateUserRoute } from '../../../utils/routes.helpers';
+import { sharedStyles } from '../../../styles';
 import { TimestampToDate } from '../../../utils/date';
 
 import { BlockAction, BlockItemBase } from './block.item.base';
@@ -100,7 +99,6 @@ export class GridCardItem extends BlockItemBase {
   static get styles() {
     return [
       sharedStyles,
-      tableStyles,
       css`
         :host {
           height: 100%;

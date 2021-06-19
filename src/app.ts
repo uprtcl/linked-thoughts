@@ -24,7 +24,16 @@ export class App extends LitElement {
           flex-direction: column;
           display: flex;
           justify-content: center;
-          --mdc-theme-primary: #2196f3;
+          --primary: #4260f6;
+          --secondary: #333333;
+          --white: #ffffff;
+          --black: #000000;
+          --black-transparent: rgba(3, 3, 3, 0.25);
+          --gray-dark: #333333;
+          --gray-light: #828282;
+          --gray-text: #9797aa;
+          --border-radius-complete: 0.5rem;
+          --background-color: #fffffb;
         }
 
         #outlet {

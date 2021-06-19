@@ -3,7 +3,7 @@ import { html, css, internalProperty, query, property } from 'lit-element';
 import { Logger, SearchOptions } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
-import { sharedStyles, tableStyles } from '../../styles';
+import { sharedStyles } from '../../styles';
 import SearchIcon from '../../assets/icons/search.svg';
 import UprtclIsVisible from '../IntersectionObserver/IntersectionObserver';
 import ListViewIcon from '../../assets/icons/list-view.svg';
@@ -12,6 +12,7 @@ import ListViewIconSelected from '../../assets/icons/list-view-selected.svg';
 import GridViewIconSelected from '../../assets/icons/grid-view-selected.svg';
 import { MenuOptions, UprtclTextField } from '@uprtcl/common-ui';
 import { ItemConfig } from './Items/block.item.base';
+import { tableStyles } from './table.styles';
 
 export enum BlockViewType {
   tableRow = 'table-row',
@@ -264,24 +265,24 @@ export class CollectionBaseElement extends ConnectedElement {
     }
   }
 
-  renderItems() {
-    if (this.blockView === BlockViewType.tableRow) {
-      return html`
-        <div class="table">
-          <div class="theader">
-            <div class="table_header">Title</div>
-            <div class="table_header">Date Created</div>
-            <div class="table_header">Author</div>
-          </div>
-
-          ${this.renderBlockItems()}
+  renderItemsTable() {
+    return html`
+      <div class="table">
+        <div class="table-row header">
+          <div class="table-cell title">Title</div>
+          <div class="table-cell date">Date Created</div>
+          <div class="table-cell location">Location</div>
         </div>
-      `;
-    } else {
-      return html`<div class="grid-view-container">
+
         ${this.renderBlockItems()}
-      </div>`;
-    }
+      </div>
+    `;
+  }
+
+  renderItemsGrid() {
+    return html`
+      <div class="grid-view-container">${this.renderBlockItems()}</div>
+    `;
   }
 
   renderBlockItems() {
@@ -302,6 +303,7 @@ export class CollectionBaseElement extends ConnectedElement {
 
       case BlockViewType.tableRow:
         return html`<app-item-table-row
+          class="table-row"
           uref=${uref}
           ui-parent=${uiParentId}
           .config=${this.config.itemConfig}
@@ -321,7 +323,9 @@ export class CollectionBaseElement extends ConnectedElement {
   render() {
     return html` ${this.renderHeader()}
       <div class="items-container">
-        ${this.renderItems()}
+        ${this.blockView === BlockViewType.gridCard
+          ? this.renderItemsGrid()
+          : this.renderItemsTable()}
 
         <app-intersection-observer
           id="is-visible"
@@ -358,7 +362,7 @@ export class CollectionBaseElement extends ConnectedElement {
           align-items: center;
         }
         .search-cont-border {
-          border: 2px solid #828282;
+          border: 2px solid var(--gray-light);
           border-radius: 5px;
           border-width: 2px;
         }
@@ -384,11 +388,13 @@ export class CollectionBaseElement extends ConnectedElement {
           font-weight: 500;
           font-size: 20px;
         }
+        .items-container {
+          padding: 1rem 0rem;
+        }
         .grid-view-container {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 1rem;
-          padding: 1rem 0rem;
         }
       `,
     ];

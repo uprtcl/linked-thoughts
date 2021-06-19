@@ -187,7 +187,7 @@ export default class ExploreSection extends ConnectedElement {
   }
 
   renderReadPage() {
-    return html`<div class="readCont">
+    return html`<div class="read-cont">
       <app-read-only-page
         containerType=${this.exploreState === 1 ? 'mobile' : 'desktop'}
         uref=${this.selectedDocId}
@@ -254,14 +254,9 @@ export default class ExploreSection extends ConnectedElement {
         .collection-container {
           padding: 0rem 1.5rem;
         }
-        .readCont {
+        .read-cont {
           flex: 1;
           width: 100%;
-        }
-        .refresh {
-          width: 25px;
-          height: 25px;
-          padding: 5px;
         }
         .close-icon {
           right: 1rem;
@@ -292,7 +287,7 @@ export default class ExploreSection extends ConnectedElement {
           writing-mode: vertical-rl;
           transform: rotate(180deg);
           padding: 2.3rem 1.9rem 2.3rem 0.3rem;
-          color: #828282;
+          color: var(--gray-light);
           font-weight: 400;
           letter-spacing: 4px;
         }

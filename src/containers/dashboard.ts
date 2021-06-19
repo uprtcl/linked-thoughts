@@ -174,15 +174,15 @@ export class DashboardElement extends ConnectedElement {
           New Page
         </uprtcl-button>
         <br />
-        <div class="actions-item clickable">
+        <!-- <div class="actions-item clickable">
           ${icons.clock} <span class="actions-label">Recents</span>
         </div>
         <div
           class="actions-item clickable"
           @click=${() => Router.go(GenerateForksRoute())}
         >
-          ${icons.fork} <span class="actions-label">Fork</span>
-        </div>
+          ${icons.fork} <span class="actions-label">Forks</span>
+        </div> -->
       </div>
 
       <div class="section-cont">

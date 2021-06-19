@@ -158,28 +158,32 @@ export class CollectionBaseElement extends ConnectedElement {
     return html`
       <div class="list-actions-cont">
         <div class="list-actions-heading">${this.config.itemsTitle}</div>
-        <div>
-          <uprtcl-options-menu
-            icon="orderby"
-            @option-click=${() => {}}
-            .config=${sortMenuConfig}
-            skinny
-            secondary
-          >
-          </uprtcl-options-menu>
-        </div>
-        <div
-          class="clickable"
+        <uprtcl-options-menu
+          icon="orderby"
+          @option-click=${() => {}}
+          .config=${sortMenuConfig}
+          skinny
+          secondary
+        >
+        </uprtcl-options-menu>
+        <uprtcl-icon-button
+          class=${`view-button ${
+            this.blockView === BlockViewType.tableRow ? 'selected' : ''
+          }`}
           @click=${() => this.setView(BlockViewType.tableRow)}
-        >
-          ${icons.list_view}
-        </div>
-        <div
-          class="clickable"
+          button
+          skinny
+          icon="list_view"
+        ></uprtcl-icon-button>
+        <uprtcl-icon-button
+          class=${`view-button ${
+            this.blockView === BlockViewType.gridCard ? 'selected' : ''
+          }`}
           @click=${() => this.setView(BlockViewType.gridCard)}
-        >
-          ${icons.grid_view}
-        </div>
+          button
+          skinny
+          icon="grid_view"
+        ></uprtcl-icon-button>
       </div>
       <div class="hr"></div>
     `;
@@ -378,6 +382,12 @@ export class CollectionBaseElement extends ConnectedElement {
           display: flex;
           align-items: center;
           margin-top: 2rem;
+        }
+        .view-button {
+          --svg-stroke: #7e8890;
+        }
+        .view-button.selected {
+          --svg-stroke: var(--primary);
         }
         .hr {
           margin: 1.5rem 0rem 0.5rem 0rem;

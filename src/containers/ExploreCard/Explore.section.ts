@@ -129,6 +129,7 @@ export default class ExploreSection extends ConnectedElement {
         <uprtcl-icon-button
           class="close-button"
           icon="clear"
+          skinny
           button
           @click=${() => this.closeExplore()}
         ></uprtcl-icon-button>
@@ -240,9 +241,6 @@ export default class ExploreSection extends ConnectedElement {
           background-color: #fafafa;
           border-radius: 1rem 0rem 0rem 0rem;
         }
-        .close-button {
-          --svg-fill: ;
-        }
         .collection-container {
           padding: 0rem 1.5rem;
         }
@@ -254,6 +252,10 @@ export default class ExploreSection extends ConnectedElement {
           right: 1rem;
           position: absolute;
         }
+        .close-button {
+          --svg-fill: var(--primary);
+        }
+
         /* ToolTip */
         .explore-navigation-tooltip {
           background: rgb(255, 255, 255);

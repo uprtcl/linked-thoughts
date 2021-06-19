@@ -258,6 +258,7 @@ export class DashboardElement extends ConnectedElement {
         app-explore-section {
           position: absolute;
           right: 0;
+          z-index: 3;
         }
         .row {
           display: flex;

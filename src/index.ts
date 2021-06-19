@@ -57,7 +57,6 @@ import UserProfile from './containers/User/User.profile';
   customElements.define('app-block-info', BlockInfoPopper);
 
   // Collections
-  customElements.define('app-block-item-router', BlockItemRouter);
   customElements.define('app-item-grid-card', GridCardItem);
   customElements.define('app-item-table-row', TableRowItem);
   customElements.define('app-item-page-feed', PageFeedItem);

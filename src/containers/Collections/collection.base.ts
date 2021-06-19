@@ -1,4 +1,4 @@
-import lodash from 'lodash';
+import lodash, { times } from 'lodash';
 import { html, css, internalProperty, query, property } from 'lit-element';
 import { Logger, SearchOptions } from '@uprtcl/evees';
 
@@ -49,6 +49,9 @@ export class CollectionBaseElement extends ConnectedElement {
   @internalProperty()
   blockView: BlockViewType;
 
+  @internalProperty()
+  itemHeight: string;
+
   appendItems: (items: string[]) => {};
 
   @query('#search-input')
@@ -59,6 +62,12 @@ export class CollectionBaseElement extends ConnectedElement {
 
   protected actionOptions: MenuOptions = new Map();
   protected batchSize: number = 3;
+  protected uiParentId: string; // valid only for data-based collections
+
+  constructor() {
+    super();
+    this.updateHeight();
+  }
 
   async firstUpdated() {
     this.config = this.config || {
@@ -164,7 +173,7 @@ export class CollectionBaseElement extends ConnectedElement {
         </div>
         <div
           class="clickable"
-          @click=${() => (this.blockView = BlockViewType.tableRow)}
+          @click=${() => this.setView(BlockViewType.tableRow)}
         >
           ${this.config.blockView === BlockViewType.tableRow
             ? html`${ListViewIconSelected}`
@@ -172,7 +181,7 @@ export class CollectionBaseElement extends ConnectedElement {
         </div>
         <div
           class="clickable"
-          @click=${() => (this.blockView = BlockViewType.gridCard)}
+          @click=${() => this.setView(BlockViewType.gridCard)}
         >
           ${this.blockView === BlockViewType.gridCard
             ? html`${GridViewIconSelected}`
@@ -181,6 +190,24 @@ export class CollectionBaseElement extends ConnectedElement {
       </div>
       <div class="hr"></div>
     `;
+  }
+
+  setView(blockView: BlockViewType) {
+    this.blockView = blockView;
+    this.updateHeight();
+  }
+
+  updateHeight() {
+    switch (this.blockView) {
+      case BlockViewType.gridCard:
+        this.itemHeight = '140px';
+
+      case BlockViewType.tableRow:
+        this.itemHeight = '140px';
+
+      case BlockViewType.pageFeedItem:
+        this.itemHeight = '140px';
+    }
   }
 
   renderSectionHeader() {
@@ -259,16 +286,36 @@ export class CollectionBaseElement extends ConnectedElement {
 
   renderBlockItems() {
     return this.itemIds.map((uref) => {
-      return html`
-        <app-block-item-router
-          class="block-item"
-          .config=${this.config}
-          block-view=${this.blockView}
-          uref=${uref}
-          .actionOptions=${this.actionOptions}
-        ></app-block-item-router>
-      `;
+      return this.renderItem(uref, this.uiParentId);
     });
+  }
+
+  renderItem(uref: string, uiParentId: string) {
+    switch (this.blockView) {
+      case BlockViewType.gridCard:
+        return html`<app-item-grid-card
+          uref=${uref}
+          ui-parent=${uiParentId}
+          .config=${this.config.itemConfig}
+          .actionOptions=${this.actionOptions}
+        ></app-item-grid-card>`;
+
+      case BlockViewType.tableRow:
+        return html`<app-item-table-row
+          uref=${uref}
+          ui-parent=${uiParentId}
+          .config=${this.config.itemConfig}
+          .actionOptions=${this.actionOptions}
+        ></app-item-table-row>`;
+
+      case BlockViewType.pageFeedItem:
+        return html`<app-item-page-feed
+          uref=${uref}
+          ui-parent=${uiParentId}
+          .config=${this.config.itemConfig}
+          .actionOptions=${this.actionOptions}
+        ></app-item-page-feed>`;
+    }
   }
 
   render() {

@@ -483,6 +483,7 @@ export class DocumentPage extends ConnectedElement {
         html`<app-block-info
           uref=${block.uref}
           parentId=${block.parentId}
+          show-forks
         ></app-block-info>`}
       .flushConfig=${{
         debounce: 2000,

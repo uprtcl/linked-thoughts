@@ -12,7 +12,7 @@ export default class AppBarPublic extends ConnectedElement {
   @internalProperty()
   loading = true;
 
-  @property()
+  @internalProperty()
   isLogged = false;
 
   remote: EveesHttp;

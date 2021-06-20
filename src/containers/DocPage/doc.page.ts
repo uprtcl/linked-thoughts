@@ -264,6 +264,8 @@ export class DocumentPage extends ConnectedElement {
     this.addingPage = true;
 
     const forkId = await this.appManager.createForkOn(this.pageId, toSectionId);
+    await this.appManager.clearGetForkedInMine(this.pageId);
+
     this.lastSharedPageId = forkId;
 
     this.loadForks();

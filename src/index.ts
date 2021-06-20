@@ -22,7 +22,6 @@ import { AppTestElement } from './containers/Test/run.e2e.test';
 import { BlockNotFound } from './components/BlockNotFound/BlockNotFound';
 import { GridCardItem } from './containers/Collections/Items/grid-card.item';
 import { TableRowItem } from './containers/Collections/Items/table-row.item';
-import { BlockItemRouter } from './containers/Collections/Items/block.item.router';
 import { EveesDataCollection } from './containers/Collections/Implementations/evees.data.collection';
 import { ExploreCollection } from './containers/Collections/Implementations/explore.collection';
 import { PageFeedItem } from './containers/Collections/Items/page-feed.Item';

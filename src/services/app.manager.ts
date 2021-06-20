@@ -235,15 +235,12 @@ export class AppManager {
     return result.perspectiveIds.filter((pid) => pid !== perspectiveId);
   }
 
-  /** find all the sections where other perspectives of a page have been
-   * created */
-  async getForkedInMine(
+  private getForkedUnderSearchOptions(
     pageId: string,
+    underId: string,
     parentId?: string
-  ): Promise<ParentAndChild[]> {
-    const linkedThoughts = await this.elements.get('/linkedThoughts');
-
-    const forks = await this.evees.explore({
+  ) {
+    return {
       start: {
         joinType: Join.inner,
         elements: [
@@ -256,11 +253,24 @@ export class AppManager {
             },
           },
           {
-            id: linkedThoughts.hash,
+            id: underId,
           },
         ],
       },
-    });
+    };
+  }
+
+  /** find all the sections where other perspectives of a page have been
+   * created */
+  async getForkedInMine(
+    pageId: string,
+    parentId?: string
+  ): Promise<ParentAndChild[]> {
+    const linkedThoughts = await this.elements.get('/linkedThoughts');
+
+    const forks = await this.evees.explore(
+      this.getForkedUnderSearchOptions(pageId, linkedThoughts.hash, parentId)
+    );
 
     const forksLocations = await Promise.all(
       forks.perspectiveIds.map(async (forkId) => {
@@ -280,6 +290,13 @@ export class AppManager {
     );
 
     return Array.prototype.concat.apply([], forksLocations);
+  }
+
+  async clearGetForkedInMine(pageId: string, parentId?: string) {
+    const linkedThoughts = await this.elements.get('/linkedThoughts');
+    this.evees.clearExplore(
+      this.getForkedUnderSearchOptions(pageId, linkedThoughts.hash, parentId)
+    );
   }
 
   /** returns an Evees service with its state modified with the effect of the merge */

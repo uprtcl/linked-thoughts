@@ -26,6 +26,8 @@ export class App extends LitElement {
           justify-content: center;
           --primary: #4260f6;
           --secondary: #333333;
+          --secondary-live: #efeffd;
+          --secondary-live-color: #4260f6;
           --white: #ffffff;
           --black: #000000;
           --black-transparent: rgba(3, 3, 3, 0.25);

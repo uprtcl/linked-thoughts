@@ -57,4 +57,9 @@ export const sharedStyles = css`
   .margin-left {
     margin-left: 1rem;
   }
+
+  .secondary-live {
+    --primary: var(--secondary-live);
+    --primary-color: var(--secondary-live-color);
+  }
 `;

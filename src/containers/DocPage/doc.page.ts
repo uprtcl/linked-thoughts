@@ -28,7 +28,7 @@ interface SectionData {
   data: Entity<Section>;
 }
 
-const LOGINFO = false;
+const LOGINFO = true;
 
 export class DocumentPage extends ConnectedElement {
   logger = new Logger('DocPage');
@@ -65,6 +65,9 @@ export class DocumentPage extends ConnectedElement {
 
   @internalProperty()
   loading = true;
+
+  @internalProperty()
+  loadingPush = true;
 
   @internalProperty()
   readOnly = false;
@@ -192,6 +195,7 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async loadForks() {
+    this.loadingPush = true;
     const forkedIn = await this.appManager.getForkedInMine(this.pageId);
     const otherForks = forkedIn.filter((e) => e.childId !== this.pageId);
 
@@ -201,6 +205,7 @@ export class DocumentPage extends ConnectedElement {
     } else {
       this.fork = undefined;
     }
+    this.loadingPush = false;
   }
 
   async loadChanges() {
@@ -276,7 +281,10 @@ export class DocumentPage extends ConnectedElement {
     if (this.pushing) return;
     this.pushing = true;
 
-    /** flush from onmemory to local */
+    /** commit changes made locally */
+    await this.appManager.commitUnder(this.pageId);
+
+    /** flush changes made to the fork */
     await this.eveesPush.flush({
       start: { elements: [{ id: this.fork.childId }] },
     });
@@ -286,11 +294,13 @@ export class DocumentPage extends ConnectedElement {
   }
 
   async checkOrigin() {
+    if (LOGINFO) this.logger.log(`checkingOrigin()`);
     this.eveesPull = await this.appManager.compareForks(
       this.pageId,
       this.originId
     );
     const diff = await this.eveesPull.diff();
+    if (LOGINFO) this.logger.log(`checkedOrigin()`, { diff });
     this.hasPull = diff.updates.length > 0;
 
     // To show the snackbar
@@ -322,24 +332,34 @@ export class DocumentPage extends ConnectedElement {
   renderTopNav() {
     return html`<div class="app-action-bar">
       ${this.fork !== undefined
-        ? html`<uprtcl-button skinny @click=${() => this.navToFork()}
+        ? html`<uprtcl-button
+            class="secondary-live"
+            @click=${() => this.navToFork()}
             >View ${this.isPagePrivate ? 'Blog' : 'Private'}
             Version</uprtcl-button
           >`
         : ''}
       <div class="pending">
-        ${this.eveesPending ? html`Saving...` : html`Saved`}
+        ${this.readOnly
+          ? ''
+          : this.eveesPending
+          ? html`Saving...`
+          : html`Saved`}
       </div>
-      <uprtcl-popper>
-        <uprtcl-button slot="icon" skinny secondary
-          >${`${
-            this.fork === undefined
-              ? 'Share'
-              : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
-          }`}</uprtcl-button
-        >
-        ${this.renderShareContent()}
-      </uprtcl-popper>
+      <div class="share">
+        ${this.loadingPush
+          ? html`Loading <uprtcl-loading></uprtcl-loading>`
+          : html`<uprtcl-popper>
+              <uprtcl-button slot="icon" skinny secondary
+                >${`${
+                  this.fork === undefined
+                    ? 'Share'
+                    : `Share${this.nChanges > 0 ? ` (${this.nChanges})` : ''}`
+                }`}</uprtcl-button
+              >
+              ${this.renderShareContent()}
+            </uprtcl-popper>`}
+      </div>
     </div>`;
   }
 
@@ -540,6 +560,13 @@ export class DocumentPage extends ConnectedElement {
           align-items: center;
           justify-content: flex-end;
           margin-right: 0.5rem;
+        }
+        .share {
+          width: 150px;
+          color: var(--gray-light, black);
+          font-size: 15px;
+          display: flex;
+          align-items: center;
         }
         .app-action-bar {
           display: flex;

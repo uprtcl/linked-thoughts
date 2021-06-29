@@ -28,6 +28,7 @@ export interface CollectionConfig {
   blockView?: BlockViewType;
   headerView?: HeaderViewType;
   itemConfig?: ItemConfig;
+  searchTopRight?: boolean;
 }
 
 export class CollectionBaseElement extends ConnectedElement {
@@ -205,7 +206,7 @@ export class CollectionBaseElement extends ConnectedElement {
         break;
 
       case BlockViewType.pageFeedItem:
-        this.itemHeight = '300px';
+        this.itemHeight = '450px';
         break;
     }
   }
@@ -221,13 +222,16 @@ export class CollectionBaseElement extends ConnectedElement {
 
   renderSearchbox() {
     const iconLeft = this.config.headerView === HeaderViewType.feed;
-    const containerClasses = `search-cont ${
-      this.config.headerView === HeaderViewType.section
-        ? `search-cont-border search-cont-small`
-        : ''
-    }`;
+    const containerClasses: string[] = ['search-cont'];
+    if (this.config.headerView === HeaderViewType.section) {
+      containerClasses.push('search-cont-border', 'search-cont-small');
+    }
 
-    return html`<div class=${containerClasses}>
+    if (this.config.searchTopRight) {
+      containerClasses.push('top-right');
+    }
+
+    return html`<div class=${containerClasses.join(' ')}>
       ${iconLeft ? this.renderIcon() : ''}
       <uprtcl-textfield
         id="search-input"
@@ -264,12 +268,12 @@ export class CollectionBaseElement extends ConnectedElement {
     }
   }
 
+  /** WARNING 
+   * THIS MUST BE CONSISTEN WITH THE 
+     table-row.item.ts component
+     and table.styles.ts */
   renderItemsTable() {
     return html`
-      <!-- WARNING 
-          THIS MUST BE CONSISTEN WITH THE 
-            table-row.item.ts component
-            and table.styles.ts -->
       <div class="table">
         <div class="table-row header">
           <div class="table-cell title">Title</div>
@@ -284,8 +288,12 @@ export class CollectionBaseElement extends ConnectedElement {
   }
 
   renderItemsGrid() {
+    const containerClasses = [];
+    if (this.blockView === BlockViewType.gridCard) {
+      containerClasses.push('grid-view-container');
+    }
     return html`
-      <div class="grid-view-container">${this.renderBlockItems()}</div>
+      <div class=${containerClasses.join(' ')}>${this.renderBlockItems()}</div>
     `;
   }
 
@@ -318,19 +326,22 @@ export class CollectionBaseElement extends ConnectedElement {
 
       case BlockViewType.pageFeedItem:
         return html`<app-item-page-feed
-          style=${`height: ${this.itemHeight}`}
-          uref=${uref}
-          ui-parent=${uiParentId}
-          .config=${this.config.itemConfig}
-          .actionOptions=${this.actionOptions}
-        ></app-item-page-feed>`;
+            style=${`height: ${this.itemHeight}; display: block`}
+            uref=${uref}
+            ui-parent=${uiParentId}
+            .config=${this.config.itemConfig}
+            .actionOptions=${this.actionOptions}
+          ></app-item-page-feed>
+          <hr />`;
     }
   }
 
   render() {
     return html` ${this.renderHeader()}
       <div class="items-container">
-        ${this.blockView === BlockViewType.gridCard
+        ${[BlockViewType.gridCard, BlockViewType.pageFeedItem].includes(
+          this.blockView
+        )
           ? this.renderItemsGrid()
           : this.renderItemsTable()}
 
@@ -347,6 +358,10 @@ export class CollectionBaseElement extends ConnectedElement {
       sharedStyles,
       tableStyles,
       css`
+        :host {
+          position: relative;
+          display: block;
+        }
         /* Header */
         .header-cont {
           display: flex;
@@ -360,6 +375,11 @@ export class CollectionBaseElement extends ConnectedElement {
         }
         .icon-padded {
           padding: 0 1rem;
+        }
+        .top-right {
+          position: absolute;
+          right: 0;
+          top: 0;
         }
         .search-cont {
           display: flex;
@@ -403,6 +423,11 @@ export class CollectionBaseElement extends ConnectedElement {
         }
         .items-container {
           padding: 1rem 0rem;
+        }
+        hr {
+          opacity: 0.3;
+          margin-top: 1rem;
+          margin-bottom: 2rem;
         }
         .grid-view-container {
           display: grid;

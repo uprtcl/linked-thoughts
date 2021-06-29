@@ -116,7 +116,7 @@ export default class ReadOnlyPage extends ConnectedElement {
   render() {
     this.logger.log('render()');
 
-    if (this.loading) return html`loading`;
+    if (this.loading) return html`<uprtcl-loading></uprtcl-loading>`;
 
     return html`
 
@@ -141,13 +141,12 @@ export default class ReadOnlyPage extends ConnectedElement {
 
       <app-appbar-public></app-appbar-public>
 
-      ${
-        this.userBlogId
-          ? html` <app-user-page-blog-section
-              userId=${this.userId}
-              uref=${this.userBlogId}
-            />`
-          : null
+      <div class="feed-container">
+        <app-user-page-blog-section
+          userId=${this.userId}
+          uref=${this.userBlogId}
+      ></app-user-page-blog-section>
+      </div>
       }
     </div>`;
   }
@@ -156,48 +155,13 @@ export default class ReadOnlyPage extends ConnectedElement {
     return [
       sharedStyles,
       css`
-        .root {
-          height: 100vh;
-          width: 100vw;
-          overflow-x: hidden;
+        .feed-container {
+          /* should be the same as Appbar.public */
+          padding: 0 7vw;
         }
-        .root::-webkit-scrollbar {
-          display: none;
-        }
-
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .root {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
-
         .docRead {
           flex: 1;
           padding-top: 1rem;
-        }
-        .closeButton {
-          z-index: inherit;
-          position: sticky;
-          left: 0.5rem;
-          top: 0;
-          background: rgb(255, 255, 255);
-          padding: 0.5rem;
-        }
-        .hide {
-          display: none;
-        }
-        .hideVisibility {
-          opacity: 0.5;
-        }
-        @keyframes zoomIn {
-          from {
-            transform: scale(0.1);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
         }
       `,
     ];

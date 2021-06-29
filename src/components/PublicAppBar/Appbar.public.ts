@@ -5,7 +5,6 @@ import { EveesHttp } from '@uprtcl/evees-http';
 
 import { sharedStyles } from '../../styles';
 import { ConnectedElement } from '../../services/connected.element';
-import IntercreativityLogo from '../../assets/intercreativity.svg';
 import { ORIGIN } from '../../utils/routes.generator';
 
 export default class AppBarPublic extends ConnectedElement {
@@ -28,11 +27,11 @@ export default class AppBarPublic extends ConnectedElement {
 
     return html`
       <div class="nav">
-        <div class="nav-logo">${IntercreativityLogo}</div>
+        <div class="nav-logo"></div>
         <div class="nav-cta-cont">
           <a class="nav-cta" href=${ORIGIN} target="_blank"
-            >${this.isLogged ? 'Go to Dashboard' : 'Get Started'}</a
-          >
+            >${this.isLogged ? 'Go to Dashboard' : 'Get Started'}
+          </a>
         </div>
       </div>
     `;
@@ -48,15 +47,18 @@ export default class AppBarPublic extends ConnectedElement {
 
         .nav {
           display: flex;
-          width: 100%;
           background: #fffffb;
           box-shadow: 0px 4px 14px rgba(14, 14, 44, 0.05);
           align-items: center;
           justify-content: start;
+          padding: 2vh 7vw;
         }
 
         .nav-logo {
           left: 0;
+          width: 150px;
+          height: 35px;
+          background-color: red;
         }
         .nav-logo svg {
           height: 5rem;

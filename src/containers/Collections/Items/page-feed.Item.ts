@@ -51,24 +51,17 @@ export class PageFeedItem extends ConnectedElement {
     }
 
     return html`<div class="cont">
-      <div class="body">
-        <span class="timestamp"
-          >${TimestampToDate(this.head.object.payload.timestamp)}</span
-        >
-        <div class="doc-cont">
-          <documents-editor
-            id="doc-editor"
-            uref=${this.uref}
-            ?read-only=${true}
-          >
-          </documents-editor>
-        </div>
-        <div class="action-cont clickable" @click=${() => this.selectItem()}>
-          <div class="read-more">Read More</div>
-
-          <hr />
-        </div>
+      <div class="timestamp">
+        ${TimestampToDate(this.head.object.payload.timestamp)}
       </div>
+      <div class="doc-cont">
+        <documents-editor id="doc-editor" uref=${this.uref} ?read-only=${true}>
+        </documents-editor>
+        <div class="overlay"></div>
+      </div>
+      <uprtcl-button skinny class="read-more" @click=${() => this.selectItem()}>
+        Read More
+      </uprtcl-button>
     </div> `;
   }
 
@@ -76,42 +69,39 @@ export class PageFeedItem extends ConnectedElement {
     return [
       sharedStyles,
       css`
-        hr {
-          opacity: 0.3;
-          margin-top: 1rem;
-          margin-bottom: 2rem;
-        }
         .cont {
-          display: flex;
-          position: relative;
-        }
-        .doc-cont {
-          max-height: ${MAX_HEIGHT}px;
-          overflow: hidden;
-        }
-        .body {
+          height: 100%;
           width: 100%;
           max-width: 900px;
         }
         .timestamp {
-          margin-left: 1.5rem;
-          color: #0007;
+          height: 30px;
+          color: var(--gray-light);
+        }
+        .doc-cont {
+          height: calc(100% - 30px - 30px);
+          overflow: hidden;
+          position: relative;
         }
         .overlay {
           position: absolute;
-          height: ${MAX_HEIGHT / 20}px;
+          height: 100%;
           width: 100%;
-          bottom: 0;
-          background: linear-gradient(0deg, #fff 0%, #fff0);
-          z-index: 2;
-        }
-        .action-cont {
-          margin-left: 1.5rem;
-          margin-top: 1rem;
+          top: 0px;
+          left: 0px;
+          pointer-events: none;
+          background-image: linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 1),
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0)
+          );
         }
         .read-more {
           font-weight: 500;
-          color: #da3e52;
+          --primary: #da3e52;
+          --primary-hover: #00000000;
         }
       `,
     ];

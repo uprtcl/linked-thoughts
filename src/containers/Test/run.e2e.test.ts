@@ -1,8 +1,8 @@
 import { Logger } from '@uprtcl/evees';
 
-import { PublishToBlog } from './03-publish.to.blog';
+import { UpdatePage } from './04-update-page';
 
-export class AppTestElement extends PublishToBlog {
+export class AppTestElement extends UpdatePage {
   logger = new Logger('Test');
 
   async firstUpdated() {
@@ -23,10 +23,13 @@ export class AppTestElement extends PublishToBlog {
     await this.initializeElements();
 
     this.state = 'updating page';
-    await this.updatePage();
+    await this.createAndReadPage();
 
     this.state = 'publishToBlog';
     await this.publishToBlog();
+
+    this.state = 'updateAndPush';
+    await this.updateAndPush();
 
     this.loading = false;
     this.state = 'finished';

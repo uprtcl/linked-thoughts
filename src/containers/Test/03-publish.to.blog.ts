@@ -10,33 +10,32 @@ export class PublishToBlog extends CreateAndRead {
       this.privateSection.hash
     );
 
-    const pageId = privateSectionData.object.pages[0];
-
-    const pageData = await this.evees.getPerspectiveData<TextNode>(pageId);
+    const pageData = await this.evees.getPerspectiveData<TextNode>(this.pageId);
 
     // fork of page
-    await this.appManager.createForkOn(pageId, this.blogSection.hash);
+    await this.appManager.createForkOn(this.pageId, this.blogSection.hash);
 
     // assert
-    const forks = await this.appManager.getForkedInMine(pageId);
+    const forks = await this.appManager.getForkedInMine(this.pageId);
     const pageFork = forks.find(
       (fork) => fork.parentId === this.blogSection.hash
     );
 
     if (pageFork === undefined) {
       this.logger.error(
-        `fork of ${pageId} on ${this.blogSection.hash} not found`,
+        `fork of ${this.pageId} on ${this.blogSection.hash} not found`,
         { forks }
       );
     }
+
+    this.forkId = pageFork.childId;
 
     // forks of paragraphs
     await Promise.all(
       pageData.object.links.map(async (par) => {
         const parForks = await this.appManager.getForkedInMine(par);
         if (
-          parForks.find((fork) => fork.parentId === pageFork.childId) ===
-          undefined
+          parForks.find((fork) => fork.parentId === this.forkId) === undefined
         ) {
           this.logger.error(`fork of ${par} not correct`, { parForks });
         }

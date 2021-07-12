@@ -2,16 +2,16 @@ import { TextNode, TextType } from '@uprtcl/documents';
 import { AsyncQueue } from '@uprtcl/evees';
 
 import { Section } from '../types';
+import { TestBaseElement } from './00-base.component';
 import { InitializeElements } from './01-initialize';
 
 const PAGE_TITLE = 'Page title';
 const PARS = ['Par1', 'Par2', 'Par3'];
 
 export class CreateAndRead extends InitializeElements {
-  private pageId: string;
   private updateQueue = new AsyncQueue();
 
-  async updatePage() {
+  async createAndReadPage() {
     this.logger.log('updatePage()');
 
     const privateSectionData = await this.evees.getPerspectiveData<Section>(
@@ -19,6 +19,8 @@ export class CreateAndRead extends InitializeElements {
     );
 
     this.pageId = privateSectionData.object.pages[0];
+
+    this.logger.log(`Page id: ${this.pageId}`);
 
     await this.create();
     await this.read();

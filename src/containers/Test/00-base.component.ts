@@ -28,6 +28,12 @@ export class TestBaseElement extends ConnectedElement {
 
   remote: any;
 
+  @internalProperty()
+  pageId: string;
+
+  @internalProperty()
+  forkId: string;
+
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
 
@@ -56,9 +62,13 @@ export class TestBaseElement extends ConnectedElement {
       >
         ${this.state}
       </div>
-      ${this.error
-        ? html`<div class="callout error">${this.error}</div>`
-        : ''}`;
+      ${this.state === 'finished'
+        ? html`<div class="callout">
+            <a href=${`/doc/${this.pageId}`} target="_blank">page</a>
+            <a href=${`/doc/${this.forkId}`} target="_blank">fork</a>
+          </div> `
+        : ''}
+      ${this.error ? html`<div class="callout error">${this.error}</div>` : ''}`;
   }
 
   static get styles() {

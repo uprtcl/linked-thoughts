@@ -1,14 +1,18 @@
 import { html, css, internalProperty, query } from 'lit-element';
+
 import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
-import { Logger } from '@uprtcl/evees';
 import { HttpMultiConnection } from '@uprtcl/http-provider';
+import {
+  Logger,
+  Secured,
+  Perspective,
+  RemoteExploreCachedOnMemory,
+} from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import { ETH_ACCOUNT_CONNECTION } from '../../services/init';
-import { Perspective } from '@uprtcl/evees';
-import { Secured } from '@uprtcl/evees';
 
 export class TestBaseElement extends ConnectedElement {
   logger = new Logger('Test');
@@ -22,7 +26,7 @@ export class TestBaseElement extends ConnectedElement {
   @internalProperty()
   error: string = '';
 
-  remote: EveesHttp;
+  remote: any;
 
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
@@ -33,12 +37,12 @@ export class TestBaseElement extends ConnectedElement {
 
   async firstUpdated() {
     this.error = '';
-    this.remote = this.evees.getRemote();
+    this.remote = this.evees.getRemote() as any;
   }
 
   async login() {
     const connectionId = ETH_ACCOUNT_CONNECTION;
-    const multiConnection: HttpMultiConnection = this.remote.connection as any;
+    const multiConnection: HttpMultiConnection = this.remote.base.connection;
 
     multiConnection.select(connectionId);
     const connection = multiConnection.connection();
@@ -52,7 +56,9 @@ export class TestBaseElement extends ConnectedElement {
       >
         ${this.state}
       </div>
-      ${this.error ? html`<div class="callout error">${this.error}</div>` : ''}`;
+      ${this.error
+        ? html`<div class="callout error">${this.error}</div>`
+        : ''}`;
   }
 
   static get styles() {

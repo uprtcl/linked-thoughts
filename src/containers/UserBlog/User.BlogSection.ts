@@ -59,11 +59,11 @@ export default class UserPublicBlogSection extends ConnectedElement {
           display: flex;
         }
         .profileCont {
-          flex: 1;
+          width: 33%;
         }
         .author {
           margin-top: 5%;
-          width: 80%;gas
+          width: 80%;
           overflow: hidden;
         }
 

@@ -4,7 +4,7 @@ import { TestBaseElement } from './00-base.component';
 export class InitializeElements extends TestBaseElement {
   async initializeElements() {
     this.logger.log('initializeElements()');
-    await this.appManager.init();
+    await this.appManager.init(Math.floor(Math.random() * 10000000));
 
     this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'

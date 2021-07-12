@@ -1,4 +1,6 @@
 import { TextNode, TextType } from '@uprtcl/documents';
+import { AsyncQueue } from '@uprtcl/evees';
+
 import { Section } from '../types';
 import { InitializeElements } from './01-initialize';
 
@@ -7,6 +9,7 @@ const PARS = ['Par1', 'Par2', 'Par3'];
 
 export class CreateAndRead extends InitializeElements {
   private pageId: string;
+  private updateQueue = new AsyncQueue();
 
   async updatePage() {
     this.logger.log('updatePage()');
@@ -31,15 +34,19 @@ export class CreateAndRead extends InitializeElements {
       },
     });
 
-    await Promise.all(
-      PARS.map(async (par) => {
-        await this.evees.addNewChild(this.pageId, {
+    let lastQueued: Promise<any> | undefined;
+
+    PARS.forEach(async (par) => {
+      lastQueued = this.updateQueue.enqueue(() =>
+        this.evees.addNewChild(this.pageId, {
           text: par,
           type: TextType.Paragraph,
           links: [],
-        });
-      })
-    );
+        })
+      );
+    });
+
+    await lastQueued;
 
     await this.evees.flush();
   }

@@ -53,13 +53,13 @@ export class AppManager {
     return getConceptPerspective(conceptId);
   }
 
-  async init() {
-    await this.checkStructure();
+  async init(nonce: number = 0) {
+    await this.checkStructure(nonce);
   }
 
-  async checkStructure() {
+  async checkStructure(nonce: number = 0) {
     /** check the app scheleton is there */
-    await this.elements.check();
+    await this.elements.check(nonce);
     await this.checkBlogPermissions();
   }
 

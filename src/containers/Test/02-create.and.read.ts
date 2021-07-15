@@ -38,7 +38,7 @@ export class CreateAndRead extends InitializeElements {
 
     let lastQueued: Promise<any> | undefined;
 
-    PARS.forEach(async (par) => {
+    PARS.reverse().forEach(async (par) => {
       lastQueued = this.updateQueue.enqueue(() =>
         this.evees.addNewChild(this.pageId, {
           text: par,

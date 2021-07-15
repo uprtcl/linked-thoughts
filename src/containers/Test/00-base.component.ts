@@ -64,8 +64,10 @@ export class TestBaseElement extends ConnectedElement {
       </div>
       ${this.state === 'finished'
         ? html`<div class="callout">
-            <a href=${`/doc/${this.pageId}`} target="_blank">page</a>
-            <a href=${`/doc/${this.forkId}`} target="_blank">fork</a>
+            <ul>
+              <li><a href=${`/doc/${this.pageId}`} target="_blank">page</a></li>
+              <li><a href=${`/doc/${this.forkId}`} target="_blank">fork</a></li>
+            </ul>
           </div> `
         : ''}
       ${this.error ? html`<div class="callout error">${this.error}</div>` : ''}`;

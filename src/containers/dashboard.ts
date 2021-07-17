@@ -6,9 +6,8 @@ import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
 import { ConnectedElement } from '../services/connected.element';
 
-import { Dashboard, Section } from './types';
+import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import {
   RouteLocation,
   RouteName,
@@ -48,7 +47,6 @@ export class DashboardElement extends ConnectedElement {
 
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('popstate', () => this.decodeUrl());
   }
 
   disconnectedCallback() {
@@ -70,10 +68,6 @@ export class DashboardElement extends ConnectedElement {
         '/linkedThoughts/forksSection'
       );
 
-      await this.decodeUrl();
-
-      this.checkLastVisited();
-
       await this.load();
     } else {
       this.dispatchEvent(
@@ -88,68 +82,7 @@ export class DashboardElement extends ConnectedElement {
   }
 
   async loggedUserChanged() {
-    DeleteLastVisited();
     await this.firstUpdated();
-  }
-
-  async decodeUrl() {
-    // /section/private
-    // /page/pageId
-    // /getting-started
-
-    this.routeName = this.location.route.name as RouteName;
-    const routeParams = this.location.params as any;
-
-    if (this.routeName === RouteName.dashboard_section) {
-      this.selectedSectionId = routeParams.sectionId;
-    } else if (this.routeName === RouteName.dashboard_page) {
-      this.selectedPageId = routeParams.pageId;
-      const PageExist = await this.evees.getPerspectiveData(
-        this.selectedPageId
-      );
-    } else if (this.routeName === RouteName.dashboard) {
-      // go to the first private page if nothing is selected.
-      if (this.isLogged) {
-        const privateSection = await this.appManager.elements.get(
-          '/linkedThoughts/privateSection'
-        );
-        const privateSectionData = await this.evees.getPerspectiveData<Section>(
-          privateSection.hash
-        );
-
-        if (privateSectionData && privateSectionData.object.pages.length > 0) {
-          this.dispatchEvent(
-            new RouterGoEvent({
-              name: RouteName.dashboard_page,
-              params: { pageId: privateSectionData.object.pages[0] },
-            })
-          );
-        }
-      }
-    }
-  }
-
-  async checkLastVisited() {
-    const lastVisited = GetLastVisited();
-
-    if (lastVisited) {
-      if (lastVisited.type === RouteName.dashboard_page) {
-        this.dispatchEvent(
-          new RouterGoEvent({
-            name: RouteName.dashboard_page,
-            params: { pageId: lastVisited.id },
-          })
-        );
-      }
-      if (lastVisited.type === RouteName.dashboard_section) {
-        this.dispatchEvent(
-          new RouterGoEvent({
-            name: RouteName.dashboard_section,
-            params: { pageId: lastVisited.id },
-          })
-        );
-      }
-    }
   }
 
   /** overwrite */

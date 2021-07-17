@@ -1,18 +1,39 @@
-import { LitElement, html, query, css } from 'lit-element';
+import {
+  LitElement,
+  html,
+  query,
+  css,
+  TemplateResult,
+  internalProperty,
+} from 'lit-element';
 
-import { LTRouter } from './router';
+import { LTRouter } from './router/router';
 import { sharedStyles } from './styles';
+import { RouteName } from './router/routes.types';
 
 export class App extends LitElement {
   @query('#outlet')
   outlet: HTMLElement;
 
+  @internalProperty()
+  component!: TemplateResult;
+
   async firstUpdated() {
     LTRouter.setupRouter(this.outlet);
   }
 
+  decodeUrl() {
+    switch (LTRouter.Router.location.pathname as RouteName) {
+      case RouteName.dashboard:
+      case RouteName.dashboard_page:
+      case RouteName.dashboard_section:
+        this.component = html`<app-dashboard></app-dashboard>`;
+    }
+  }
+
   render() {
-    return html`<div id="outlet"></div> `;
+    return html`<div id="outlet"></div>
+      ${this.component}`;
   }
 
   static get styles() {

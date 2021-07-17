@@ -4,9 +4,7 @@ import { styles } from '@uprtcl/common-ui';
 import { Logger } from '@uprtcl/evees';
 import { EveesHttp } from '@uprtcl/evees-http';
 
-import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
-import { NavigateTo404 } from '../utils/routes.helpers';
 
 export class VisitorElement extends ConnectedElement {
   logger = new Logger('Dashboard');
@@ -25,28 +23,7 @@ export class VisitorElement extends ConnectedElement {
   async firstUpdated() {
     this.remote = this.evees.getRemote() as EveesHttp;
     this.isLogged = await this.remote.isLogged();
-    this.decodeUrl();
     this.loading = false;
-  }
-
-  async decodeUrl() {
-    const routeParams = LTRouter.Router.location.params as any;
-    const { userId, docId } = routeParams;
-    if (routeParams.userId) {
-      let authorId;
-      try {
-        const {
-          object: { payload: { creatorId = null } = {} } = {},
-        } = await this.evees.getEntity(docId);
-
-        authorId = creatorId;
-      } catch (e) {
-        NavigateTo404();
-      }
-
-      if (authorId !== userId) NavigateTo404();
-    }
-    this.pageId = LTRouter.Router.location.params.docId as string;
   }
 
   render() {

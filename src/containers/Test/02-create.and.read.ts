@@ -27,29 +27,6 @@ export class CreateAndRead extends InitializeElements {
   }
 
   async create() {
-    await this.evees.updatePerspectiveData({
-      perspectiveId: this.pageId,
-      object: {
-        text: PAGE_TITLE,
-        type: TextType.Title,
-        links: [],
-      },
-    });
-
-    let lastQueued: Promise<any> | undefined;
-
-    PARS.reverse().forEach(async (par) => {
-      lastQueued = this.updateQueue.enqueue(() =>
-        this.evees.addNewChild(this.pageId, {
-          text: par,
-          type: TextType.Paragraph,
-          links: [],
-        })
-      );
-    });
-
-    await lastQueued;
-
     await this.evees.flush();
   }
 

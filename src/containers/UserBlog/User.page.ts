@@ -1,20 +1,11 @@
-import {
-  BeforeLeaveObserver,
-  PreventCommands,
-  Router,
-  RouterLocation,
-} from '@vaadin/router';
 import { html, css, property, internalProperty, query } from 'lit-element';
 
 import { UprtclTextField } from '@uprtcl/common-ui';
 
-import { LTRouter } from '../../router';
-import { GenearateUserDocReadURL } from '../../utils/routes.generator';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import LTIntersectionObserver from '../IntersectionObserver/IntersectionObserver';
-import { NavigateTo404 } from '../../utils/routes.helpers';
-import { GenerateUserRoute } from '../../utils/routes.helpers';
+import { RouteName, RouterGoEvent } from '../../router/routes.types';
 
 import { PAGE_SELECTED_EVENT_NAME } from '../Collections/Items/page-feed.Item';
 import { Logger } from '@uprtcl/evees';
@@ -55,41 +46,15 @@ export default class ReadOnlyPage extends ConnectedElement {
     this.logger.log('connectedCallback()');
     super.connectedCallback();
 
-    window.addEventListener('popstate', () => this.decodeUrl());
-
     this.addEventListener(PAGE_SELECTED_EVENT_NAME, ((event: CustomEvent) => {
       event.stopPropagation();
       this.showSelectedBlogPost(event.detail.uref);
     }) as EventListener);
   }
 
-  async getUserBlogId(userId) {
-    this.userBlogId = await this.appManager.getBlogIdOf(userId);
-
-    if (!this.userBlogId) {
-      NavigateTo404();
-    }
-  }
-
   async load() {
     this.logger.log('load()');
-    await this.decodeUrl();
-  }
-
-  async decodeUrl() {
-    this.logger.log('decodeUrl()');
-
-    const routeParams = LTRouter.Router.location.params as any;
-    if (routeParams.userId) {
-      this.userId = routeParams.userId;
-    }
-
-    const URLDocId = LTRouter.Router.location.params.docId as string;
-    if (URLDocId) {
-      this.selectedBlogId = URLDocId;
-    }
-
-    await this.getUserBlogId(routeParams.userId);
+    this.userBlogId = await this.appManager.getBlogIdOf(this.userId);
   }
 
   updated(cp) {
@@ -104,13 +69,23 @@ export default class ReadOnlyPage extends ConnectedElement {
 
   showSelectedBlogPost(uref: string) {
     this.logger.log('showSelectedBlogPost()', uref);
-    Router.go(GenearateUserDocReadURL(this.userId, uref));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.user_blog_page,
+        params: { userId: this.userId, pageId: uref },
+      })
+    );
   }
 
   closeSelectedBlogPost() {
     this.logger.log('closeSelectedBlogPost()');
     this.selectedBlogId = undefined;
-    Router.go(GenerateUserRoute(this.userId));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.user_blog,
+        params: { userId: this.userId },
+      })
+    );
   }
 
   render() {

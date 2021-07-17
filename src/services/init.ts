@@ -24,7 +24,7 @@ import {
 } from './app.elements.patterns';
 import { AppManager } from './app.manager';
 import { env } from './env';
-import { ORIGIN } from '../utils/routes.generator';
+import { ORIGIN } from '../router/routes.builder';
 
 export const APP_MANAGER = 'app-manager-service';
 
@@ -44,7 +44,7 @@ export const initUprtcl = async () => {
   const auth0Config: Auth0ClientOptions = {
     domain: 'linked-thoughts-dev.eu.auth0.com',
     client_id: 'I7cwQfbSOm9zzU29Lt0Z3TjQsdB6GVEf',
-    redirect_uri: `${ORIGIN}/homeBLYAT`,
+    redirect_uri: `${ORIGIN}/home`,
     cacheLocation: 'localstorage',
   };
 

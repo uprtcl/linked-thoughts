@@ -22,6 +22,8 @@ export class AppTestElement extends UpdatePage {
     this.state = 'initializing appManager';
     await this.initializeElements();
 
+    this.initializing = false;
+
     this.state = 'updating page';
     await this.createAndReadPage();
 

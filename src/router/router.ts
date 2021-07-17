@@ -1,15 +1,15 @@
 import { Router } from '@vaadin/router';
-import * as Routes from './constants/routeNames';
-import { SetLastVisited } from './utils/localStorage';
+import { SetLastVisited } from '../utils/localStorage';
+import { RouteName, RouteBase } from './routes.types';
 import {
   GenerateDocumentRoute,
   GenerateReadDocumentRoute,
   GenerateSectionRoute,
   GenerateUserRoute,
-  GenerateForksRoute,
-  RouteName,
-} from './utils/routes.helpers';
+} from './routes.builder';
 
+/** components are dummy DIVs because rendering is manually done on the app.ts file. Router is used
+ * to parse and manipulate the browser location */
 export class LTRouter {
   static Router: Router;
 
@@ -18,32 +18,32 @@ export class LTRouter {
 
     router.setRoutes([
       {
-        path: Routes.Test,
+        path: RouteBase.test,
         name: RouteName.test,
-        component: 'app-test',
+        component: 'div',
       },
       {
-        path: Routes.Icons,
+        path: RouteBase.icons,
         name: RouteName.icons,
-        component: 'uprtcl-icons-gallery',
+        component: 'div',
       },
       {
-        path: Routes.GettingStarted,
-        name: RouteName.gettingStarted,
-        component: 'app-getting-started',
+        path: RouteBase.getting_started,
+        name: RouteName.getting_started,
+        component: 'div',
       },
       {
         path: GenerateReadDocumentRoute(),
-        component: 'app-visitor',
+        component: 'div',
       },
       {
         path: GenerateUserRoute(),
-        component: 'app-user-page',
-        children: [{ path: '/:docId', component: 'div' }],
+        component: 'div',
+        children: [{ path: '/:pageId', component: 'div' }],
       },
       {
-        path: Routes.Home,
-        component: 'app-dashboard', // Slot
+        path: RouteBase.home,
+        component: 'div', // Slot
         children: [
           {
             name: RouteName.dashboard,
@@ -51,18 +51,18 @@ export class LTRouter {
             component: 'div',
           },
           {
-            name: RouteName.page,
+            name: RouteName.dashboard_page,
             path: GenerateDocumentRoute(),
             component: 'div',
             action: (context) => {
               SetLastVisited(
                 context.route.name,
-                context.params.docId as string
+                context.params.pageId as string
               );
             },
           },
           {
-            name: RouteName.section,
+            name: RouteName.dashboard_section,
             path: GenerateSectionRoute(),
             component: 'div',
             action: (context) => {
@@ -70,14 +70,6 @@ export class LTRouter {
                 context.route.name,
                 context.params.sectionId as string
               );
-            },
-          },
-          {
-            name: RouteName.fork,
-            path: GenerateForksRoute(),
-            component: 'div',
-            action: (context) => {
-              SetLastVisited(context.route.name, '');
             },
           },
         ],

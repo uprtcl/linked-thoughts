@@ -1,26 +1,29 @@
-import { html, css, internalProperty, query } from 'lit-element';
-import { Router } from '@vaadin/router';
+import { html, css, internalProperty, property } from 'lit-element';
+
 import { EveesHttp } from '@uprtcl/evees-http';
-import { icons, styles } from '@uprtcl/common-ui';
+import { styles } from '@uprtcl/common-ui';
 import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
-import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
-import { GettingStarted } from '../constants/routeNames';
 
 import { Dashboard, Section } from './types';
 import { sharedStyles } from '../styles';
 import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import {
-  GenerateDocumentRoute,
-  GenerateSectionRoute,
-  GenerateForksRoute,
+  RouteLocation,
   RouteName,
-  NavigateTo404,
-} from '../utils/routes.helpers';
+  RouterGoEvent,
+} from '../router/routes.types';
 
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
+
+  // initNoce is different from zero on tests
+  @property({ type: Number })
+  initNonce: number = 0;
+
+  @property({ type: Object })
+  location: RouteLocation;
 
   @internalProperty()
   loading = true;
@@ -57,7 +60,7 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      await this.appManager.init();
+      await this.appManager.init(this.initNonce);
 
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
@@ -73,7 +76,9 @@ export class DashboardElement extends ConnectedElement {
 
       await this.load();
     } else {
-      Router.go(GettingStarted);
+      this.dispatchEvent(
+        new RouterGoEvent({ name: RouteName.getting_started })
+      );
     }
   }
 
@@ -92,21 +97,16 @@ export class DashboardElement extends ConnectedElement {
     // /page/pageId
     // /getting-started
 
-    this.routeName = LTRouter.Router.location.route.name as RouteName;
-    const routeParams = LTRouter.Router.location.params as any;
+    this.routeName = this.location.route.name as RouteName;
+    const routeParams = this.location.params as any;
 
-    if (this.routeName === RouteName.section) {
+    if (this.routeName === RouteName.dashboard_section) {
       this.selectedSectionId = routeParams.sectionId;
-    } else if (this.routeName === RouteName.page) {
-      this.selectedPageId = routeParams.docId;
-      try {
-        const PageExist = await this.evees.getPerspectiveData(
-          this.selectedPageId
-        );
-      } catch (e) {
-        this.appManager.appError.clearLastVisited();
-        NavigateTo404();
-      }
+    } else if (this.routeName === RouteName.dashboard_page) {
+      this.selectedPageId = routeParams.pageId;
+      const PageExist = await this.evees.getPerspectiveData(
+        this.selectedPageId
+      );
     } else if (this.routeName === RouteName.dashboard) {
       // go to the first private page if nothing is selected.
       if (this.isLogged) {
@@ -118,7 +118,12 @@ export class DashboardElement extends ConnectedElement {
         );
 
         if (privateSectionData && privateSectionData.object.pages.length > 0) {
-          Router.go(GenerateDocumentRoute(privateSectionData.object.pages[0]));
+          this.dispatchEvent(
+            new RouterGoEvent({
+              name: RouteName.dashboard_page,
+              params: { pageId: privateSectionData.object.pages[0] },
+            })
+          );
         }
       }
     }
@@ -128,11 +133,21 @@ export class DashboardElement extends ConnectedElement {
     const lastVisited = GetLastVisited();
 
     if (lastVisited) {
-      if (lastVisited.type === RouteName.page) {
-        Router.go(GenerateDocumentRoute(lastVisited.id));
+      if (lastVisited.type === RouteName.dashboard_page) {
+        this.dispatchEvent(
+          new RouterGoEvent({
+            name: RouteName.dashboard_page,
+            params: { pageId: lastVisited.id },
+          })
+        );
       }
-      if (lastVisited.type === RouteName.section) {
-        Router.go(GenerateSectionRoute(lastVisited.id));
+      if (lastVisited.type === RouteName.dashboard_section) {
+        this.dispatchEvent(
+          new RouterGoEvent({
+            name: RouteName.dashboard_section,
+            params: { pageId: lastVisited.id },
+          })
+        );
       }
     }
   }
@@ -153,7 +168,12 @@ export class DashboardElement extends ConnectedElement {
     const pageId = await this.appManager.newPage(
       this.dashboardData.object.sections[onSection]
     );
-    Router.go(GenerateDocumentRoute(pageId));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.dashboard_page,
+        params: { pageId: pageId },
+      })
+    );
   }
 
   renderHome() {
@@ -173,16 +193,6 @@ export class DashboardElement extends ConnectedElement {
         <uprtcl-button class="button-new-page" @click=${() => this.newPage()}>
           New Page
         </uprtcl-button>
-        <br />
-        <!-- <div class="actions-item clickable">
-          ${icons.clock} <span class="actions-label">Recents</span>
-        </div>
-        <div
-          class="actions-item clickable"
-          @click=${() => Router.go(GenerateForksRoute())}
-        >
-          ${icons.fork} <span class="actions-label">Forks</span>
-        </div> -->
       </div>
 
       <div class="section-cont">
@@ -227,14 +237,12 @@ export class DashboardElement extends ConnectedElement {
 
           <div class="app-content">
             ${
-              this.routeName === RouteName.page
+              this.routeName === RouteName.dashboard_page
                 ? html`<app-document-page page-id=${this.selectedPageId} />`
-                : this.routeName === RouteName.section
+                : this.routeName === RouteName.dashboard_section
                 ? html`<app-section-page
                     uref=${this.selectedSectionId}
                   ></app-section-page>`
-                : this.routeName === RouteName.fork
-                ? this.renderForkContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }
           </div>

@@ -5,7 +5,7 @@ import { EveesHttp } from '@uprtcl/evees-http';
 
 import { sharedStyles } from '../../styles';
 import { ConnectedElement } from '../../services/connected.element';
-import { ORIGIN } from '../../utils/routes.generator';
+import { ORIGIN } from '../../router/routes.builder';
 
 export default class AppBarPublic extends ConnectedElement {
   @internalProperty()

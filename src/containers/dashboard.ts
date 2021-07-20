@@ -30,15 +30,6 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   isLogged = false;
 
-  @internalProperty()
-  routeName: RouteName;
-
-  @internalProperty()
-  selectedPageId: string | undefined;
-
-  @internalProperty()
-  selectedSectionId: string | undefined;
-
   dashboardPerspective: Secured<Perspective>;
   forksSection: Secured<Perspective>;
 
@@ -164,11 +155,13 @@ export class DashboardElement extends ConnectedElement {
 
           <div class="app-content">
             ${
-              this.routeName === RouteName.dashboard_page
-                ? html`<app-document-page page-id=${this.selectedPageId} />`
-                : this.routeName === RouteName.dashboard_section
+              this.location.name === RouteName.dashboard_page
+                ? html`<app-document-page
+                    page-id=${this.location.params.pageId}
+                  />`
+                : this.location.name === RouteName.dashboard_section
                 ? html`<app-section-page
-                    uref=${this.selectedSectionId}
+                    uref=${this.location.params.sectionId}
                   ></app-section-page>`
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }

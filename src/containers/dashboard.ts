@@ -58,8 +58,6 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      await this.appManager.init(this.initNonce);
-
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
       );
@@ -69,10 +67,6 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.load();
-    } else {
-      this.dispatchEvent(
-        new RouterGoEvent({ name: RouteName.getting_started })
-      );
     }
   }
 

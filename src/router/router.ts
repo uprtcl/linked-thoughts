@@ -11,36 +11,12 @@ import {
 /** components are dummy DIVs because rendering is manually done on the app.ts file. Router is used
  * to parse and manipulate the browser location */
 export class LTRouter {
-  static Router: Router;
+  router: Router;
 
-  static setupRouter(outlet: HTMLElement) {
-    const router = new Router(outlet);
+  async setupRouter(outlet: HTMLElement) {
+    this.router = new Router(outlet);
 
-    router.setRoutes([
-      {
-        path: RouteBase.test,
-        name: RouteName.test,
-        component: 'div',
-      },
-      {
-        path: RouteBase.icons,
-        name: RouteName.icons,
-        component: 'div',
-      },
-      {
-        path: RouteBase.getting_started,
-        name: RouteName.getting_started,
-        component: 'div',
-      },
-      {
-        path: GenerateReadDocumentRoute(),
-        component: 'div',
-      },
-      {
-        path: GenerateUserRoute(),
-        component: 'div',
-        children: [{ path: '/:pageId', component: 'div' }],
-      },
+    this.router.setRoutes([
       {
         path: RouteBase.home,
         component: 'div', // Slot
@@ -74,13 +50,33 @@ export class LTRouter {
           },
         ],
       },
+      {
+        path: RouteBase.test,
+        name: RouteName.test,
+        component: 'div',
+      },
+      {
+        path: RouteBase.icons,
+        name: RouteName.icons,
+        component: 'div',
+      },
+      {
+        path: RouteBase.getting_started,
+        name: RouteName.getting_started,
+        component: 'div',
+      },
+      {
+        path: GenerateReadDocumentRoute(),
+        component: 'div',
+      },
+      {
+        path: GenerateUserRoute(),
+        component: 'div',
+        children: [{ path: '/:pageId', component: 'div' }],
+      },
       { path: '(.*)', component: 'app-error-page' },
     ]);
 
-    this.Router = router;
-
-    return router;
+    await this.router.ready;
   }
 }
-
-export const LTRouterInstance = new LTRouter();

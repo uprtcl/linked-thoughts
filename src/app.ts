@@ -1,20 +1,26 @@
 import {
-  LitElement,
   html,
   query,
   css,
   TemplateResult,
   internalProperty,
 } from 'lit-element';
+import { Router } from '@vaadin/router';
 
 import { EveesHttp } from '@uprtcl/evees-http';
 
 import { LTRouter } from './router/router';
 import { sharedStyles } from './styles';
-import { RouteLocation, RouteName, RouteParams } from './router/routes.types';
+import {
+  RouteBase,
+  RouteLocation,
+  RouteName,
+  RouteParams,
+  RouterGoEvent,
+  ROUTER_GO_EVENT,
+} from './router/routes.types';
 import { ConnectedElement } from './services/connected.element';
 import { Section } from './containers/types';
-import { Router } from '@vaadin/router';
 import {
   GenerateDocumentRoute,
   GenerateSectionRoute,
@@ -36,26 +42,61 @@ export class App extends ConnectedElement {
   @internalProperty()
   isLogged = false;
 
+  @internalProperty()
+  loading: boolean = true;
+
   remote: EveesHttp;
+  router: LTRouter;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener(ROUTER_GO_EVENT, (event: RouterGoEvent) => {
+      this.goToRoute(event.detail.name, event.detail.params);
+    });
+  }
 
   async firstUpdated() {
-    LTRouter.setupRouter(this.outlet);
+    this.router = new LTRouter();
+    await this.router.setupRouter(this.outlet);
 
     this.remote = this.evees.getRemote() as EveesHttp;
-    this.isLogged = await this.remote.isLogged();
 
-    this.checkLastVisited();
+    // this.checkLastVisited();
+    await this.decodeUrl();
+
+    this.loading = false;
 
     window.addEventListener('popstate', () => this.decodeUrl());
   }
 
   async decodeUrl() {
+    if (!this.router.router.location.route) return;
+
     this.location = {
-      name: LTRouter.Router.location.route.name as RouteName,
+      name: this.router.router.location.route.name as RouteName,
       params: {
-        ...LTRouter.Router.location.params,
+        ...this.router.router.location.params,
       },
     };
+
+    await this.updateLocation();
+  }
+
+  /** redirect logic */
+  async updateLocation() {
+    if (
+      [
+        RouteName.dashboard,
+        RouteName.dashboard_page,
+        RouteName.dashboard_section,
+      ].includes(this.location.name)
+    ) {
+      // init app
+      this.isLogged = await this.remote.isLogged();
+      if (this.isLogged) {
+        await this.appManager.init();
+      }
+    }
 
     if (this.location.name === RouteName.dashboard) {
       // go to the first private page if nothing is selected.
@@ -72,11 +113,15 @@ export class App extends ConnectedElement {
             pageId: privateSectionData.object.pages[0],
           });
         }
+      } else {
+        this.goToRoute(RouteName.getting_started);
       }
     }
+
+    this.reloadComponent();
   }
 
-  goToRoute(name: RouteName, params: RouteParams) {
+  goToRoute(name: RouteName, params?: RouteParams) {
     let url: string;
     ('');
 
@@ -100,6 +145,13 @@ export class App extends ConnectedElement {
       case RouteName.user_blog_page:
         url = GenerateUserDocRoute(params.userId, params.pageId);
         break;
+
+      case RouteName.getting_started:
+        url = RouteBase.getting_started;
+        break;
+
+      default:
+        throw new Error(`Unknown route ${name}`);
     }
 
     Router.go(url);
@@ -110,7 +162,17 @@ export class App extends ConnectedElement {
       case RouteName.dashboard:
       case RouteName.dashboard_page:
       case RouteName.dashboard_section:
-        this.component = html`<app-dashboard></app-dashboard>`;
+        this.component = html`<app-dashboard
+          .location=${this.location}
+        ></app-dashboard>`;
+        break;
+
+      case RouteName.getting_started:
+        this.component = html`<app-getting-started></app-getting-started>`;
+        break;
+
+      default:
+        throw new Error(`Unknown route name ${this.location.name}`);
     }
   }
 
@@ -129,7 +191,7 @@ export class App extends ConnectedElement {
 
   render() {
     return html`<div id="outlet"></div>
-      ${this.component}`;
+      <div id="app">${this.component}</div> `;
   }
 
   static get styles() {
@@ -155,7 +217,7 @@ export class App extends ConnectedElement {
           --background-color: #fffffb;
         }
 
-        #outlet {
+        #app {
           height: 100%;
           display: flex;
           flex-direction: column;

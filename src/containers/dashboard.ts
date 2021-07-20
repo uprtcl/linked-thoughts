@@ -116,14 +116,17 @@ export class DashboardElement extends ConnectedElement {
       <div class="section-cont">
         <app-nav-section
           uref=${this.dashboardData.object.sections[0]}
+          selected-id=${this.location.params.pageId}
           idx=${0}
         ></app-nav-section>
         <app-nav-section
           uref=${this.dashboardData.object.sections[1]}
+          selected-id=${this.location.params.pageId}
           idx=${1}
         ></app-nav-section>
         <app-nav-section
           uref=${this.dashboardData.object.sections[2]}
+          selected-id=${this.location.params.pageId}
           idx=${2}
         ></app-nav-section>
       </div> `;

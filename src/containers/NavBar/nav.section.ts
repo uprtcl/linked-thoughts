@@ -14,7 +14,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   @property({ type: Number })
   idx: number = 0;
 
-  @property({ type: String })
+  @property({ type: String, attribute: 'selected-id' })
   selectedId: string;
 
   @internalProperty()

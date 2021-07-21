@@ -1,5 +1,5 @@
 import { DocumentEditor, TextNode, TextType } from '@uprtcl/documents';
-import { AsyncQueue } from '@uprtcl/evees';
+import { AsyncQueue, EveesEvents } from '@uprtcl/evees';
 import { query } from 'lit-element';
 
 import { Section } from '../types';
@@ -22,7 +22,7 @@ export class CreateAndRead extends InitializeElements {
     this.logger.log(`Page id: ${this.pageId}`);
 
     await this.updateDoc();
-    // await this.read();
+    await this.read();
   }
 
   async updateDoc() {
@@ -37,12 +37,20 @@ export class CreateAndRead extends InitializeElements {
       type: TextType.Title,
       links: [],
     };
+
     await editor.contentChanged(editor.doc, content);
     await editor.split(editor.doc, PARS[0], true);
     await editor.split(editor.doc.childrenNodes[0], PARS[1], false);
     await editor.split(editor.doc.childrenNodes[1], PARS[2], false);
 
-    // await this.evees.flush();
+    // await debounce
+    await new Promise<void>((resolve) => {
+      editor.evees.events.on(EveesEvents.pending, (pending: boolean) => {
+        if (!pending) {
+          resolve();
+        }
+      });
+    });
   }
 
   async read() {
@@ -60,7 +68,7 @@ export class CreateAndRead extends InitializeElements {
       pageData.object.links.map(async (par, ix) => {
         const parData = await this.evees.getPerspectiveData<TextNode>(par);
 
-        if (parData.object.text !== PARS.reverse()[ix]) {
+        if (parData.object.text !== PARS[ix]) {
           throw new Error(`unexpected`);
         }
       })

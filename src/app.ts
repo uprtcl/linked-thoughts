@@ -146,6 +146,10 @@ export class App extends ConnectedElement {
         url = GenerateUserDocRoute(params.userId, params.pageId);
         break;
 
+      case RouteName.test:
+        url = RouteBase.test;
+        break;
+
       case RouteName.getting_started:
         url = RouteBase.getting_started;
         break;
@@ -171,8 +175,14 @@ export class App extends ConnectedElement {
         this.component = html`<app-getting-started></app-getting-started>`;
         break;
 
+      case RouteName.test:
+        this.component = html`<app-test></app-test>`;
+        break;
+
       default:
-        throw new Error(`Unknown route name ${this.location.name}`);
+        throw new Error(
+          `Unknown component ofor route name ${this.location.name}`
+        );
     }
   }
 

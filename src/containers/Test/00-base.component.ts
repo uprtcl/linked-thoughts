@@ -33,15 +33,6 @@ export class TestBaseElement extends ConnectedElement {
   @internalProperty()
   initializing: boolean = true;
 
-  locationStub: any = {
-    route: {
-      name: RouteName.dashboard_page,
-    },
-    params: {
-      pageId: '',
-    },
-  };
-
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
   initNonce = Date.now();
@@ -74,7 +65,12 @@ export class TestBaseElement extends ConnectedElement {
       </div>
       ${this.initializing
         ? html`<uprtcl-loading></uprtcl-loading>`
-        : html`<app-dashboard .location=${this.locationStub} initNonce=${this.initNonce}></app-dashboard></div>`}
+        : html`<app-dashboard 
+          id="dashboard" 
+          .location=${{
+            name: RouteName.dashboard_page,
+            params: { pageId: this.pageId },
+          }} initNonce=${this.initNonce}></app-dashboard></div>`}
       ${this.state === 'finished'
         ? html`<div class="callout">
             <ul>

@@ -22,18 +22,16 @@ export class AppTestElement extends UpdatePage {
     this.state = 'initializing appManager';
     await this.initializeElements();
 
-    this.initializing = false;
-
     this.state = 'updating page';
-    await this.createAndReadPage();
+    await this.updateAndReadPage();
 
-    this.state = 'publishToBlog';
-    await this.publishToBlog();
+    // this.state = 'publishToBlog';
+    // await this.publishToBlog();
 
-    this.state = 'updateAndPush';
-    await this.updateAndPush();
+    // this.state = 'updateAndPush';
+    // await this.updateAndPush();
 
-    this.loading = false;
-    this.state = 'finished';
+    // this.loading = false;
+    // this.state = 'finished';
   }
 }

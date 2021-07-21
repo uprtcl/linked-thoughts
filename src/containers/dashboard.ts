@@ -1,4 +1,4 @@
-import { html, css, internalProperty, property } from 'lit-element';
+import { html, css, internalProperty, property, query } from 'lit-element';
 
 import { EveesHttp } from '@uprtcl/evees-http';
 import { styles } from '@uprtcl/common-ui';
@@ -13,6 +13,7 @@ import {
   RouteName,
   RouterGoEvent,
 } from '../router/routes.types';
+import { DocumentPage } from './DocPage/doc.page';
 
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
@@ -30,11 +31,24 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   isLogged = false;
 
+  @query('#doc-page')
+  docPage: DocumentPage;
+
   dashboardPerspective: Secured<Perspective>;
   forksSection: Secured<Perspective>;
 
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
+
+  loadingPromise: Promise<void>;
+  resolveLoading: Function;
+
+  constructor() {
+    super();
+    this.loadingPromise = new Promise((resolve) => {
+      this.resolveLoading = resolve;
+    });
+  }
 
   connectedCallback() {
     super.connectedCallback();
@@ -58,6 +72,7 @@ export class DashboardElement extends ConnectedElement {
       );
 
       await this.load();
+      this.resolveLoading();
     }
   }
 
@@ -160,6 +175,7 @@ export class DashboardElement extends ConnectedElement {
             ${
               this.location.name === RouteName.dashboard_page
                 ? html`<app-document-page
+                    id="doc-page"
                     page-id=${this.location.params.pageId}
                   />`
                 : this.location.name === RouteName.dashboard_section

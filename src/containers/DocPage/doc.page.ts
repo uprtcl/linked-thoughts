@@ -88,6 +88,16 @@ export class DocumentPage extends ConnectedElement {
 
   originId: string;
 
+  loadingPromise: Promise<void>;
+  resolveLoading: Function;
+
+  constructor() {
+    super();
+    this.loadingPromise = new Promise((resolve) => {
+      this.resolveLoading = resolve;
+    });
+  }
+
   async firstUpdated() {
     if (this.evees.getClient().events) {
       this.evees
@@ -101,7 +111,8 @@ export class DocumentPage extends ConnectedElement {
       });
     }
 
-    this.load();
+    await this.load();
+    this.resolveLoading();
   }
 
   updated(changedProperties) {

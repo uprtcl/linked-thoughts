@@ -5,7 +5,7 @@ import { PublishToBlog } from './03-publish.to.blog';
 const SUBSECTION_TITLE = 'Subtitle 1';
 const SUBPAR_TEXT = 'Sub paragraph text';
 
-export class UpdatePage extends PublishToBlog {
+export class PushChanges extends PublishToBlog {
   async updateAndPublish() {
     this.logger.log('updateAndPublish()');
 

@@ -8,7 +8,12 @@ import { Logger, Secured, Perspective } from '@uprtcl/evees';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import { ETH_ACCOUNT_CONNECTION } from '../../services/init';
-import { RouteBase, RouteName } from '../../router/routes.types';
+import {
+  RouteBase,
+  RouteName,
+  RouterGoEvent,
+  ROUTER_GO_EVENT,
+} from '../../router/routes.types';
 
 export class TestBaseElement extends ConnectedElement {
   logger = new Logger('Test');
@@ -37,8 +42,18 @@ export class TestBaseElement extends ConnectedElement {
   blogSection!: Secured<Perspective>;
   initNonce = Date.now();
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.addEventListener(ROUTER_GO_EVENT, (event: RouterGoEvent) => {
+      event.stopPropagation();
+
+      if (event.detail.name !== RouteName.dashboard_page) {
+        throw new Error('Tests only suppor reroute to page for now');
+      }
+
+      this.pageId = event.detail.params.pageId;
+    });
   }
 
   async firstUpdated() {

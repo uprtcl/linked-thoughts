@@ -8,7 +8,7 @@ import { Logger, Secured, Perspective } from '@uprtcl/evees';
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 import { ETH_ACCOUNT_CONNECTION } from '../../services/init';
-import { RouteName } from '../../router/routes.types';
+import { RouteBase, RouteName } from '../../router/routes.types';
 
 export class TestBaseElement extends ConnectedElement {
   logger = new Logger('Test');
@@ -75,10 +75,18 @@ export class TestBaseElement extends ConnectedElement {
         ? html`<div class="callout">
             <ul>
               <li>
-                <a href=${`/doc/${this.pageId}`} target="_blank">page</a>
+                <a
+                  href=${`${RouteBase.dashboard_page}/${this.pageId}`}
+                  target="_blank"
+                  >page</a
+                >
               </li>
               <li>
-                <a href=${`/doc/${this.forkId}`} target="_blank">fork</a>
+                <a
+                  href=${`${RouteBase.dashboard_page}/${this.forkId}`}
+                  target="_blank"
+                  >fork</a
+                >
               </li>
             </ul>
           </div>`

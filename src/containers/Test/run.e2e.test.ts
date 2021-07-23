@@ -28,8 +28,8 @@ export class AppTestElement extends UpdatePage {
     this.state = 'publishToBlog';
     await this.publishToBlog();
 
-    // this.state = 'updateAndPush';
-    // await this.updateAndPush();
+    this.state = 'updateAndPush';
+    await this.updateAndPush();
 
     this.state = 'finished';
   }

@@ -304,7 +304,7 @@ export class DocumentPage extends ConnectedElement {
     });
 
     this.pushing = false;
-    this.loadForks();
+    await this.loadForks();
   }
 
   async checkOrigin() {

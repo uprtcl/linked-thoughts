@@ -7,7 +7,7 @@ export class PublishToBlog extends CreateAndRead {
     this.logger.log('publishToBlog()');
 
     // fork of page
-    await this.appManager.createForkOn(this.pageId, this.blogSection.hash);
+    await this.dashboard.docPage.shareTo(this.blogSection.hash);
 
     // assert
     const forks = await this.appManager.getForkedInMine(this.pageId);

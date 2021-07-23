@@ -25,13 +25,12 @@ export class AppTestElement extends UpdatePage {
     this.state = 'updating page';
     await this.updateAndReadPage();
 
-    // this.state = 'publishToBlog';
-    // await this.publishToBlog();
+    this.state = 'publishToBlog';
+    await this.publishToBlog();
 
     // this.state = 'updateAndPush';
     // await this.updateAndPush();
 
-    // this.loading = false;
-    // this.state = 'finished';
+    this.state = 'finished';
   }
 }

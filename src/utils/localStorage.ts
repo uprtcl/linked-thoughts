@@ -1,5 +1,5 @@
 import { LastVisitedKey } from '../constants/localStorage';
-import { RouteName } from './routes.helpers';
+import { RouteName } from '../router/routes.types';
 
 export const SetLastVisited = (type: string, id: string) => {
   localStorage.setItem(LastVisitedKey, JSON.stringify({ type, id }));

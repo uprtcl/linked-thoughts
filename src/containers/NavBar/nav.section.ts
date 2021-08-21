@@ -1,14 +1,9 @@
 import { html, css, internalProperty, property } from 'lit-element';
 import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { styles } from '@uprtcl/common-ui';
-import { Router } from '@vaadin/router';
 
-import { LTRouter } from '../../router';
 import { sharedStyles } from '../../styles';
-import {
-  GenerateDocumentRoute,
-  GenerateSectionRoute,
-} from '../../utils/routes.helpers';
+import { RouteName, RouterGoEvent } from '../../router/routes.types';
 
 import { APP_MANAGER } from '../../services/init';
 import { AppManager } from '../../services/app.manager';
@@ -16,13 +11,10 @@ import { AppManager } from '../../services/app.manager';
 import { Section } from '../types';
 
 export class NavSectionElement extends EveesBaseElement<Section> {
-  @property({ type: String })
-  uref: string;
-
   @property({ type: Number })
   idx: number = 0;
 
-  @internalProperty()
+  @property({ type: String, attribute: 'selected-id' })
   selectedId: string;
 
   @internalProperty()
@@ -37,7 +29,6 @@ export class NavSectionElement extends EveesBaseElement<Section> {
   connectedCallback() {
     super.connectedCallback();
     this.appManager = this.request(APP_MANAGER);
-    window.addEventListener('popstate', () => this.decodeUrl());
   }
 
   async firstUpdated() {
@@ -46,14 +37,6 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       '/linkedThoughts/privateSection'
     );
     this.canCreate = privateSection.hash === this.uref;
-    this.decodeUrl();
-  }
-
-  decodeUrl() {
-    if (LTRouter.Router.location.params.docId) {
-      this.selectedId = LTRouter.Router.location.params.docId as string;
-    } else if (LTRouter.Router.location.params.sectionId)
-      this.selectedId = LTRouter.Router.location.params.sectionId as string;
   }
 
   async newPage(e: Event) {
@@ -62,11 +45,22 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     e.stopPropagation();
     const pageId = await this.appManager.newPage(this.uref);
     this.creatingPage = false;
-    Router.go(GenerateDocumentRoute(pageId));
+
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.dashboard_page,
+        params: { pageId: pageId },
+      })
+    );
   }
 
   navigateSection() {
-    Router.go(GenerateSectionRoute(this.uref));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.dashboard_section,
+        params: { pageId: this.uref },
+      })
+    );
   }
 
   async deletePage(pageIx: number) {
@@ -85,7 +79,12 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       await this.evees.flush();
 
       if (wasSelected) {
-        Router.go(GenerateSectionRoute(this.uref));
+        this.dispatchEvent(
+          new RouterGoEvent({
+            name: RouteName.dashboard_section,
+            params: { pageId: this.uref },
+          })
+        );
       }
     }
   }

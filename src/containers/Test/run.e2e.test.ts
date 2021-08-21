@@ -1,8 +1,8 @@
 import { Logger } from '@uprtcl/evees';
 
-import { UpdatePage } from './04-update-page';
+import { CreatePage } from './05-create.page';
 
-export class AppTestElement extends UpdatePage {
+export class AppTestElement extends CreatePage {
   logger = new Logger('Test');
 
   async firstUpdated() {
@@ -23,7 +23,7 @@ export class AppTestElement extends UpdatePage {
     await this.initializeElements();
 
     this.state = 'updating page';
-    await this.createAndReadPage();
+    await this.updateAndReadPage();
 
     this.state = 'publishToBlog';
     await this.publishToBlog();
@@ -31,7 +31,9 @@ export class AppTestElement extends UpdatePage {
     this.state = 'updateAndPush';
     await this.updateAndPush();
 
-    this.loading = false;
+    this.state = 'createPage';
+    await this.createPage();
+
     this.state = 'finished';
   }
 }

@@ -1,11 +1,10 @@
 import { html, css, internalProperty, property } from 'lit-element';
-import { Router } from '@vaadin/router';
 
 import { icons, MenuOptions, styles } from '@uprtcl/common-ui';
 import { EveesBaseElement } from '@uprtcl/evees-ui';
 import { TextNode } from '@uprtcl/documents';
 
-import { GenerateDocumentRoute } from '../../utils/routes.helpers';
+import { RouteName, RouterGoEvent } from '../../router/routes.types';
 
 import { sharedStyles } from '../../styles';
 
@@ -46,7 +45,12 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   selectPage() {
     // Change the Page Title
     // window.document.title = this.title + ' | Linked Thoughts';
-    Router.go(GenerateDocumentRoute(this.uref));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.dashboard_page,
+        params: { pageId: this.uref },
+      })
+    );
   }
 
   async optionOnPage(e) {

@@ -12,14 +12,12 @@ import {
   Entity,
 } from '@uprtcl/evees';
 import { DocumentEditor } from '@uprtcl/documents';
-import { Router } from '@vaadin/router';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
 
-import { GenerateDocumentRoute } from '../../utils/routes.helpers';
-import { GenearateReadURL } from '../../utils/routes.generator';
-import { LTRouter } from '../../router';
+import { RouteName, RouterGoEvent } from '../../router/routes.types';
+import { GenearateReadURL } from '../../router/routes.builder';
 
 import { Section } from '../types';
 
@@ -90,6 +88,16 @@ export class DocumentPage extends ConnectedElement {
 
   originId: string;
 
+  loadingPromise: Promise<void>;
+  resolveLoading: Function;
+
+  constructor() {
+    super();
+    this.loadingPromise = new Promise((resolve) => {
+      this.resolveLoading = resolve;
+    });
+  }
+
   async firstUpdated() {
     if (this.evees.getClient().events) {
       this.evees
@@ -103,7 +111,8 @@ export class DocumentPage extends ConnectedElement {
       });
     }
 
-    this.load();
+    await this.load();
+    this.resolveLoading();
   }
 
   updated(changedProperties) {
@@ -247,7 +256,12 @@ export class DocumentPage extends ConnectedElement {
   }
 
   navToFork() {
-    Router.go(GenerateDocumentRoute(this.fork.childId));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.dashboard_page,
+        params: { pageId: this.fork.childId },
+      })
+    );
   }
 
   async deleteFrom(sectionId: string) {
@@ -290,7 +304,7 @@ export class DocumentPage extends ConnectedElement {
     });
 
     this.pushing = false;
-    this.loadForks();
+    await this.loadForks();
   }
 
   async checkOrigin() {
@@ -319,9 +333,7 @@ export class DocumentPage extends ConnectedElement {
     try {
       await window.navigator.clipboard.writeText(
         `${GenearateReadURL(
-          this.lastSharedPageId
-            ? this.lastSharedPageId
-            : (LTRouter.Router.location.params.docId as string)
+          this.lastSharedPageId ? this.lastSharedPageId : this.pageId
         )}`
       );
     } catch (e) {
@@ -426,9 +438,7 @@ export class DocumentPage extends ConnectedElement {
         with others.
       </div>
       <uprtcl-copy-to-clipboard
-        text=${GenearateReadURL(
-          LTRouter.Router.location.params.docId as string
-        )}
+        text=${GenearateReadURL(this.pageId)}
       ></uprtcl-copy-to-clipboard> `;
   }
 

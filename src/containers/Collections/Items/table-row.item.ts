@@ -5,11 +5,9 @@ import { MenuOptions } from '@uprtcl/common-ui';
 import { ConnectedElement } from '../../../services/connected.element';
 import { sharedStyles } from '../../../styles';
 
-import {
-  GenerateDocumentRoute,
-  GenerateUserRoute,
-} from '../../../utils/routes.helpers';
 import { TimestampToDate } from '../../../utils/date';
+import { GenerateDocumentRoute } from '../../../router/routes.builder';
+
 import { tableStyles } from '../table.styles';
 
 export class TableRowItem extends ConnectedElement {

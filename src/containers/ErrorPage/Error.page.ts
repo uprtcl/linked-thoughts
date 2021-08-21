@@ -4,7 +4,7 @@ import { styles } from '@uprtcl/common-ui';
 import { EveesBaseElement } from '@uprtcl/evees-ui';
 
 import { sharedStyles } from '../../styles';
-import { ORIGIN } from '../../utils/routes.generator';
+import { ORIGIN } from '../../router/routes.builder';
 
 export class ErrorPage extends EveesBaseElement {
   render() {

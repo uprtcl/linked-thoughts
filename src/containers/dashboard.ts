@@ -1,26 +1,29 @@
-import { html, css, internalProperty, query } from 'lit-element';
-import { Router } from '@vaadin/router';
+import { html, css, internalProperty, property, query } from 'lit-element';
+
 import { EveesHttp } from '@uprtcl/evees-http';
-import { icons, styles } from '@uprtcl/common-ui';
+import { styles } from '@uprtcl/common-ui';
 import { Entity, Logger, Perspective, Secured } from '@uprtcl/evees';
 
-import { LTRouter } from '../router';
 import { ConnectedElement } from '../services/connected.element';
-import { GettingStarted } from '../constants/routeNames';
 
-import { Dashboard, Section } from './types';
+import { Dashboard } from './types';
 import { sharedStyles } from '../styles';
-import { DeleteLastVisited, GetLastVisited } from '../utils/localStorage';
 import {
-  GenerateDocumentRoute,
-  GenerateSectionRoute,
-  GenerateForksRoute,
+  RouteLocation,
   RouteName,
-  NavigateTo404,
-} from '../utils/routes.helpers';
+  RouterGoEvent,
+} from '../router/routes.types';
+import { DocumentPage } from './DocPage/doc.page';
 
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
+
+  // initNoce is different from zero on tests
+  @property({ type: Number })
+  initNonce: number = 0;
+
+  @property({ type: Object })
+  location: RouteLocation;
 
   @internalProperty()
   loading = true;
@@ -28,14 +31,8 @@ export class DashboardElement extends ConnectedElement {
   @internalProperty()
   isLogged = false;
 
-  @internalProperty()
-  routeName: RouteName;
-
-  @internalProperty()
-  selectedPageId: string | undefined;
-
-  @internalProperty()
-  selectedSectionId: string | undefined;
+  @query('#doc-page')
+  docPage: DocumentPage;
 
   dashboardPerspective: Secured<Perspective>;
   forksSection: Secured<Perspective>;
@@ -43,9 +40,18 @@ export class DashboardElement extends ConnectedElement {
   dashboardData: Entity<Dashboard>;
   remote: EveesHttp;
 
+  loadingPromise: Promise<void>;
+  resolveLoading: Function;
+
+  constructor() {
+    super();
+    this.loadingPromise = new Promise((resolve) => {
+      this.resolveLoading = resolve;
+    });
+  }
+
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('popstate', () => this.decodeUrl());
   }
 
   disconnectedCallback() {
@@ -57,8 +63,6 @@ export class DashboardElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      await this.appManager.init();
-
       this.dashboardPerspective = await this.appManager.elements.get(
         '/linkedThoughts'
       );
@@ -67,13 +71,8 @@ export class DashboardElement extends ConnectedElement {
         '/linkedThoughts/forksSection'
       );
 
-      await this.decodeUrl();
-
-      this.checkLastVisited();
-
       await this.load();
-    } else {
-      Router.go(GettingStarted);
+      this.resolveLoading();
     }
   }
 
@@ -83,58 +82,7 @@ export class DashboardElement extends ConnectedElement {
   }
 
   async loggedUserChanged() {
-    DeleteLastVisited();
     await this.firstUpdated();
-  }
-
-  async decodeUrl() {
-    // /section/private
-    // /page/pageId
-    // /getting-started
-
-    this.routeName = LTRouter.Router.location.route.name as RouteName;
-    const routeParams = LTRouter.Router.location.params as any;
-
-    if (this.routeName === RouteName.section) {
-      this.selectedSectionId = routeParams.sectionId;
-    } else if (this.routeName === RouteName.page) {
-      this.selectedPageId = routeParams.docId;
-      try {
-        const PageExist = await this.evees.getPerspectiveData(
-          this.selectedPageId
-        );
-      } catch (e) {
-        this.appManager.appError.clearLastVisited();
-        NavigateTo404();
-      }
-    } else if (this.routeName === RouteName.dashboard) {
-      // go to the first private page if nothing is selected.
-      if (this.isLogged) {
-        const privateSection = await this.appManager.elements.get(
-          '/linkedThoughts/privateSection'
-        );
-        const privateSectionData = await this.evees.getPerspectiveData<Section>(
-          privateSection.hash
-        );
-
-        if (privateSectionData && privateSectionData.object.pages.length > 0) {
-          Router.go(GenerateDocumentRoute(privateSectionData.object.pages[0]));
-        }
-      }
-    }
-  }
-
-  async checkLastVisited() {
-    const lastVisited = GetLastVisited();
-
-    if (lastVisited) {
-      if (lastVisited.type === RouteName.page) {
-        Router.go(GenerateDocumentRoute(lastVisited.id));
-      }
-      if (lastVisited.type === RouteName.section) {
-        Router.go(GenerateSectionRoute(lastVisited.id));
-      }
-    }
   }
 
   /** overwrite */
@@ -153,7 +101,12 @@ export class DashboardElement extends ConnectedElement {
     const pageId = await this.appManager.newPage(
       this.dashboardData.object.sections[onSection]
     );
-    Router.go(GenerateDocumentRoute(pageId));
+    this.dispatchEvent(
+      new RouterGoEvent({
+        name: RouteName.dashboard_page,
+        params: { pageId: pageId },
+      })
+    );
   }
 
   renderHome() {
@@ -173,29 +126,22 @@ export class DashboardElement extends ConnectedElement {
         <uprtcl-button class="button-new-page" @click=${() => this.newPage()}>
           New Page
         </uprtcl-button>
-        <br />
-        <!-- <div class="actions-item clickable">
-          ${icons.clock} <span class="actions-label">Recents</span>
-        </div>
-        <div
-          class="actions-item clickable"
-          @click=${() => Router.go(GenerateForksRoute())}
-        >
-          ${icons.fork} <span class="actions-label">Forks</span>
-        </div> -->
       </div>
 
       <div class="section-cont">
         <app-nav-section
           uref=${this.dashboardData.object.sections[0]}
+          selected-id=${this.location.params.pageId}
           idx=${0}
         ></app-nav-section>
         <app-nav-section
           uref=${this.dashboardData.object.sections[1]}
+          selected-id=${this.location.params.pageId}
           idx=${1}
         ></app-nav-section>
         <app-nav-section
           uref=${this.dashboardData.object.sections[2]}
+          selected-id=${this.location.params.pageId}
           idx=${2}
         ></app-nav-section>
       </div> `;
@@ -227,14 +173,15 @@ export class DashboardElement extends ConnectedElement {
 
           <div class="app-content">
             ${
-              this.routeName === RouteName.page
-                ? html`<app-document-page page-id=${this.selectedPageId} />`
-                : this.routeName === RouteName.section
+              this.location.name === RouteName.dashboard_page
+                ? html`<app-document-page
+                    id="doc-page"
+                    page-id=${this.location.params.pageId}
+                  />`
+                : this.location.name === RouteName.dashboard_section
                 ? html`<app-section-page
-                    uref=${this.selectedSectionId}
+                    uref=${this.location.params.sectionId}
                   ></app-section-page>`
-                : this.routeName === RouteName.fork
-                ? this.renderForkContent()
                 : html` <div class="home-container">${this.renderHome()}</div> `
             }
           </div>

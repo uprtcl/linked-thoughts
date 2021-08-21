@@ -1,10 +1,11 @@
 import { TextNode, TextType } from '@uprtcl/documents';
+import { EveesEvents } from '@uprtcl/evees';
 import { PublishToBlog } from './03-publish.to.blog';
 
 const SUBSECTION_TITLE = 'Subtitle 1';
 const SUBPAR_TEXT = 'Sub paragraph text';
 
-export class UpdatePage extends PublishToBlog {
+export class PushChanges extends PublishToBlog {
   async updateAndPublish() {
     this.logger.log('updateAndPublish()');
 
@@ -12,32 +13,33 @@ export class UpdatePage extends PublishToBlog {
   }
 
   async updateAndPush() {
-    // convert paragraph to title
-    const pageData = await this.evees.getPerspectiveData<TextNode>(this.pageId);
-    const parId = pageData.object.links[2];
-    const parData: TextNode = {
+    // updade the document
+    const editor = this.dashboard.docPage.documentEditor;
+
+    await editor.contentChanged(editor.doc.childrenNodes[2], {
       type: TextType.Title,
       links: [],
       text: SUBSECTION_TITLE,
-    };
-
-    await this.evees.updatePerspectiveData({
-      perspectiveId: parId,
-      object: parData,
     });
-
-    // add new sub-paragraph
-    await this.evees.addNewChild(parId, {
+    await editor.split(editor.doc.childrenNodes[2], '', true);
+    await editor.contentChanged(editor.doc.childrenNodes[2].childrenNodes[0], {
       type: TextType.Paragraph,
       links: [],
       text: SUBPAR_TEXT,
     });
 
-    // compute push
-    const eveesPush = await this.appManager.compareForks(
-      this.forkId,
-      this.pageId
-    );
+    // wait for the debounce
+    await new Promise<void>((resolve) => {
+      this.evees.events.on(EveesEvents.pending, (pending) => {
+        if (!pending) resolve();
+      });
+    });
+
+    // reload forks of the docPage component
+    await this.dashboard.docPage.loadForks();
+
+    // check the diff includes the expected changes
+    const eveesPush = this.dashboard.docPage.eveesPush;
 
     const diff = await eveesPush.diff();
 
@@ -49,13 +51,8 @@ export class UpdatePage extends PublishToBlog {
       this.logger.error(`push changes wrong`, { diff });
     }
 
-    /** commit changes made locally */
-    await this.appManager.commitUnder(this.pageId);
-
-    /** flush changes made to the fork */
-    await eveesPush.flush({
-      start: { elements: [{ id: this.forkId }] },
-    });
+    /** push the pending changes */
+    await this.dashboard.docPage.pushChanges();
 
     // check changes were merged on the fork
     const forkData = await this.evees.getPerspectiveData<TextNode>(this.forkId);

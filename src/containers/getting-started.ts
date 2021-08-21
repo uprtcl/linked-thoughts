@@ -1,5 +1,4 @@
 import { html, css, internalProperty } from 'lit-element';
-import { Router } from '@vaadin/router';
 
 import { styles } from '@uprtcl/common-ui';
 import { Logger } from '@uprtcl/evees';
@@ -7,7 +6,6 @@ import { HttpMultiConnection } from '@uprtcl/http-provider';
 
 import { EveesHttp } from '@uprtcl/evees-http';
 
-import { Home } from '../constants/routeNames';
 import { ConnectedElement } from '../services/connected.element';
 import { DeleteLastVisited } from '../utils/localStorage';
 import { AUTH0_CONNECTION, ETH_ACCOUNT_CONNECTION } from '../services/init';
@@ -21,6 +19,8 @@ import Home21Background from '../assets/illustrations/home-2-1.svg';
 import Home22Background from '../assets/illustrations/home-2-2.svg';
 import Home3Background from '../assets/illustrations/home-3.svg';
 import Home4Background from '../assets/illustrations/home-4.svg';
+
+import { RouteName, RouterGoEvent } from '../router/routes.types';
 
 export class GettingStartedElement extends ConnectedElement {
   logger = new Logger('Dashboard');
@@ -52,7 +52,11 @@ export class GettingStartedElement extends ConnectedElement {
     this.isLogged = await this.remote.isLogged();
 
     if (this.isLogged) {
-      Router.go(Home);
+      this.dispatchEvent(
+        new RouterGoEvent({
+          name: RouteName.dashboard,
+        })
+      );
     }
     this.carouselAttachTimer();
     this.loading = false;
@@ -106,7 +110,11 @@ export class GettingStartedElement extends ConnectedElement {
 
       this.isLogged = await this.remote.isLogged();
       if (this.isLogged) {
-        Router.go(Home);
+        this.dispatchEvent(
+          new RouterGoEvent({
+            name: RouteName.dashboard,
+          })
+        );
       } else {
         this.loginError = 'Error loggin in';
       }

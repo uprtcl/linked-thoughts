@@ -32,12 +32,11 @@ import UserProfile from './containers/User/User.profile';
 
   customElements.define('intercreativity-app', App);
   customElements.define('app-dashboard', DashboardElement);
+  customElements.define('app-getting-started', GettingStartedElement);
+  customElements.define('app-visitor', VisitorElement);
 
   customElements.define('app-nav-section', NavSectionElement);
   customElements.define('app-nav-page-item', PageItemElement);
-
-  customElements.define('app-getting-started', GettingStartedElement);
-  customElements.define('app-visitor', VisitorElement);
 
   customElements.define('app-section-page', SectionPage);
   customElements.define('app-document-page', DocumentPage);

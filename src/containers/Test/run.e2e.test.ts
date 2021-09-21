@@ -12,27 +12,21 @@ export class AppTestElement extends CreatePage {
 
   async run() {
     this.logger.log('run()');
-    const isLogged = await this.remote.isLogged();
-
-    if (!isLogged) {
-      this.state = 'logging in';
-      await this.login();
-    }
 
     this.state = 'initializing appManager';
-    await this.initializeElements();
+    await this.initializeElements(Date.now());
 
     this.state = 'updating page';
     await this.updateAndReadPage();
 
-    this.state = 'publishToBlog';
-    await this.publishToBlog();
+    // this.state = 'publishToBlog';
+    // await this.publishToBlog();
 
-    this.state = 'updateAndPush';
-    await this.updateAndPush();
+    // this.state = 'updateAndPush';
+    // await this.updateAndPush();
 
-    this.state = 'createPage';
-    await this.createPage();
+    // this.state = 'createPage';
+    // await this.createPage();
 
     this.state = 'finished';
   }

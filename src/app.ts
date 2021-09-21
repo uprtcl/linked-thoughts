@@ -194,7 +194,9 @@ export class App extends ConnectedElement {
         this.goToRoute(RouteName.dashboard_page, { pageId: lastVisited.id });
       }
       if (lastVisited.type === RouteName.dashboard_section) {
-        this.goToRoute(RouteName.dashboard_section, { pageId: lastVisited.id });
+        this.goToRoute(RouteName.dashboard_section, {
+          sectionId: lastVisited.id,
+        });
       }
     }
   }

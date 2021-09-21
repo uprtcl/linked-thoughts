@@ -58,7 +58,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
     this.dispatchEvent(
       new RouterGoEvent({
         name: RouteName.dashboard_section,
-        params: { pageId: this.uref },
+        params: { sectionId: this.uref },
       })
     );
   }
@@ -82,7 +82,7 @@ export class NavSectionElement extends EveesBaseElement<Section> {
         this.dispatchEvent(
           new RouterGoEvent({
             name: RouteName.dashboard_section,
-            params: { pageId: this.uref },
+            params: { sectionId: this.uref },
           })
         );
       }
@@ -98,7 +98,8 @@ export class NavSectionElement extends EveesBaseElement<Section> {
       classes.push('selected-item');
     }
 
-    return html`<div class=${classes.join(' ')} @click=${this.navigateSection}>
+    return html`<div class=${classes.join(' ')} @click=${() =>
+      this.navigateSection()}>
         <span class="section-text">${this.data.object.title}</span>
         ${
           this.canCreate

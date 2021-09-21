@@ -26,7 +26,7 @@ interface SectionData {
   data: Entity<Section>;
 }
 
-const LOGINFO = true;
+const LOGINFO = false;
 
 export class DocumentPage extends ConnectedElement {
   logger = new Logger('DocPage');
@@ -418,7 +418,9 @@ export class DocumentPage extends ConnectedElement {
             </div>
             <div class="row buttons">
               <uprtcl-button-loading
-                ?loading=${this.pushing}
+                ?loading=${this.pushing ||
+                this.eveesPending ||
+                this.loadingPush}
                 @click=${() => this.pushChanges()}
                 >Push to Blog</uprtcl-button-loading
               >

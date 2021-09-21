@@ -20,7 +20,7 @@ export enum HeaderViewType {
   feed = 'feed',
 }
 
-const LOGINFO = true;
+const LOGINFO = false;
 
 export interface CollectionConfig {
   title?: string;

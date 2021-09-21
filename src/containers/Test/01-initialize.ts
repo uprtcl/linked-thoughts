@@ -8,10 +8,21 @@ export class InitializeElements extends TestBaseElement {
   @query(`#dashboard`)
   dashboard: DashboardElement;
 
-  async initializeElements() {
+  homeNonce: number;
+
+  async initializeElements(nonce?: number) {
     this.logger.log('initializeElements()');
 
-    await this.appManager.init(Date.now());
+    const isLogged = await this.remote.isLogged();
+
+    if (!isLogged) {
+      this.state = 'logging in';
+      await this.login();
+    }
+
+    if (nonce) this.homeNonce = nonce;
+
+    await this.appManager.init(this.homeNonce);
 
     this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'

@@ -6,13 +6,10 @@ module.exports = {
   output: {
     filename: 'main.[hash].bundle.js',
     path: path.resolve(__dirname, 'dist-pages'),
+    publicPath: '/',
   },
   resolve: {
     alias: {
-      '@uprtcl/graphql': path.resolve('./node_modules/@uprtcl/graphql'),
-      'graphql-tag': path.resolve('./node_modules/graphql-tag'),
-      // https://github.com/apollographql/react-apollo/issues/1274#issuecomment-339692383
-      graphql: path.resolve('./node_modules/graphql'),
       'lit-element': path.resolve('./node_modules/lit-element'),
       'lit-html': path.resolve('./node_modules/lit-html'),
       'wicg-inert': path.resolve('./node_modules/wicg-inert/dist/inert'),
@@ -52,6 +49,21 @@ module.exports = {
           loader: 'ts-loader',
         },
       },
+      {
+        test: /\.(png|jpg|gif)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg$/i,
+        loader: 'lit-svg-loader',
+      },
     ],
   },
   plugins: [
@@ -59,6 +71,6 @@ module.exports = {
       template: 'index.html',
       minify: true,
     }),
-    new CopyWebpackPlugin([{ from: 'src/img', to: 'img' }]),
+    new CopyWebpackPlugin([{ from: 'src/assets', to: 'src/assets' }]),
   ],
 };

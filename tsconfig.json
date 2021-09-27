@@ -16,14 +16,10 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "apollo-client": ["node_modules/apollo-client"],
-      "apollo-client/*": ["node_modules/apollo-client/*"],
       "lit-html": ["node_modules/lit-html"],
-      "lit-html/*": ["node_modules/lit-html/*"],
-      "inversify": ["node_modules/inversify"],
-      "inversify/*": ["node_modules/inversify/*"]
+      "lit-html/*": ["node_modules/lit-html/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "src/svg.d.ts"],
   "exclude": ["node_modules"]
 }

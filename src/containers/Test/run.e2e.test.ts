@@ -19,14 +19,14 @@ export class AppTestElement extends CreatePage {
     this.state = 'updating page';
     await this.updateAndReadPage();
 
-    // this.state = 'publishToBlog';
-    // await this.publishToBlog();
+    this.state = 'publishToBlog';
+    await this.publishToBlog();
 
-    // this.state = 'updateAndPush';
-    // await this.updateAndPush();
+    this.state = 'updateAndPush';
+    await this.updateAndPush();
 
-    // this.state = 'createPage';
-    // await this.createPage();
+    this.state = 'createPage';
+    await this.createPage();
 
     this.state = 'finished';
   }

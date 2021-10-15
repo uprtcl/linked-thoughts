@@ -1,9 +1,17 @@
 import { html, css, internalProperty, query } from 'lit-element';
 
-import { DocumentEditor } from '@uprtcl/documents';
 import { styles } from '@uprtcl/common-ui';
 import { HttpMultiConnection } from '@uprtcl/http-provider';
-import { Logger, Secured, Perspective } from '@uprtcl/evees';
+import {
+  Logger,
+  Secured,
+  Perspective,
+  ClientMutationLocal,
+  ClientMutationMemory,
+  EntityRemoteLocal,
+  MutationStoreLocal,
+  EveesEvents,
+} from '@uprtcl/evees';
 
 import { ConnectedElement } from '../../services/connected.element';
 import { sharedStyles } from '../../styles';
@@ -14,6 +22,7 @@ import {
   RouterGoEvent,
   ROUTER_GO_EVENT,
 } from '../../router/routes.types';
+import { DashboardElement } from '../dashboard';
 
 export class TestBaseElement extends ConnectedElement {
   logger = new Logger('Test');
@@ -38,6 +47,9 @@ export class TestBaseElement extends ConnectedElement {
   @internalProperty()
   initializing: boolean = true;
 
+  @query(`#dashboard`)
+  dashboard: DashboardElement;
+
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
   initNonce = Date.now();
@@ -51,6 +63,8 @@ export class TestBaseElement extends ConnectedElement {
       if (event.detail.name !== RouteName.dashboard_page) {
         throw new Error('Tests only suppor reroute to page for now');
       }
+
+      this.logger.log('router go event', { event });
 
       this.pageId = event.detail.params.pageId;
     });
@@ -70,6 +84,41 @@ export class TestBaseElement extends ConnectedElement {
     const connection = multiConnection.connection();
 
     await connection.login();
+  }
+
+  /** Delete all memory and local entities and evees data */
+  async deleteLocal() {
+    this.logger.log('deleteLocal() - start');
+    // localStorage.clear();
+
+    /** clear memory and local eveess */
+    const memoryEvees = this.evees.getClient() as ClientMutationMemory;
+    const localEvees = memoryEvees.base as ClientMutationLocal;
+
+    await memoryEvees.mutationStore.clear();
+    await localEvees.mutationStore.clear();
+
+    /** clear memory and local entities stores */
+    const memoryEntities = (this.evees.entityResolver as any).cache;
+    await memoryEntities.clear();
+
+    const localEntities = (localEvees.mutationStore as MutationStoreLocal)
+      .entityCache as EntityRemoteLocal;
+
+    await localEntities.db.entities.clear();
+    this.logger.log('deleteLocal() - done');
+  }
+
+  async awaitPending() {
+    const editor = this.dashboard.docPage.documentEditor;
+
+    await new Promise<void>((resolve) => {
+      editor.evees.events.on(EveesEvents.pending, (pending: boolean) => {
+        if (!pending) {
+          resolve();
+        }
+      });
+    });
   }
 
   render() {

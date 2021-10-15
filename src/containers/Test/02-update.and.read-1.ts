@@ -14,19 +14,11 @@ import { InitializeElements } from './01-initialize';
 const PAGE_TITLE = 'Page title';
 const PARS = ['Par1', 'Par2', 'Par3'];
 
-export class CreateAndRead extends InitializeElements {
-  async updateAndReadPage() {
+export class UpdatedAndRead extends InitializeElements {
+  async updateAndReadPage1() {
     console.clear();
 
     this.logger.log('updatePage()');
-
-    const privateSectionData = await this.evees.getPerspectiveData<Section>(
-      this.privateSection.hash
-    );
-
-    this.pageId = privateSectionData.object.pages[0];
-
-    this.logger.log(`Page id: ${this.pageId}`);
 
     await this.updateDoc();
     this.logger.log('updateDoc() - done');
@@ -54,17 +46,11 @@ export class CreateAndRead extends InitializeElements {
     await editor.contentChanged(editor.doc, content);
     await editor.split(editor.doc, PARS[0], true);
     await editor.split(editor.doc.childrenNodes[0], PARS[1], false);
-    // await editor.split(editor.doc.childrenNodes[1], PARS[2], false);
+    await editor.split(editor.doc.childrenNodes[1], PARS[2], false);
 
     /** editor changes are applied asynchronously. We now need to wait for them to
      * be fully executed (applied on the top-layer on mutation Client) */
-    await new Promise<void>((resolve) => {
-      editor.evees.events.on(EveesEvents.pending, (pending: boolean) => {
-        if (!pending) {
-          resolve();
-        }
-      });
-    });
+    await this.awaitPending();
   }
 
   async read() {
@@ -74,7 +60,7 @@ export class CreateAndRead extends InitializeElements {
       throw new Error(`unexpected`);
     }
 
-    if (pageData.object.links.length !== 2) {
+    if (pageData.object.links.length !== 3) {
       throw new Error(`unexpected`);
     }
 
@@ -87,29 +73,6 @@ export class CreateAndRead extends InitializeElements {
         }
       })
     );
-  }
-
-  /** Delete all memory and local entities and evees data */
-  async deleteLocal() {
-    this.logger.log('deleteLocal() - start');
-    localStorage.clear();
-
-    /** clear memory and local eveess */
-    const memoryEvees = this.evees.getClient() as ClientMutationMemory;
-    const localEvees = memoryEvees.base as ClientMutationLocal;
-
-    await memoryEvees.mutationStore.clear();
-    await localEvees.mutationStore.clear();
-
-    /** clear memory and local entities stores */
-    const memoryEntities = (this.evees.entityResolver as any).cache;
-    await memoryEntities.clear();
-
-    const localEntities = (localEvees.mutationStore as MutationStoreLocal)
-      .entityCache as EntityRemoteLocal;
-
-    await localEntities.db.entities.clear();
-    this.logger.log('deleteLocal() - done');
   }
 
   async clearAndRead() {

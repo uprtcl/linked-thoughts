@@ -1,7 +1,7 @@
 import { TextNode } from '@uprtcl/documents';
-import { CreateAndRead } from './02-update.and.read';
+import { UpdatedAndRead } from './02-update.and.read-1';
 
-export class PublishToBlog extends CreateAndRead {
+export class PublishToBlog extends UpdatedAndRead {
   async publishToBlog() {
     this.logger.log('publishToBlog()');
 

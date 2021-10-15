@@ -132,6 +132,7 @@ export class DocumentPage extends ConnectedElement {
   }
 
   debounceUpdateChanges() {
+    // set true to remember that an update was received while blocked
     this.pendingUpdates = true;
 
     if (!this.blockUpdates) {

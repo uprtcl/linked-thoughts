@@ -7,6 +7,8 @@ const PAGE_SUBTITLE_11 = 'Subtitle 1.1';
 const PARS = ['Par1', 'Par2', 'Par3'];
 const SUB_PARS = ['SubPar1'];
 
+const LOGINFO = false;
+
 export class CreatePage extends PushChanges {
   async createPage() {
     await this.dashboard.newPage();
@@ -22,9 +24,35 @@ export class CreatePage extends PushChanges {
       links: [],
     };
 
+    if (LOGINFO)
+      this.logger.log('createPage - contentChanged', {
+        node: editor.doc,
+        value: title,
+      });
     await editor.contentChanged(editor.doc, title);
+
+    if (LOGINFO)
+      this.logger.log('createPage - split', {
+        node: editor.doc,
+        tail: PARS[0],
+        asChild: true,
+      });
     await editor.split(editor.doc, PARS[0], true);
+
+    if (LOGINFO)
+      this.logger.log('createPage - split', {
+        node: editor.doc.childrenNodes[0],
+        tail: PARS[1],
+        asChild: false,
+      });
     await editor.split(editor.doc.childrenNodes[0], PARS[1], false);
+
+    if (LOGINFO)
+      this.logger.log('createPage - split', {
+        node: editor.doc.childrenNodes[1],
+        tail: PARS[2],
+        asChild: false,
+      });
     await editor.split(editor.doc.childrenNodes[1], PARS[2], false);
 
     const subtitle: TextNode = {
@@ -33,7 +61,19 @@ export class CreatePage extends PushChanges {
       links: [],
     };
 
+    if (LOGINFO)
+      this.logger.log('createPage - contentChanged', {
+        node: editor.doc.childrenNodes[1],
+        value: subtitle,
+      });
     await editor.contentChanged(editor.doc.childrenNodes[1], subtitle);
+
+    if (LOGINFO)
+      this.logger.log('createPage - split', {
+        node: editor.doc.childrenNodes[1],
+        tail: PARS[2],
+        asChild: true,
+      });
     await editor.split(editor.doc.childrenNodes[1], PARS[2], true);
 
     const subtitle11: TextNode = {
@@ -42,11 +82,22 @@ export class CreatePage extends PushChanges {
       links: [],
     };
 
+    if (LOGINFO)
+      this.logger.log('createPage - contentChanged', {
+        node: editor.doc.childrenNodes[1].childrenNodes[0],
+        value: subtitle,
+      });
     await editor.contentChanged(
       editor.doc.childrenNodes[1].childrenNodes[0],
       subtitle11
     );
 
+    if (LOGINFO)
+      this.logger.log('createPage - split', {
+        node: editor.doc.childrenNodes[1].childrenNodes[0],
+        tail: '',
+        asChild: true,
+      });
     await editor.split(editor.doc.childrenNodes[1].childrenNodes[0], '', true);
 
     const subpar: TextNode = {
@@ -61,23 +112,19 @@ export class CreatePage extends PushChanges {
       links: [],
     };
 
+    if (LOGINFO)
+      this.logger.log('createPage - contentChanged', {
+        node: editor.doc.childrenNodes[1].childrenNodes[0].childrenNodes[0],
+        value: subpar,
+      });
+
+    const awaiting = this.awaitPending();
     await editor.contentChanged(
       editor.doc.childrenNodes[1].childrenNodes[0].childrenNodes[0],
       subpar
     );
+    await awaiting;
 
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 500));
-
-    await editor.contentChanged(
-      editor.doc.childrenNodes[1].childrenNodes[0].childrenNodes[0],
-      emptyPar
-    );
-
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 500));
-
-    await editor.contentChanged(
-      editor.doc.childrenNodes[1].childrenNodes[0].childrenNodes[0],
-      subpar
-    );
+    if (LOGINFO) this.logger.log('done');
   }
 }

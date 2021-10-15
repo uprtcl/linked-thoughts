@@ -123,7 +123,7 @@ export class AppManager {
       },
     };
     const childId = await this.evees.addNewChild(onSectionId, page);
-    await this.evees.flush();
+    this.evees.flush();
 
     return childId;
   }

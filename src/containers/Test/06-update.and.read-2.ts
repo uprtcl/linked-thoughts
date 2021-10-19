@@ -1,28 +1,26 @@
 import { TextNode, TextType } from '@uprtcl/documents';
 import { EveesEvents } from '@uprtcl/evees';
 
-import { CreatePage } from './05-create.page';
+import { CreatePage } from './05-create.page-2';
 
 const PAGE_TITLE = 'Page title';
 const PARS = ['Par1', 'Par2', 'Par3'];
 
-export class CreateAndRead2 extends CreatePage {
+export class UpdateAndRead2 extends CreatePage {
   async updateAndReadPage2() {
-    console.clear();
-
     this.logger.log('updatePage()');
 
-    await this.updateDoc();
+    await this.updateDoc2();
     this.logger.log('updateDoc() - done');
 
-    await this.read();
+    await this.read2();
     this.logger.log('read() - done');
 
     // await this.clearAndRead();
     // this.logger.log('clearAndRead() - done');
   }
 
-  async updateDoc() {
+  private async updateDoc2() {
     await this.dashboard.docPage.loadingPromise;
     await this.dashboard.docPage.updateComplete;
 
@@ -64,36 +62,18 @@ export class CreateAndRead2 extends CreatePage {
     );
 
     // update par3
+    const awaiting = this.awaitPending();
     await editor.contentChanged(
       par3,
       { ...par3.draft, text: par3.draft.text + ' uupp' },
       false
     );
+    await awaiting;
 
-    /** editor changes are applied asynchronously. We now need to wait for them to
-     * be fully executed (applied on the top-layer on mutation Client) */
-    await new Promise<void>((resolve) => {
-      editor.evees.events.on(EveesEvents.pending, (pending: boolean) => {
-        if (!pending) {
-          resolve();
-        }
-      });
-    });
+    await this.dashboard.appManager.commitUnder(editor.doc.uref);
   }
 
-  async read() {
+  private async read2() {
     const pageData = await this.evees.getPerspectiveData<TextNode>(this.pageId);
-  }
-
-  async clearAndRead() {
-    /** await for flush into local storage to occur */
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 500));
-
-    /** flush local storage to backend */
-    await this.appManager.commitUnder(this.pageId);
-
-    await this.deleteLocal();
-    await this.initializeElements();
-    this.read();
   }
 }

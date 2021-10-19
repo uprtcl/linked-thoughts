@@ -1,7 +1,7 @@
 import { Logger } from '@uprtcl/evees';
-import { CreateAndRead2 } from './06-update.and.read-2';
+import { UpdatedAndRead3 } from './08-update.and.read-3';
 
-export class AppTestElement extends CreateAndRead2 {
+export class AppTestElement extends UpdatedAndRead3 {
   logger = new Logger('Test');
 
   async firstUpdated() {
@@ -25,10 +25,16 @@ export class AppTestElement extends CreateAndRead2 {
     // await this.updateAndPush();
 
     this.state = 'createPage';
-    await this.createPage();
+    await this.createPage2();
 
     this.state = 'createPage';
     await this.publishToBlog();
+
+    this.state = 'updating page';
+    await this.updateAndReadPage2();
+
+    // this.state = 'createPage';
+    // await this.createPage3();
 
     // // this.state = 'updating page';
     // await this.updateAndReadPage2();

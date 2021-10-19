@@ -1,34 +1,25 @@
-import { DocumentEditor, TextNode, TextType } from '@uprtcl/documents';
-import {
-  AsyncQueue,
-  ClientMutationLocal,
-  ClientMutationMemory,
-  EntityRemoteLocal,
-  EveesEvents,
-  MutationStoreLocal,
-} from '@uprtcl/evees';
+import { TextNode, TextType } from '@uprtcl/documents';
 
-import { Section } from '../types';
 import { InitializeElements } from './01-initialize';
+import { CreatePage3 } from './07-create.page-3';
 
 const PAGE_TITLE = 'Page title';
 const PARS = ['Par1', 'Par2', 'Par3'];
 
-export class UpdatedAndRead extends InitializeElements {
+export class UpdatedAndRead3 extends CreatePage3 {
   async updateAndReadPage1() {
+    console.clear();
+
     this.logger.log('updatePage()');
 
-    await this.updateDoc1();
+    await this.updateDoc3();
     this.logger.log('updateDoc() - done');
 
-    await this.read1();
+    await this.read3();
     this.logger.log('read() - done');
-
-    await this.clearAndRead1();
-    this.logger.log('clearAndRead() - done');
   }
 
-  private async updateDoc1() {
+  private async updateDoc3() {
     await this.dashboard.docPage.loadingPromise;
     await this.dashboard.docPage.updateComplete;
 
@@ -51,7 +42,7 @@ export class UpdatedAndRead extends InitializeElements {
     await this.awaitPending();
   }
 
-  private async read1() {
+  private async read3() {
     const pageData = await this.evees.getPerspectiveData<TextNode>(this.pageId);
 
     if (pageData.object.text !== PAGE_TITLE) {
@@ -71,17 +62,5 @@ export class UpdatedAndRead extends InitializeElements {
         }
       })
     );
-  }
-
-  async clearAndRead1() {
-    /** await for flush into local storage to occur */
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 500));
-
-    /** flush local storage to backend */
-    await this.appManager.commitUnder(this.pageId);
-
-    await this.deleteLocal();
-    await this.initializeElements();
-    this.read1();
   }
 }

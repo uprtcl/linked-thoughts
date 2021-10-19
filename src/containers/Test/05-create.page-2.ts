@@ -10,7 +10,7 @@ const SUB_PARS = ['SubPar1'];
 const LOGINFO = false;
 
 export class CreatePage extends PushChanges {
-  async createPage() {
+  async createPage2() {
     await this.dashboard.newPage();
 
     // time to load the page and the editor

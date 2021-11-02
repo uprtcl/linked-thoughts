@@ -8,7 +8,6 @@ import {
   MutationStoreLocal,
 } from '@uprtcl/evees';
 
-import { Section } from '../types';
 import { InitializeElements } from './01-initialize';
 
 const PAGE_TITLE = 'Page title';
@@ -19,10 +18,10 @@ export class UpdatedAndRead extends InitializeElements {
     this.logger.log('updatePage()');
 
     await this.updateDoc1();
-    this.logger.log('updateDoc() - done');
+    this.logger.log('updateDoc1() - done');
 
     await this.read1();
-    this.logger.log('read() - done');
+    this.logger.log('read1() - done');
 
     await this.clearAndRead1();
     this.logger.log('clearAndRead() - done');

@@ -7,7 +7,7 @@ const PAGE_TITLE = 'Page title';
 const PARS = ['Par1', 'Par2', 'Par3'];
 
 export class UpdatedAndRead3 extends CreatePage3 {
-  async updateAndReadPage1() {
+  async updateAndReadPage3() {
     console.clear();
 
     this.logger.log('updatePage()');

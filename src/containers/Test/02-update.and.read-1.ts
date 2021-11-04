@@ -81,6 +81,6 @@ export class UpdatedAndRead extends InitializeElements {
 
     await this.deleteLocal();
     await this.initializeElements();
-    this.read1();
+    await this.read1();
   }
 }

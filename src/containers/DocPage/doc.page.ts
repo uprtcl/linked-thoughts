@@ -26,7 +26,7 @@ interface SectionData {
   data: Entity<Section>;
 }
 
-const LOGINFO = true;
+const LOGINFO = false;
 
 export class DocumentPage extends ConnectedElement {
   logger = new Logger('DocPage');

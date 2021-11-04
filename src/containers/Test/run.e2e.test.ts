@@ -15,18 +15,17 @@ export class AppTestElement extends UpdatedAndRead3 {
     this.state = 'initializing appManager';
     await this.initializeElements(Date.now());
 
-    console.clear();
-
+    // console.clear();
     this.logger.log(`nonce: ${this.homeNonce}`);
 
     this.state = 'updating page';
     await this.updateAndReadPage1();
 
-    // this.state = 'publishToBlog';
-    // await this.publishToBlog();
+    this.state = 'publishToBlog';
+    await this.publishToBlog();
 
-    // this.state = 'updateAndPush';
-    // await this.updateAndPush();
+    this.state = 'updateAndPush';
+    await this.updateAndPush();
 
     // this.state = 'createPage';
     // await this.createPage2();
@@ -40,8 +39,8 @@ export class AppTestElement extends UpdatedAndRead3 {
     // this.state = 'createPage';
     // await this.createPage3();
 
-    // // this.state = 'updating page';
-    // await this.updateAndReadPage2();
+    // this.state = 'updating page';
+    // await this.updateAndReadPage3();
 
     this.state = 'finished';
   }

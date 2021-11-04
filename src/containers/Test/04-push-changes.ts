@@ -77,11 +77,11 @@ export class PushChanges extends PublishToBlog {
 
     const diff = await eveesPush.diff();
 
-    if (diff.newPerspectives.length !== 1) {
+    if (diff.newPerspectives.length !== 3) {
       this.logger.error(`push changes wrong`, { diff });
     }
 
-    if (diff.updates.length !== 1) {
+    if (diff.updates.length !== 3) {
       this.logger.error(`push changes wrong`, { diff });
     }
 

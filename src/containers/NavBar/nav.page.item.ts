@@ -21,9 +21,6 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
   @internalProperty()
   title: string = '';
 
-  @internalProperty()
-  isShortcut: boolean = false;
-
   deleteCurrentPerspective: Function = () => null;
 
   connectedCallback() {
@@ -32,10 +29,6 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
 
   async firstUpdated() {
     await super.firstUpdated();
-
-    if (this.guardianId !== this.uiParentId) {
-      this.isShortcut = true;
-    }
   }
 
   async dataUpdated() {
@@ -92,7 +85,7 @@ export class PageItemElement extends EveesBaseElement<TextNode> {
         @click=${() => this.selectPage()}
         title=${titleStr}
       >
-        ${this.isShortcut
+        ${this.guardianId !== this.uiParentId
           ? html`<div class="item-icon-container">${icons.link}</div>`
           : ''}
         <span class="text-container">${this.deriveTitle(titleStr)}</span>

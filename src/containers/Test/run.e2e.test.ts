@@ -27,11 +27,11 @@ export class AppTestElement extends UpdatedAndRead3 {
     this.state = 'updateAndPush';
     await this.updateAndPush();
 
-    // this.state = 'createPage';
-    // await this.createPage2();
+    this.state = 'createPage';
+    await this.createPage2();
 
-    // this.state = 'createPage';
-    // await this.publishToBlog();
+    this.state = 'createPage';
+    await this.publishToBlog();
 
     // this.state = 'updating page';
     // await this.updateAndReadPage2();

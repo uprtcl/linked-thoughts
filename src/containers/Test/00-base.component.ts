@@ -52,7 +52,6 @@ export class TestBaseElement extends ConnectedElement {
 
   privateSection!: Secured<Perspective>;
   blogSection!: Secured<Perspective>;
-  initNonce = Date.now();
 
   connectedCallback() {
     super.connectedCallback();
@@ -71,7 +70,6 @@ export class TestBaseElement extends ConnectedElement {
   }
 
   async firstUpdated() {
-    this.logger.log(`Test nonce: ${this.initNonce}`);
     this.error = '';
     this.remote = this.evees.getRemote() as any;
   }
@@ -134,7 +132,7 @@ export class TestBaseElement extends ConnectedElement {
           .location=${{
             name: RouteName.dashboard_page,
             params: { pageId: this.pageId },
-          }} initNonce=${this.initNonce}></app-dashboard></div>`}
+          }}></app-dashboard></div>`}
       ${this.state === 'finished'
         ? html`<div class="callout">
             <ul>

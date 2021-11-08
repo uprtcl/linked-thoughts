@@ -21,6 +21,10 @@ export class InitializeElements extends TestBaseElement {
 
     await this.appManager.init(this.homeNonce);
 
+    const home = await this.appManager.elements.get('/');
+
+    this.logger.log(`home id: ${home.hash}`);
+
     this.privateSection = await this.appManager.elements.get(
       '/linkedThoughts/privateSection'
     );

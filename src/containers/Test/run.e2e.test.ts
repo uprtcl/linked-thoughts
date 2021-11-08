@@ -13,19 +13,20 @@ export class AppTestElement extends UpdatedAndRead3 {
     this.logger.log('run()');
 
     this.state = 'initializing appManager';
-    await this.initializeElements(Date.now());
+    const nonce = Date.now();
+    await this.initializeElements(nonce);
 
     // console.clear();
     this.logger.log(`nonce: ${this.homeNonce}`);
 
-    this.state = 'updating page';
-    await this.updateAndReadPage1();
+    // this.state = 'updating page';
+    // await this.updateAndReadPage1();
 
-    this.state = 'publishToBlog';
-    await this.publishToBlog();
+    // this.state = 'publishToBlog';
+    // await this.publishToBlog();
 
-    this.state = 'updateAndPush';
-    await this.updateAndPush();
+    // this.state = 'updateAndPush';
+    // await this.updateAndPush();
 
     this.state = 'createPage';
     await this.createPage2();

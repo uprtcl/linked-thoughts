@@ -41,6 +41,8 @@ export class AppManager {
   elements: AppElements;
   appError: AppError;
 
+  isInitialized: boolean = false;
+
   constructor(protected evees: Evees, appElementsInit: AppElement) {
     this.elements = new AppElements(evees, appElementsInit);
     this.appError = new AppError();
@@ -54,7 +56,10 @@ export class AppManager {
   }
 
   async init(nonce: number = 0) {
-    await this.checkStructure(nonce);
+    if (!this.isInitialized) {
+      this.isInitialized = true;
+      await this.checkStructure(nonce);
+    }
   }
 
   async checkStructure(nonce: number = 0) {

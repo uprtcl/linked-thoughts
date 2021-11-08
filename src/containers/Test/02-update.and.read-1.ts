@@ -1,12 +1,4 @@
-import { DocumentEditor, TextNode, TextType } from '@uprtcl/documents';
-import {
-  AsyncQueue,
-  ClientMutationLocal,
-  ClientMutationMemory,
-  EntityRemoteLocal,
-  EveesEvents,
-  MutationStoreLocal,
-} from '@uprtcl/evees';
+import { TextNode, TextType } from '@uprtcl/documents';
 
 import { InitializeElements } from './01-initialize';
 

@@ -18,10 +18,6 @@ import { DocumentPage } from './DocPage/doc.page';
 export class DashboardElement extends ConnectedElement {
   logger = new Logger('Dashboard');
 
-  // initNoce is different from zero on tests
-  @property({ type: Number })
-  initNonce: number = 0;
-
   @property({ type: Object })
   location: RouteLocation;
 

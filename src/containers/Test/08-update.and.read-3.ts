@@ -8,15 +8,13 @@ const PARS = ['Par1', 'Par2', 'Par3'];
 
 export class UpdatedAndRead3 extends CreatePage3 {
   async updateAndReadPage3() {
-    console.clear();
-
-    this.logger.log('updatePage()');
-
-    await this.updateDoc3();
-    this.logger.log('updateDoc() - done');
-
-    await this.read3();
-    this.logger.log('read() - done');
+    // TEST TO BE MADE
+    // console.clear();
+    // this.logger.log('updatePage()');
+    // await this.updateDoc3();
+    // this.logger.log('updateDoc() - done');
+    // await this.read3();
+    // this.logger.log('read() - done');
   }
 
   private async updateDoc3() {

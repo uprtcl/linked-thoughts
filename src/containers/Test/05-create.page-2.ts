@@ -7,7 +7,7 @@ const PAGE_SUBTITLE_11 = 'Subtitle 1.1';
 const PARS = ['Par1', 'Par2', 'Par3'];
 const SUB_PARS = ['SubPar1'];
 
-const LOGINFO = false;
+const LOGINFO = true;
 
 export class CreatePage extends PushChanges {
   async createPage2() {
